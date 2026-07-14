@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adv Kinetics · Reaction Rate Expressions — Interactive Lesson</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
+<style>
+:root{
+  --paper:#f7f5f0; --card:#ffffff; --ink:#1c2733; --muted:#5c6b7a;
+  --navy:#123a5c; --accent:#d97706; --line:#e3ddd2;
+  --good:#1a7f5a; --bad:#b3261e; --radius:10px;
+  --shadow:0 1px 3px rgba(28,39,51,.08);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sarabun',system-ui,sans-serif;color:var(--ink);background:var(--paper);
+  line-height:1.75;font-size:17px;margin:0;}
+h1{font-size:clamp(1.9rem,4vw,2.7rem);color:var(--navy);line-height:1.22;margin:.2em 0;}
+h2{font-size:clamp(1.3rem,2.6vw,1.7rem);color:var(--navy);margin:.2em 0;}
+h3{color:var(--navy);font-size:1.08rem;margin:1.4em 0 .3em;}
+a{color:var(--accent);}
+.mono,.readout-value{font-family:'IBM Plex Mono',monospace;}
+p{margin:.7em 0;}
+
+/* nav */
+nav{position:sticky;top:0;background:rgba(247,245,240,.93);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);z-index:50;}
+.nav-in{max-width:1040px;margin:0 auto;}
+.nav-top{display:flex;align-items:baseline;gap:.6rem;padding:.5rem 1rem .1rem;}
+.nav-code{font-family:'IBM Plex Mono';color:var(--accent);font-size:.8rem;font-weight:500;letter-spacing:.04em;}
+.nav-title{font-size:.86rem;color:var(--muted);font-weight:600;}
+.pills{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem 1rem .55rem;-webkit-overflow-scrolling:touch;}
+.pills a{white-space:nowrap;padding:.28rem .75rem;border-radius:999px;font-size:.82em;
+  color:var(--muted);text-decoration:none;border:1px solid transparent;}
+.pills a.active,.pills a:hover{background:var(--navy);color:#fff;}
+.pills .grp{white-space:nowrap;padding:.28rem .4rem;font-size:.72em;color:var(--accent);
+  font-family:'IBM Plex Mono';align-self:center;text-transform:uppercase;letter-spacing:.05em;}
+
+/* hero */
+header.hero{max-width:820px;margin:2.6rem auto 1rem;padding:0 1.2rem;}
+.kicker{font-family:'IBM Plex Mono';color:var(--accent);font-size:.82rem;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:.4rem;}
+.hero p.frame{font-size:1.12rem;color:var(--ink);max-width:70ch;}
+.credit{color:var(--muted);font-size:.92rem;margin-top:1.1rem;border-top:1px solid var(--line);padding-top:.9rem;}
+.hero-map{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.8rem 0 .5rem;}
+.hero-map .m{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:.85rem .95rem;box-shadow:var(--shadow);}
+.hero-map .m b{color:var(--accent);font-family:'IBM Plex Mono';font-size:.8rem;}
+.hero-map .m span{display:block;color:var(--navy);font-weight:600;margin-top:.15rem;font-size:.98rem;}
+.hero-map .m small{color:var(--muted);font-size:.82rem;}
+
+/* sections */
+main{padding-bottom:3rem;}
+.partband{max-width:1040px;margin:3.6rem auto 0;padding:0 1.2rem;}
+.partband .pb{border-top:2px solid var(--navy);padding-top:.5rem;display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;}
+.partband .pn{font-family:'IBM Plex Mono';color:var(--accent);font-weight:600;font-size:.9rem;}
+.partband .pt{color:var(--navy);font-weight:700;font-size:1.15rem;}
+.partband .ps{color:var(--muted);font-size:.9rem;}
+section{margin:3.4rem auto;max-width:72ch;padding:0 1.2rem;scroll-margin-top:92px;}
+.partband{scroll-margin-top:92px;}
+.sec-num{font-family:'IBM Plex Mono';color:var(--accent);font-weight:500;letter-spacing:.05em;font-size:.95rem;}
+.thesis{font-size:1.12em;color:var(--muted);font-weight:600;margin-top:-.1em;}
+
+/* panels / figures */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1.2rem;box-shadow:var(--shadow);max-width:940px;margin:1.5rem auto;}
+.panel-title{font-size:.82em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.panel.wide{max-width:940px;}
+svg.fig{width:100%;height:auto;display:block;}
+.caption{color:var(--muted);font-size:.95em;max-width:72ch;margin:.6rem auto 0;}
+.controls{margin-top:1rem;}
+.ctl{display:block;margin:.65rem 0;}
+.ctl span{display:flex;justify-content:space-between;font-size:.93em;gap:1rem;}
+.ctl span b{color:var(--navy);}
+input[type=range]{width:100%;accent-color:var(--accent);height:26px;}
+.ctlrow{display:flex;gap:1.1rem;flex-wrap:wrap;}
+.ctlrow .ctl{flex:1;min-width:180px;}
+.numin{display:inline-flex;align-items:center;gap:.35rem;margin:.3rem .8rem .3rem 0;font-size:.9em;}
+.numin input{width:56px;padding:.2rem .35rem;border:1px solid var(--line);border-radius:6px;
+  font-family:'IBM Plex Mono';text-align:center;font-size:.95em;background:var(--paper);}
+.readouts{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;}
+.ro{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:.45rem .8rem;min-width:78px;}
+.ro span{display:block;font-size:.72em;color:var(--muted);}
+.ro b{font-size:1.12em;color:var(--navy);}
+
+/* tabs / toggles */
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0 .2rem;}
+.tab{padding:.35rem .85rem;border-radius:999px;border:1px solid var(--line);background:var(--paper);
+  color:var(--muted);font-size:.85em;cursor:pointer;font-family:inherit;}
+.tab.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* callouts */
+.note,.warn,.beyond{padding:.9rem 1.1rem;border-radius:0 8px 8px 0;margin:1.2rem 0;font-size:.98em;}
+.note{border-left:4px solid var(--accent);background:#fdf6ec;}
+.warn{border-left:4px solid var(--bad);background:#fbf0ef;}
+.beyond{border-left:4px solid var(--navy);background:#eef2f6;}
+.note b,.warn b,.beyond b{color:var(--navy);}
+
+/* equations */
+.eqbox{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:.5rem .9rem;
+  margin:1rem 0;overflow-x:auto;}
+
+/* step-stack */
+ol.steps{list-style:none;counter-reset:st;padding:0;margin:1.2rem 0;}
+ol.steps li{counter-increment:st;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:.85rem 1rem .85rem 2.6rem;position:relative;margin:.6rem 0;cursor:pointer;transition:.15s;}
+ol.steps li::before{content:counter(st);position:absolute;left:.85rem;top:.85rem;
+  font-family:'IBM Plex Mono';color:var(--accent);font-weight:600;}
+ol.steps li.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(217,118,6,.15);}
+ol.steps li .why{color:var(--muted);font-size:.92em;margin:.35em 0 0;}
+ol.steps li .fig-link{color:var(--navy);font-size:.86em;margin:.3em 0 0;font-style:italic;}
+.hlt{transition:.2s;}
+.dim{opacity:.22;}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;margin:1.2rem 0;}
+table.data{border-collapse:collapse;width:100%;font-size:.92em;}
+table.data th,table.data td{border-bottom:1px solid var(--line);padding:.42rem .7rem;text-align:right;}
+table.data th{color:var(--navy);font-weight:600;border-bottom:2px solid var(--line);}
+table.data td:first-child,table.data th:first-child{text-align:left;font-weight:600;}
+table.data td.mono{font-family:'IBM Plex Mono';}
+
+/* canvas lab */
+.lab-wrap{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start;}
+canvas.lab{background:var(--paper);border:1px solid var(--line);border-radius:8px;width:100%;max-width:420px;height:auto;}
+.labbtns{display:flex;gap:.5rem;margin:.6rem 0;}
+.btn{padding:.4rem .9rem;border-radius:8px;border:1px solid var(--navy);background:var(--navy);
+  color:#fff;font-family:inherit;font-size:.88em;cursor:pointer;}
+.btn.ghost{background:transparent;color:var(--navy);}
+
+/* quiz */
+.quiz .qcard{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:1.1rem 1.2rem;margin:1rem 0;box-shadow:var(--shadow);}
+.quiz .qq{font-weight:600;color:var(--navy);}
+.quiz .qq .qn{font-family:'IBM Plex Mono';color:var(--accent);margin-right:.4rem;}
+.quiz .choices{list-style:none;padding:0;margin:.8rem 0 0;}
+.quiz .choices li{border:1px solid var(--line);border-radius:8px;padding:.55rem .8rem;margin:.4rem 0;
+  cursor:pointer;transition:.12s;background:var(--paper);}
+.quiz .choices li:hover{border-color:var(--accent);}
+.quiz .choices li.correct{border-color:var(--good);background:#eef7f2;}
+.quiz .choices li.wrong{border-color:var(--bad);background:#fbf0ef;}
+.quiz .choices li.dis{cursor:default;pointer-events:none;}
+.quiz .exp{font-size:.9em;margin:.5rem 0 0;padding:.5rem .7rem;border-radius:6px;background:var(--paper);display:none;}
+.quiz .exp.show{display:block;}
+.quiz .exp .ok{color:var(--good);font-weight:600;}
+.quiz .exp .no{color:var(--bad);font-weight:600;}
+.scorebar{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem 1.2rem;
+  margin:1.2rem 0;text-align:center;box-shadow:var(--shadow);}
+.scorebar b{font-family:'IBM Plex Mono';font-size:1.6rem;color:var(--navy);}
+
+/* footer */
+footer{max-width:820px;margin:3rem auto 2rem;padding:1.4rem 1.2rem 0;border-top:2px solid var(--navy);color:var(--muted);font-size:.9rem;}
+footer h3{color:var(--navy);margin-top:0;}
+footer ol{padding-left:1.2rem;}
+footer li{margin:.3rem 0;}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.82em;color:var(--muted);margin:.4rem 0;}
+.legend i{width:22px;height:0;border-top:3px solid;display:inline-block;vertical-align:middle;margin-right:.3rem;}
+@media(max-width:520px){ body{font-size:16px;} .hero-map{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <div class="nav-top"><span class="nav-code">2105604</span><span class="nav-title">Adv Chemical Kinetics · Reaction Rate Expressions</span></div>
+    <div class="pills" id="pills">
+      <span class="grp">L1</span>
+      <a href="#s1">1.1 Rate &amp; stoichiometry</a>
+      <a href="#s2">1.2 Arrhenius</a>
+      <a href="#s3">1.3 Selectivity</a>
+      <span class="grp">L2</span>
+      <a href="#s4">2.1 Elementary</a>
+      <a href="#s5">2.2 RLS + PSSH</a>
+      <a href="#s6">2.3 Michaelis–Menten</a>
+      <a href="#s7">2.4 Monod</a>
+      <a href="#s8">2.5 Inhibition</a>
+      <span class="grp">L3</span>
+      <a href="#s9">3.1 Seven steps</a>
+      <a href="#s10">3.2 Building blocks</a>
+      <a href="#s11">3.3 Which step limits</a>
+      <a href="#s12">3.4 LHHW + data</a>
+      <a href="#s13">3.5 MEK example</a>
+      <a href="#s14">3.6 Deactivation</a>
+      <a href="#s15">Quiz</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="kicker">2105604 Adv Che Kinetics · Lectures 1–3</div>
+  <h1>Building the reaction rate expression</h1>
+  <p class="frame">Every reactor design begins with one question: <em>how fast?</em> This lesson walks the three-lecture arc that answers it — from defining what a reaction rate even <em>is</em> (L1), to writing rate laws for elementary and biological reactions (L2), to the Langmuir–Hinshelwood machinery for solid-catalytic reactions where the chemistry, not transport, sets the pace (L3). Move the sliders: every curve is computed live from the equations in the deck, and the worked examples reproduce the slides' own numbers.</p>
+  <div class="hero-map">
+    <div class="m"><b>Lecture 1</b><span>What is a rate?</span><small>Definitions · stoichiometry · Arrhenius · conversion &amp; selectivity</small></div>
+    <div class="m"><b>Lecture 2</b><span>Elementary &amp; bio</span><small>Power laws · PSSH · Michaelis–Menten · Monod · inhibition</small></div>
+    <div class="m"><b>Lecture 3</b><span>Solid catalytic</span><small>7 steps · adsorption/surface/desorption · LHHW · deactivation</small></div>
+  </div>
+  <p class="credit">Assoc. Prof. Dr. Apinan Soottitantawat · Department of Chemical Engineering, Faculty of Engineering, Chulalongkorn University · built from Lecture 1–3 slide decks.</p>
+</header>
+
+<main>
+
+<!-- ============ PART 1 ============ -->
+<div class="partband" id="p1"><div class="pb"><span class="pn">Part 1</span><span class="pt">Reaction Kinetics Fundamentals</span><span class="ps">Lecture 1 — what a rate is, and how temperature drives it</span></div></div>
+
+<section id="s1">
+  <div class="sec-num">1.1</div>
+  <h2>Reaction rate is the consuming rate of the limiting reactant — made scale-free</h2>
+  <p class="thesis">One reaction has one rate; every species' rate is that rate times its stoichiometric coefficient.</p>
+  <p>For a single reaction \(a\mathrm{A}+b\mathrm{B}\rightarrow c\mathrm{C}+d\mathrm{D}\), the raw "how many moles of A disappear per second" depends on how big your reactor is. To get an intrinsic property we normalise by the <b>volume</b> of reaction (homogeneous), the <b>mass of catalyst</b> \(W\) (solid-catalytic), or the catalyst <b>surface area</b>. That normalised number is the rate, and by convention the limiting reactant's stoichiometric coefficient is set to 1.</p>
+  <div class="eqbox">$$ \frac{-r_\mathrm{A}}{a}=\frac{-r_\mathrm{B}}{b}=\frac{r_\mathrm{C}}{c}=\frac{r_\mathrm{D}}{d}=r_1 $$</div>
+  <p>Pick the coefficients and the reaction rate \(r_1\), and switch the basis, to see how each species' molar rate follows:</p>
+  <div class="panel">
+    <div class="panel-title">Stoichiometry relator — species rates from one reaction rate</div>
+    <svg id="fig1" class="fig" viewBox="0 0 640 300" role="img" aria-label="Bar chart of species rates"></svg>
+    <div class="controls">
+      <div>
+        <span class="numin">a (A) <input type="number" id="a1" value="1" min="1" max="4" step="1"></span>
+        <span class="numin">b (B) <input type="number" id="b1" value="1" min="1" max="4" step="1"></span>
+        <span class="numin">c (C) <input type="number" id="c1" value="1" min="1" max="4" step="1"></span>
+        <span class="numin">d (D) <input type="number" id="d1" value="2" min="1" max="4" step="1"></span>
+      </div>
+      <label class="ctl"><span>reaction rate <b class="mono" id="r1v">1.00</b></span>
+        <input type="range" id="r1" min="0" max="3" step="0.05" value="1"></label>
+      <div class="tabs" id="basis1">
+        <button class="tab on" data-b="V">per volume &nbsp;mol·m⁻³·s⁻¹</button>
+        <button class="tab" data-b="W">per catalyst mass &nbsp;mol·g⁻¹·s⁻¹</button>
+        <button class="tab" data-b="S">per surface area &nbsp;mol·m⁻²·s⁻¹</button>
+      </div>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>−r<sub>A</sub></span><b class="readout-value" id="ro_rA">1.00</b></div>
+      <div class="ro"><span>−r<sub>B</sub></span><b class="readout-value" id="ro_rB">1.00</b></div>
+      <div class="ro"><span>r<sub>C</sub></span><b class="readout-value" id="ro_rC">1.00</b></div>
+      <div class="ro"><span>r<sub>D</sub></span><b class="readout-value" id="ro_rD">2.00</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>The four bars always stay locked in the ratio a : b : c : d. Change the basis and the number's meaning changes — the physics of the ratio does not.</em></p>
+  <div class="note"><b>Instructor's framing.</b> Whether you write the rate per unit volume, per gram of catalyst, or per unit area is a modelling choice — pick the one that makes the mass balance clean. Homogeneous single-phase → volume; solid catalytic → mass of catalyst.</div>
+</section>
+
+<section id="s2">
+  <div class="sec-num">1.2</div>
+  <h2>Arrhenius: temperature's exponential grip on the rate constant</h2>
+  <p class="thesis">Raise T and \(k\) climbs exponentially; the slope of \(\ln k\) vs \(1/T\) is exactly \(-E_a/R\).</p>
+  <p>Concentration dependence lives in the rate law; temperature dependence lives in the constant \(k(T)\). Arrhenius gives it as a frequency factor \(A\) throttled by an activation-energy barrier:</p>
+  <div class="eqbox">$$ k(T)=A\,e^{-E_a/RT}\qquad\Longleftrightarrow\qquad k(T)=k(T_0)\,\exp\!\left[\frac{E_a}{R}\!\left(\frac{1}{T_0}-\frac{1}{T}\right)\right] $$</div>
+  <p>The two-point form on the right is what you actually use in problems: anchor \(k\) at one temperature \(T_0\), then predict any other \(T\). Drag \(E_a\) and \(T\) and watch both the rate constant and the straight-line Arrhenius plot respond.</p>
+  <div class="panel">
+    <div class="panel-title">Arrhenius — <span id="arr_mode_lbl">k vs T</span></div>
+    <svg id="fig2" class="fig" viewBox="0 0 640 380" role="img" aria-label="Arrhenius plot"></svg>
+    <div class="tabs" id="arrtabs">
+      <button class="tab on" data-m="kt">k vs T</button>
+      <button class="tab" data-m="ln">ln k vs 1/T (linearised)</button>
+    </div>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>activation energy E<sub>a</sub> <b class="mono" id="Eav">100 kJ/mol</b></span>
+        <input type="range" id="Ea" min="20" max="250" step="1" value="100"></label>
+      <label class="ctl"><span>temperature T <b class="mono" id="Tv">350 K</b></span>
+        <input type="range" id="T2" min="280" max="450" step="1" value="350"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>k(T)</span><b class="readout-value" id="ro_k">—</b></div>
+      <div class="ro"><span>k(T)/k(T₀)</span><b class="readout-value" id="ro_kr">—</b></div>
+      <div class="ro"><span>slope −E<sub>a</sub>/R</span><b class="readout-value" id="ro_slope">—</b></div>
+      <div class="ro"><span>anchor</span><b class="readout-value">k₀=0.01 @ 300 K</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>Same data, two views. On the left the exponential runaway; on the right it straightens into a line whose slope reads off the activation energy directly.</em></p>
+  <div class="warn"><b>Common mistake.</b> \(T\) in Arrhenius is <b>absolute temperature (Kelvin)</b>, never °C. Forgetting to convert is the single most frequent error on this topic — and \(1/T\) makes it silently wrong, not obviously wrong.</div>
+  <div class="beyond"><b>Beyond the slides.</b> A rule of thumb worth carrying: near room temperature many reactions roughly double their rate for every +10 K. Set \(E_a\approx 50\) kJ/mol and step T from 300→310 K to see how close that "×2 per 10°" folklore really is.</div>
+</section>
+
+<section id="s3">
+  <div class="sec-num">1.3</div>
+  <h2>With side reactions, conversion is not enough — you chase selectivity</h2>
+  <p class="thesis">When A can become desired C or wasteful U, the concentration you run at tilts the split.</p>
+  <p>Real processes rarely give one clean reaction. Define <b>conversion</b> \(X=(N_{\mathrm{A}0}-N_\mathrm{A})/N_{\mathrm{A}0}\), and for the desired product C the <b>instantaneous selectivity</b> \(S_{\mathrm{C/U}}=r_\mathrm{C}/r_\mathrm{U}\) and <b>yield</b>. Suppose two parallel paths compete:</p>
+  <div class="eqbox">$$ \mathrm{A}\xrightarrow{\;k_\mathrm{D}\;}\mathrm{C\ (desired)},\quad r_\mathrm{C}=k_\mathrm{D}C_\mathrm{A}^{\,\alpha_1}\qquad\qquad \mathrm{A}\xrightarrow{\;k_\mathrm{U}\;}\mathrm{U\ (waste)},\quad r_\mathrm{U}=k_\mathrm{U}C_\mathrm{A}^{\,\alpha_2} $$</div>
+  <div class="eqbox">$$ S_{\mathrm{C/U}}=\frac{r_\mathrm{C}}{r_\mathrm{U}}=\frac{k_\mathrm{D}}{k_\mathrm{U}}\,C_\mathrm{A}^{\,\alpha_1-\alpha_2} $$</div>
+  <p>The exponent difference \(\alpha_1-\alpha_2\) decides everything. If the desired path is higher-order (\(\alpha_1>\alpha_2\)), selectivity <em>rises</em> with concentration — run concentrated. If it is lower-order, run dilute. Test it:</p>
+  <div class="panel">
+    <div class="panel-title">Instantaneous selectivity of the desired product vs C<sub>A</sub></div>
+    <svg id="fig3" class="fig" viewBox="0 0 640 360" role="img" aria-label="Selectivity vs concentration"></svg>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>desired order α₁ <b class="mono" id="a1v">2.0</b></span>
+        <input type="range" id="al1" min="0" max="3" step="0.1" value="2"></label>
+      <label class="ctl"><span>waste order α₂ <b class="mono" id="a2v">1.0</b></span>
+        <input type="range" id="al2" min="0" max="3" step="0.1" value="1"></label>
+      <label class="ctl"><span>operating C<sub>A</sub> <b class="mono" id="cav">2.0 mol/L</b></span>
+        <input type="range" id="ca3" min="0.1" max="5" step="0.1" value="2"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>S<sub>C/U</sub> at C<sub>A</sub></span><b class="readout-value" id="ro_S">4.00</b></div>
+      <div class="ro"><span>α₁ − α₂</span><b class="readout-value" id="ro_da">1.0</b></div>
+      <div class="ro"><span>strategy</span><b class="readout-value" id="ro_strat">run concentrated</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>The sign of α₁ − α₂ flips the whole strategy: a rising curve says concentrate the feed; a falling curve says dilute it. Equal orders → selectivity is fixed by k<sub>D</sub>/k<sub>U</sub> alone (flat line).</em></p>
+</section>
+
+<!-- ============ PART 2 ============ -->
+<div class="partband" id="p2"><div class="pb"><span class="pn">Part 2</span><span class="pt">Rate Laws for Elementary &amp; Bio Reactions</span><span class="ps">Lecture 2 — from collisions to enzymes and cells</span></div></div>
+
+<section id="s4">
+  <div class="sec-num">2.1</div>
+  <h2>For an elementary step, the orders <em>are</em> the stoichiometric coefficients</h2>
+  <p class="thesis">Elementary means single-step, collision-driven — so the rate law reads straight off the equation.</p>
+  <p>An elementary reaction happens in one step, from the direct collision of the reactants. Only then are you allowed to write the rate as a power law using the stoichiometric coefficients as exponents:</p>
+  <div class="eqbox">$$ r_1=k_r\,C_\mathrm{A}^{\,a}\,C_\mathrm{B}^{\,b},\qquad \text{order}=a+b $$</div>
+  <p>The order is the whole personality of the curve. Zero order is a flat line (rate ignores concentration); first order is a straight ramp; second order curves upward. Sweep the order in A and watch the shape morph — the ghosted lines show orders 0, 1, 2 for reference.</p>
+  <div class="panel">
+    <div class="panel-title">Elementary rate −r<sub>A</sub> = k·C<sub>A</sub><sup>α</sup> (C<sub>B</sub> held fixed)</div>
+    <svg id="fig4" class="fig" viewBox="0 0 640 360" role="img" aria-label="Rate vs concentration for varying order"></svg>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>rate constant k <b class="mono" id="k4v">0.50</b></span>
+        <input type="range" id="k4" min="0.1" max="2" step="0.05" value="0.5"></label>
+      <label class="ctl"><span>order in A, α <b class="mono" id="ord4v">1.0</b></span>
+        <input type="range" id="ord4" min="0" max="2.5" step="0.1" value="1"></label>
+      <label class="ctl"><span>evaluate at C<sub>A</sub> <b class="mono" id="ca4v">2.0 mol/L</b></span>
+        <input type="range" id="ca4" min="0" max="5" step="0.1" value="2"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>−r<sub>A</sub> at C<sub>A</sub></span><b class="readout-value" id="ro_r4">1.00</b></div>
+      <div class="ro"><span>slope d(−r)/dC</span><b class="readout-value" id="ro_slope4">—</b></div>
+      <div class="ro"><span>shape</span><b class="readout-value" id="ro_shape4">linear</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>Order = 0 → horizontal; order = 1 → the rate is proportional to concentration; order &gt; 1 → the curve accelerates. Reading the shape backwards from data is how you infer the order.</em></p>
+  <div class="warn"><b>Instructor's caution ("k<sub>i</sub> เท่ากันหรือไม่?").</b> You may only equate orders to stoichiometric coefficients for a genuinely <em>elementary</em> step. For an overall (non-elementary) reaction the exponents must come from data or a derived mechanism — they need not even be integers.</div>
+</section>
+
+<section id="s5">
+  <div class="sec-num">2.2</div>
+  <h2>Non-elementary reactions: build the rate from a mechanism using RLS + PSSH</h2>
+  <p class="thesis">Two tools turn a multi-step mechanism into one measurable rate law: the rate-limiting step and pseudo-steady state.</p>
+  <p>Most real reactions are a sequence of elementary steps. The apparent rate is assembled from them with two moves: (1) pick the <b>rate-limiting step</b> — the slowest link; any reversible non-limiting step is set to equilibrium (\(r=0\)); (2) apply the <b>Pseudo-Steady-State Hypothesis</b> (PSSH) to unstable intermediates (radicals, surface species), whose net rate of formation is taken as zero. The final expression must contain only <em>measurable</em> concentrations. Click through the ethane-pyrolysis derivation:</p>
+  <ol class="steps" id="steps5">
+    <li data-hl="mech"><b>Propose the mechanism</b> — ethane cracks to ethylene via radical steps.
+      <p class="why">\(\mathrm{C_2H_6}\rightarrow\mathrm{C_2H_4}+\mathrm{H_2}\), through initiation, propagation and termination of radicals.</p>
+      <p class="fig-link">→ this fixes which species are stable (measurable) and which are fleeting intermediates.</p></li>
+    <li data-hl="pssh"><b>Apply PSSH to the radicals</b> — set their net formation rate to zero.
+      <p class="why">The radical concentrations are tiny and constant, so \(r_{\text{radical}}\approx 0\) lets you solve for them algebraically.</p>
+      <p class="fig-link">→ eliminates the unmeasurable \([\text{H}\!\cdot],[\text{C}_2\text{H}_5\!\cdot]\) from the equations.</p></li>
+    <li data-hl="rls"><b>Insert the rate-limiting step</b> — the slow step carries the overall rate.
+      <p class="why">Fast, reversible steps are put at equilibrium (\(K_i=k_i/k_{-i}\)); only the slow step's constant survives out front.</p>
+      <p class="fig-link">→ collapses many constants into one apparent \(k\).</p></li>
+    <li data-hl="fin"><b>Result: a rate in measurable concentrations</b>.
+      <p class="why">The algebra returns an apparent order (here ≈ 1 in ethane) — a number you can now check against experiment.</p>
+      <p class="fig-link">→ ready to drop into a reactor mass balance.</p></li>
+  </ol>
+  <div class="note"><b>When PSSH vs single RLS?</b> Use a single rate-limiting step when one step is clearly slowest. Use PSSH when several competing steps have comparable rates, so no single one dominates — the assumption then pins the reactive intermediates instead.</div>
+</section>
+
+<section id="s6">
+  <div class="sec-num">2.3</div>
+  <h2>Michaelis–Menten: enzyme rate that saturates, and K<sub>M</sub> is where it's half-full</h2>
+  <p class="thesis">An enzyme has finite active sites, so rate rises, bends, and plateaus at V<sub>max</sub>; K<sub>M</sub> marks the half-maximum.</p>
+  <p>Treating the enzyme–substrate complex as a PSSH intermediate (adsorption then reaction) gives the Michaelis–Menten law — the deck's exact form:</p>
+  <div class="eqbox">$$ r_P=k_3\frac{C_{E_T}C_S}{K_M+C_S}=\frac{V_{max}\,C_S}{K_M+C_S},\qquad V_{max}=k_3 C_{E_T} $$</div>
+  <p>At \(C_S=K_M\) the rate is exactly \(V_{max}/2\) — that is the definition of \(K_M\), and the fastest way to read it off a graph. Because the equation is nonlinear, experimentalists often flip it into the straight <b>Lineweaver–Burk</b> double-reciprocal form to fit \(V_{max}\) and \(K_M\):</p>
+  <div class="eqbox">$$ \frac{1}{r_P}=\frac{K_M}{V_{max}}\frac{1}{C_S}+\frac{1}{V_{max}} $$</div>
+  <div class="panel">
+    <div class="panel-title">Michaelis–Menten — <span id="mm_mode_lbl">saturation curve</span></div>
+    <svg id="fig6" class="fig" viewBox="0 0 640 360" role="img" aria-label="Michaelis-Menten"></svg>
+    <div class="tabs" id="mmtabs">
+      <button class="tab on" data-m="sat">r<sub>P</sub> vs C<sub>S</sub></button>
+      <button class="tab" data-m="lb">Lineweaver–Burk 1/r vs 1/C<sub>S</sub></button>
+    </div>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>V<sub>max</sub> <b class="mono" id="vmaxv">2.00</b></span>
+        <input type="range" id="vmax6" min="0.5" max="4" step="0.05" value="2"></label>
+      <label class="ctl"><span>K<sub>M</sub> <b class="mono" id="kmv">1.0 mol/L</b></span>
+        <input type="range" id="km6" min="0.2" max="4" step="0.1" value="1"></label>
+      <label class="ctl"><span>read at C<sub>S</sub> <b class="mono" id="cs6v">1.0 mol/L</b></span>
+        <input type="range" id="cs6" min="0.1" max="10" step="0.1" value="1"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>r<sub>P</sub></span><b class="readout-value" id="ro_rp6">1.00</b></div>
+      <div class="ro"><span>V<sub>max</sub>/2</span><b class="readout-value" id="ro_half6">1.00</b></div>
+      <div class="ro"><span>% of V<sub>max</sub></span><b class="readout-value" id="ro_pct6">50%</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>Drag C<sub>S</sub> to K<sub>M</sub> and the rate lands exactly on V<sub>max</sub>/2. Switch to Lineweaver–Burk: the same two constants become the line's slope (K<sub>M</sub>/V<sub>max</sub>) and intercept (1/V<sub>max</sub>).</em></p>
+</section>
+
+<section id="s7">
+  <div class="sec-num">2.4</div>
+  <h2>Monod cell growth: the same saturation shape, a biological meaning</h2>
+  <p class="thesis">Microbial growth obeys Monod — mathematically identical to Michaelis–Menten, with cells eating substrate.</p>
+  <p>With ample nutrient, cells multiply and the specific growth rate follows Monod kinetics; the growth rate is that specific rate times the cell concentration:</p>
+  <div class="eqbox">$$ \mu=\mu_{max}\frac{C_S}{K_S+C_S},\qquad r_g=\mu\,C_C=\mu_{max}\frac{C_C\,C_S}{K_S+C_S} $$</div>
+  <p>Notice the structural twin of Michaelis–Menten: \(\mu_{max}\leftrightarrow V_{max}\), \(K_S\leftrightarrow K_M\). Defaults below are the deck's own culture parameters (\(\mu_{max}=0.7\ \mathrm{h^{-1}}\), \(K_S=10\ \mathrm{mg/dm^3}\)). At \(C_S=K_S\), \(\mu=\mu_{max}/2\).</p>
+  <div class="panel">
+    <div class="panel-title">Monod specific growth rate μ vs substrate C<sub>S</sub></div>
+    <svg id="fig7" class="fig" viewBox="0 0 640 350" role="img" aria-label="Monod"></svg>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>μ<sub>max</sub> <b class="mono" id="mumaxv">0.70 h⁻¹</b></span>
+        <input type="range" id="mumax7" min="0.1" max="1.2" step="0.05" value="0.7"></label>
+      <label class="ctl"><span>K<sub>S</sub> <b class="mono" id="ksv">10 mg/dm³</b></span>
+        <input type="range" id="ks7" min="2" max="40" step="1" value="10"></label>
+      <label class="ctl"><span>read at C<sub>S</sub> <b class="mono" id="cs7v">10 mg/dm³</b></span>
+        <input type="range" id="cs7" min="1" max="120" step="1" value="10"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>μ</span><b class="readout-value" id="ro_mu7">0.350 h⁻¹</b></div>
+      <div class="ro"><span>μ<sub>max</sub>/2</span><b class="readout-value" id="ro_half7">0.350</b></div>
+      <div class="ro"><span>% of μ<sub>max</sub></span><b class="readout-value" id="ro_pct7">50%</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>Substrate-limited at low C<sub>S</sub> (roughly first-order), saturated at high C<sub>S</sub> (zero-order, cells growing flat-out). The knee sits at C<sub>S</sub> = K<sub>S</sub>.</em></p>
+</section>
+
+<section id="s8">
+  <div class="sec-num">2.5</div>
+  <h2>Substrate inhibition: too much food poisons the rate (Andrews / Haldane)</h2>
+  <p class="thesis">Add a \(C_S^2/K_I\) term and the ever-rising Monod curve turns over into a peak.</p>
+  <p>Some cultures grow slower when substrate is <em>too</em> abundant. The Andrews (Haldane) model captures it with one extra term in the denominator:</p>
+  <div class="eqbox">$$ \mu=\mu_{max}\frac{C_S}{K_S+C_S+\dfrac{C_S^{2}}{K_I}} $$</div>
+  <p>That quadratic term is negligible at low \(C_S\) (you recover Monod) but dominates at high \(C_S\), pulling the rate back down. The maximum sits at \(C_S=\sqrt{K_S K_I}\). Toggle Monod vs Andrews and shrink \(K_I\) to make the inhibition bite harder:</p>
+  <div class="panel">
+    <div class="panel-title">Monod vs Andrews (substrate inhibition)</div>
+    <svg id="fig8" class="fig" viewBox="0 0 640 350" role="img" aria-label="Andrews inhibition"></svg>
+    <div class="tabs" id="andtabs">
+      <button class="tab on" data-m="both">show both</button>
+      <button class="tab" data-m="and">Andrews only</button>
+    </div>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>μ<sub>max</sub> <b class="mono" id="mumax8v">0.70 h⁻¹</b></span>
+        <input type="range" id="mumax8" min="0.1" max="1.2" step="0.05" value="0.7"></label>
+      <label class="ctl"><span>K<sub>S</sub> <b class="mono" id="ks8v">10</b></span>
+        <input type="range" id="ks8" min="2" max="30" step="1" value="10"></label>
+      <label class="ctl"><span>inhibition K<sub>I</sub> <b class="mono" id="ki8v">50</b></span>
+        <input type="range" id="ki8" min="10" max="300" step="5" value="50"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>peak at C<sub>S</sub></span><b class="readout-value" id="ro_peak8">22.4</b></div>
+      <div class="ro"><span>μ at peak</span><b class="readout-value" id="ro_mupk8">0.370</b></div>
+      <div class="ro"><span>√(K<sub>S</sub>K<sub>I</sub>)</span><b class="readout-value" id="ro_sqrt8">22.4</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>Monod (navy) only ever climbs to a plateau; Andrews (accent) climbs, peaks at √(K<sub>S</sub>K<sub>I</sub>), then falls. A smaller K<sub>I</sub> means stronger inhibition and an earlier, lower peak.</em></p>
+  <div class="beyond"><b>Beyond the slides.</b> The same inhibition-by-excess shape governs product inhibition in fermenters and enzyme reactors near saturation. Whenever a measured rate rises then <em>falls</em> with the very species that feeds it, suspect an inhibition term — a cue you'll reuse in L3 with the MEK example.</div>
+</section>
+
+<!-- ============ PART 3 ============ -->
+<div class="partband" id="p3"><div class="pb"><span class="pn">Part 3</span><span class="pt">Solid Catalytic Reactions — Chemical-Rate Controlled</span><span class="ps">Lecture 3 — Langmuir–Hinshelwood–Hougen–Watson kinetics</span></div></div>
+
+<section id="s9">
+  <div class="sec-num">3.1</div>
+  <h2>A catalytic reaction is seven steps in series — chemistry is only three of them</h2>
+  <p class="thesis">"Chemical-rate controlled" means the transport steps are fast, so a chemical step is the bottleneck.</p>
+  <p>For \(\mathrm{A}\rightarrow\mathrm{B}\) on a solid catalyst, a molecule must run a seven-step gauntlet: diffuse from the bulk to the surface, diffuse into the pores, adsorb, react on the surface, desorb, diffuse back out of the pores, and diffuse back to the bulk. Three are <b>chemical-rate</b> steps (adsorption, surface reaction, desorption); four are <b>physical-rate</b> transport steps. Since they act in series, the slowest one controls. Click a step to see its role:</p>
+  <div class="panel">
+    <div class="panel-title">The seven-step sequence — click a step</div>
+    <svg id="fig9" class="fig" viewBox="0 0 660 260" role="img" aria-label="Seven step catalytic sequence"></svg>
+    <div class="readouts" style="margin-top:.8rem">
+      <div class="ro" style="min-width:100%"><span id="step9-lbl">selected step</span><b class="readout-value" id="step9-desc" style="font-size:.95em;font-weight:400;color:var(--ink)">Tap any block above. External &amp; internal diffusion are physical (transport); adsorption, surface reaction and desorption are the chemical steps.</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>When the physical (transport) steps are much faster than the chemical steps, concentration at the surface ≈ concentration in the bulk (C<sub>Ab</sub> ≈ C<sub>As</sub> ≈ C<sub>A</sub>), and the rate law is written purely from the chemical steps. That is the "chemical-rate controlled" regime of this lecture.</em></p>
+  <div class="note"><b>Why are adsorption and desorption "chemical"?</b> Because the reactant <em>chemisorbs</em> — it forms an actual chemical bond to the active site (e.g. ethylidyne on platinum). Bond formation and breaking, not mere diffusion, is what makes these rate steps chemical.</div>
+</section>
+
+<section id="s10">
+  <div class="sec-num">3.2</div>
+  <h2>The three building-block rates, and the site balance that closes them</h2>
+  <p class="thesis">Each chemical step is a reversible mass-action rate on <em>sites</em>; a site balance ties the surface coverages together.</p>
+  <p>Write every chemical step from mass action, counting vacant sites \(S\) as reactants. These are the deck's exact forms. Adsorption of A:</p>
+  <div class="eqbox">$$ \mathrm{A}+S\rightleftharpoons \mathrm{A\!\cdot\!S}:\quad r_{ad}'=k_a'\!\left(C_\mathrm{A}C_S-\frac{C_{\mathrm{A}\cdot S}}{K_\mathrm{A}}\right) $$</div>
+  <p>Surface reaction (single-site and dual-site variants) and desorption follow the same pattern:</p>
+  <div class="eqbox">$$ r_S'=k_S'\!\left(C_{\mathrm{A}\cdot S}-\frac{C_{\mathrm{B}\cdot S}}{K_S}\right)\quad(\text{single site}),\qquad r_S'=k_S'\!\left(C_{\mathrm{A}\cdot S}C_S-\frac{C_{\mathrm{B}\cdot S}C_S}{K_S}\right)\quad(\text{dual site}) $$</div>
+  <p>The key that unlocks the algebra is the <b>site balance</b>: total sites = vacant + every occupied kind.</p>
+  <div class="eqbox">$$ C_t=C_S+\sum_i C_{i\cdot S} $$</div>
+  <div class="note"><b>Mechanism menu.</b> The surface step can be <b>single-site</b> (A·S isomerises), <b>dual-site</b> (A·S reacts with an adjacent site or B·S), or <b>Eley–Rideal</b> (adsorbed A·S reacts with gas-phase B). Which one you assume changes the final rate law — the next section makes that consequence visible.</div>
+  <div class="beyond"><b>Beyond the slides.</b> Counting sites is bookkeeping with a physical punchline: every species that sits on a site during the reaction earns a term in the denominator of the final rate law, and the number of distinct sites involved becomes the denominator's exponent. Hold that thought for §3.4.</div>
+</section>
+
+<section id="s11">
+  <div class="sec-num">3.3</div>
+  <h2>The same mechanism, different limiting step → different rate law (Cumene)</h2>
+  <p class="thesis">Choosing which chemical step is slow rewrites the rate expression — and reshapes its pressure dependence.</p>
+  <p>Cumene decomposes to benzene and propylene, \(\mathrm{C}\rightarrow\mathrm{B}+\mathrm{P}\), through adsorption → surface reaction → desorption. Assume one step is limiting and set the others to equilibrium; the surviving expression depends entirely on your choice. Toggle the limiting step:</p>
+  <div class="panel">
+    <div class="panel-title">Cumene C → B + P : rate law by limiting step</div>
+    <div class="tabs" id="cumtabs">
+      <button class="tab on" data-m="surf">surface reaction limiting</button>
+      <button class="tab" data-m="ads">adsorption limiting</button>
+      <button class="tab" data-m="des">desorption limiting</button>
+    </div>
+    <div class="eqbox" id="cum_eq" style="margin-top:1rem"></div>
+    <svg id="fig11" class="fig" viewBox="0 0 640 340" role="img" aria-label="Cumene rate vs partial pressure"></svg>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>partial pressure P<sub>C</sub> <b class="mono" id="pc11v">2.0 atm</b></span>
+        <input type="range" id="pc11" min="0.1" max="10" step="0.1" value="2"></label>
+      <label class="ctl"><span>adsorption group K<sub>C</sub> <b class="mono" id="kc11v">1.0</b></span>
+        <input type="range" id="kc11" min="0" max="4" step="0.1" value="1"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>−r′<sub>C</sub> at P<sub>C</sub></span><b class="readout-value" id="ro_rc11">—</b></div>
+      <div class="ro"><span>behaviour</span><b class="readout-value" id="ro_beh11" style="font-size:.9em">saturating</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>Adsorption-limited (at low conversion) gives a rate linear in P<sub>C</sub>; surface-reaction-limited gives the classic saturating LHHW curve as sites fill. Same molecules, same catalyst — the shape of the data tells you which step is slow.</em></p>
+  <div class="note"><b>Guideline from the deck.</b> About <b>75% of catalytic reactions are surface-reaction limited</b> — so if you have no other information, the surface-reaction-limited LHHW form is the sensible first guess.</div>
+</section>
+
+<section id="s12">
+  <div class="sec-num">3.4</div>
+  <h2>The LHHW form, and reading K's straight out of differential-reactor data</h2>
+  <p class="thesis">Rate = (kinetic factor)·(driving force) / (adsorption term)ⁿ — and the data hands you the constants.</p>
+  <p>The Langmuir–Hinshelwood / Hougen–Watson rate law, for surface reaction limiting, has a fixed anatomy:</p>
+  <div class="eqbox">$$ -r_\mathrm{A}'=\frac{k_r'\,C_\mathrm{A}^{a}C_\mathrm{B}^{b}}{\big(1+K_\mathrm{A}C_\mathrm{A}+K_\mathrm{B}C_\mathrm{B}+\cdots\big)^{n}} $$</div>
+  <p>A species appears in the denominator only if it occupies a site; the exponent \(n\) is the number of sites in the limiting step. Here is a real differential-reactor dataset from the deck (Problem II), \(\mathrm{A}\rightarrow\text{products}\) where the product-like species B strongly adsorbs and blocks sites. Fit it live with the single-site form \(-r_a'=kP_a/(1+K_aP_a+K_bP_b)\):</p>
+  <div class="panel wide">
+    <div class="panel-title">Problem II — fit the 16 differential-reactor points</div>
+    <div class="tabs" id="p2tabs">
+      <button class="tab on" data-m="a">vary P<sub>a</sub> (P<sub>b</sub> = 0)</button>
+      <button class="tab" data-m="b">vary P<sub>b</sub> (P<sub>a</sub> = 1)</button>
+    </div>
+    <svg id="fig12" class="fig" viewBox="0 0 640 360" role="img" aria-label="Differential reactor fit"></svg>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>k <b class="mono" id="k12v">1.00</b></span>
+        <input type="range" id="k12" min="0.4" max="1.6" step="0.01" value="1"></label>
+      <label class="ctl"><span>K<sub>a</sub> (A adsorption) <b class="mono" id="ka12v">0.50</b></span>
+        <input type="range" id="ka12" min="0" max="1.5" step="0.01" value="0.5"></label>
+      <label class="ctl"><span>K<sub>b</sub> (B adsorption) <b class="mono" id="kb12v">8.0</b></span>
+        <input type="range" id="kb12" min="0" max="16" step="0.1" value="8"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>fit error (SSE)</span><b class="readout-value" id="ro_sse12">—</b></div>
+      <div class="ro"><span>max saturation k/K<sub>a</sub></span><b class="readout-value" id="ro_sat12">2.00</b></div>
+      <div class="ro"><span>best fit</span><b class="readout-value">k=1.0, K<sub>a</sub>=0.5, K<sub>b</sub>=8.0</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>With k = 1.0, K<sub>a</sub> = 0.5, K<sub>b</sub> = 8.0 the model threads all 16 points. Rate saturates in P<sub>a</sub> (sites filling with A) and collapses as P<sub>b</sub> rises (B out-competes A for sites) — the fingerprint of competitive adsorption.</em></p>
+</section>
+
+<section id="s13">
+  <div class="sec-num">3.5</div>
+  <h2>Worked example: MEK from butanol — a rate that peaks means a dual site</h2>
+  <p class="thesis">A rate that rises then falls with reactant pressure is the signature of a dual-site surface reaction.</p>
+  <p>Methyl ethyl ketone (MEK) is made by dehydrogenating butan-2-ol (Bu) over ZnO. In a differential reactor at 490 °C the rate <em>rises then falls</em> as \(P_{Bu}\) increases — H₂ and MEK are weakly adsorbed, so the deck's dual-site surface-reaction rate law is:</p>
+  <div class="eqbox">$$ r_{MEK}'=\frac{k\,P_{Bu}}{\left(1+K_{Bu}P_{Bu}\right)^{2}} $$</div>
+  <p>The squared denominator (two sites) is what creates the maximum, located at \(P_{Bu}=1/K_{Bu}\) with height \(k/4K_{Bu}\). The deck's regression gives \(k=0.4939,\ K_{Bu}=1.869\). Fit the six data points yourself:</p>
+  <div class="panel">
+    <div class="panel-title">Problem IV — MEK rate vs butanol pressure (490 °C)</div>
+    <svg id="fig13" class="fig" viewBox="0 0 640 350" role="img" aria-label="MEK dual site fit"></svg>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>k <b class="mono" id="k13v">0.4939</b></span>
+        <input type="range" id="k13" min="0.2" max="0.9" step="0.0001" value="0.4939"></label>
+      <label class="ctl"><span>K<sub>Bu</sub> <b class="mono" id="k13K">1.869</b></span>
+        <input type="range" id="kK13" min="0.5" max="4" step="0.001" value="1.869"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>peak at P<sub>Bu</sub>=1/K</span><b class="readout-value" id="ro_peak13">0.535</b></div>
+      <div class="ro"><span>r′<sub>max</sub>=k/4K</span><b class="readout-value" id="ro_rmax13">0.0661</b></div>
+      <div class="ro"><span>fit error (SSE)</span><b class="readout-value" id="ro_sse13">—</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>The single-site form kP/(1+KP) could never turn over — only the squared (dual-site) denominator produces the peak the data demand. That maximum is the mechanism revealing itself.</em></p>
+  <div class="warn"><b>Reading the hint ("some species might be weakly adsorbed").</b> H₂ and MEK adsorb weakly, so their K·P terms drop out of the denominator, leaving only K<sub>Bu</sub>P<sub>Bu</sub>. Deciding which terms to keep <em>is</em> the modelling — keep only what the data justify.</div>
+</section>
+
+<section id="s14">
+  <div class="sec-num">3.6</div>
+  <h2>Catalyst deactivation: the rate that fades with time on stream</h2>
+  <p class="thesis">Real catalysts age; multiply the fresh rate by an activity a(t) that decays by its own law.</p>
+  <p>Sintering, poisoning and coking all steal active sites. Model it by scaling the fresh LHHW rate with a time-dependent <b>activity</b> \(a(t)\in[0,1]\), governed by a decay-rate law:</p>
+  <div class="eqbox">$$ -r_\mathrm{A}'(t)=a(t)\,\big[-r_{\mathrm{A},\,fresh}'\big]=a(t)\frac{k'C_\mathrm{A}C_\mathrm{B}}{1+K_\mathrm{A}C_\mathrm{A}+K_\mathrm{B}C_\mathrm{B}},\qquad -\frac{da}{dt}=k_d\,a^{\,p} $$</div>
+  <p>First-order decay (\(p=1\)) gives \(a=e^{-k_d t}\); second-order (\(p=2\), e.g. sintering) gives \(a=1/(1+k_d t)\). Run the reactor clock and watch activity — and the measured rate — fade:</p>
+  <div class="panel">
+    <div class="panel-title">Virtual run — activity &amp; rate decaying with time on stream</div>
+    <div class="lab-wrap">
+      <canvas id="lab14" class="lab" width="420" height="260" aria-label="Deactivation animation"></canvas>
+      <div style="flex:1;min-width:220px">
+        <svg id="fig14" class="fig" viewBox="0 0 340 240" role="img" aria-label="Activity vs time"></svg>
+      </div>
+    </div>
+    <div class="labbtns"><button class="btn" id="lab14start">Start</button><button class="btn ghost" id="lab14reset">Reset</button></div>
+    <div class="controls ctlrow">
+      <label class="ctl"><span>decay constant k<sub>d</sub> <b class="mono" id="kd14v">0.20</b></span>
+        <input type="range" id="kd14" min="0.02" max="0.6" step="0.01" value="0.2"></label>
+      <label class="ctl"><span>decay order p <b class="mono" id="p14v">1 (exponential)</b></span>
+        <input type="range" id="p14" min="1" max="2" step="1" value="1"></label>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span>time on stream</span><b class="readout-value" id="ro_t14">0.0</b></div>
+      <div class="ro"><span>activity a(t)</span><b class="readout-value" id="ro_a14">1.000</b></div>
+      <div class="ro"><span>−r′<sub>A</sub> / fresh</span><b class="readout-value" id="ro_rr14">100%</b></div>
+      <div class="ro"><span>half-activity at</span><b class="readout-value" id="ro_half14">—</b></div>
+    </div>
+  </div>
+  <p class="caption"><em>The particle greys and the rate needle drops as sites are lost. First-order decay dies exponentially; second-order (sintering) has a long, slow tail — the catalyst lingers at partial activity far longer.</em></p>
+  <div class="note"><b>Design consequence.</b> To keep including deactivation, the decay-rate law is fitted <em>alongside</em> the kinetic law against time-resolved data — then the reactor is sized for the <em>aged</em> activity, not the fresh one. A catalyst that looks great on day one can still miss the spec by month three.</div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<div class="partband"><div class="pb"><span class="pn">Check</span><span class="pt">Concept Quiz</span><span class="ps">Eight questions across Lectures 1–3 · every choice explains itself</span></div></div>
+<section id="s15" class="quiz">
+  <div class="sec-num">Q</div>
+  <h2>Test yourself</h2>
+  <p class="thesis">Pick an answer to see why it's right — or why the tempting wrong ones are wrong.</p>
+  <div id="quizmount"></div>
+  <div class="scorebar" id="scorebar" style="display:none">You scored <b id="scoreval">0/8</b><div id="scoremsg" style="margin-top:.4rem;color:var(--muted)"></div>
+    <button class="btn ghost" id="quizreset" style="margin-top:.7rem">Try again</button></div>
+</section>
+
+
+</main>
+
+<footer>
+<h3>Sources &amp; provenance of every constant</h3>
+<ol id="srclist"></ol>
+<p style="margin-top:1rem">2105604 Advanced Chemical Kinetics · Assoc. Prof. Dr. Apinan Soottitantawat · Department of Chemical Engineering, Chulalongkorn University · Academic year 2025. Interactive lesson generated from the Lecture 1–3 decks; all curves computed in-page from the equations shown.</p>
+</footer>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var R=8.314;
+
+/* ---------- helpers ---------- */
+function fmt(v,s){ if(!isFinite(v))return '—'; s=s||3;
+  if(v!==0 && (Math.abs(v)>=1e5||Math.abs(v)<1e-3)) return v.toExponential(2);
+  return (+v.toPrecision(s)).toString(); }
+function niceTicks(min,max,n){
+  var span=max-min; if(span<=0) return [min];
+  var raw=span/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), norm=raw/mag, step;
+  if(norm<1.5)step=1; else if(norm<3)step=2; else if(norm<7)step=5; else step=10;
+  step*=mag; var start=Math.ceil(min/step-1e-9)*step, t=[];
+  for(var v=start; v<=max+1e-9; v+=step) t.push(+v.toFixed(10));
+  return t;
+}
+function renderEq(el){
+  if(window.renderMathInElement){ try{ renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false}); }catch(e){} }
+  else setTimeout(function(){renderEq(el);},150);
+}
+/* generic line/scatter plot into an <svg> */
+function plot(svg,o){
+  var W=o.W||640, H=o.H||360, ml=o.ml||62, mr=16, mt=16, mb=46;
+  var x0=o.x[0],x1=o.x[1],y0=o.y[0],y1=o.y[1];
+  var pw=W-ml-mr, ph=H-mt-mb;
+  var sx=function(v){return ml+(v-x0)/(x1-x0)*pw;};
+  var sy=function(v){return mt+(1-(v-y0)/(y1-y0))*ph;};
+  var xf=o.xfmt||function(v){return fmt(v,3);}, yf=o.yfmt||function(v){return fmt(v,3);};
+  var s='';
+  var xt=niceTicks(x0,x1,6), yt=niceTicks(y0,y1,5), i;
+  for(i=0;i<yt.length;i++){ var yy=sy(yt[i]);
+    s+='<line x1="'+ml+'" y1="'+yy.toFixed(1)+'" x2="'+(W-mr)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>';
+    s+='<text x="'+(ml-8)+'" y="'+(yy+4).toFixed(1)+'" text-anchor="end" font-size="12" font-family="IBM Plex Mono, monospace" fill="var(--muted)">'+yf(yt[i])+'</text>'; }
+  for(i=0;i<xt.length;i++){ var xx=sx(xt[i]);
+    s+='<text x="'+xx.toFixed(1)+'" y="'+(H-mb+18)+'" text-anchor="middle" font-size="12" font-family="IBM Plex Mono, monospace" fill="var(--muted)">'+xf(xt[i])+'</text>'; }
+  // axes
+  s+='<line x1="'+ml+'" y1="'+mt+'" x2="'+ml+'" y2="'+(H-mb)+'" stroke="var(--ink)" stroke-width="1.4"/>';
+  s+='<line x1="'+ml+'" y1="'+(H-mb)+'" x2="'+(W-mr)+'" y2="'+(H-mb)+'" stroke="var(--ink)" stroke-width="1.4"/>';
+  // guides
+  (o.guides||[]).forEach(function(g){
+    if(g.x!=null){ s+='<line x1="'+sx(g.x).toFixed(1)+'" y1="'+mt+'" x2="'+sx(g.x).toFixed(1)+'" y2="'+(H-mb)+'" stroke="'+(g.color||'var(--muted)')+'" stroke-width="1.2" stroke-dasharray="5 4"/>'; }
+    if(g.y!=null){ s+='<line x1="'+ml+'" y1="'+sy(g.y).toFixed(1)+'" x2="'+(W-mr)+'" y2="'+sy(g.y).toFixed(1)+'" stroke="'+(g.color||'var(--muted)')+'" stroke-width="1.2" stroke-dasharray="5 4"/>'; }
+  });
+  // line series
+  (o.series||[]).forEach(function(se){
+    if(!se.pts.length)return; var d='';
+    for(i=0;i<se.pts.length;i++){ var p=se.pts[i]; if(p[1]==null||!isFinite(p[1]))continue;
+      var X=sx(p[0]).toFixed(1), Y=sy(Math.max(y0,Math.min(y1,p[1]))).toFixed(1);
+      d+=(d?'L':'M')+X+','+Y; }
+    s+='<path d="'+d+'" fill="none" stroke="'+(se.color||'var(--navy)')+'" stroke-width="'+(se.w||2.5)+'"'+(se.dash?' stroke-dasharray="'+se.dash+'"':'')+' stroke-linejoin="round"/>';
+  });
+  // scatter
+  (o.scatter||[]).forEach(function(sc){
+    sc.pts.forEach(function(p){ if(p[1]==null)return;
+      s+='<circle cx="'+sx(p[0]).toFixed(1)+'" cy="'+sy(Math.max(y0,Math.min(y1,p[1]))).toFixed(1)+'" r="'+(sc.r||4)+'" fill="'+(sc.color||'var(--accent)')+'" stroke="#fff" stroke-width="1"/>'; });
+  });
+  // marks
+  (o.marks||[]).forEach(function(m){
+    s+='<circle cx="'+sx(m.x).toFixed(1)+'" cy="'+sy(m.y).toFixed(1)+'" r="'+(m.r||5.5)+'" fill="'+(m.color||'var(--navy)')+'" stroke="#fff" stroke-width="1.5"/>';
+  });
+  // axis titles
+  if(o.xlabel) s+='<text x="'+(ml+pw/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="13" fill="var(--muted)">'+o.xlabel+'</text>';
+  if(o.ylabel) s+='<text transform="translate(15,'+(mt+ph/2)+') rotate(-90)" text-anchor="middle" font-size="13" fill="var(--muted)">'+o.ylabel+'</text>';
+  // legend
+  if(o.legend){ var lx=ml+14, ly=mt+8;
+    o.legend.forEach(function(lg,k){ var yy=ly+k*18;
+      s+='<line x1="'+lx+'" y1="'+yy+'" x2="'+(lx+22)+'" y2="'+yy+'" stroke="'+lg.color+'" stroke-width="3"'+(lg.dash?' stroke-dasharray="'+lg.dash+'"':'')+'/>';
+      s+='<text x="'+(lx+28)+'" y="'+(yy+4)+'" font-size="12" fill="var(--muted)">'+lg.label+'</text>'; });
+  }
+  svg.innerHTML=s;
+}
+
+/* ---------- 1.1 stoichiometry ---------- */
+(function(){
+  var ids=['a1','b1','c1','d1','r1'], basis='V';
+  function draw(){
+    var a=+$('a1').value,b=+$('b1').value,c=+$('c1').value,d=+$('d1').value,r=+$('r1').value;
+    $('r1v').textContent=r.toFixed(2);
+    var rA=a*r,rB=b*r,rC=c*r,rD=d*r;
+    $('ro_rA').textContent=rA.toFixed(2); $('ro_rB').textContent=rB.toFixed(2);
+    $('ro_rC').textContent=rC.toFixed(2); $('ro_rD').textContent=rD.toFixed(2);
+    var unit=basis==='V'?'mol·m⁻³·s⁻¹':basis==='W'?'mol·g⁻¹·s⁻¹':'mol·m⁻²·s⁻¹';
+    var bars=[['−r_A',rA,'var(--navy)'],['−r_B',rB,'var(--navy)'],['r_C',rC,'var(--accent)'],['r_D',rD,'var(--accent)']];
+    var W=640,H=300,ml=52,mb=52,mt=20,mr=20, maxv=Math.max(4*Math.max(a,b,c,d)*1,rA,rB,rC,rD,0.1);
+    var top=Math.max(maxv,3*3); var s='';
+    var bw=(W-ml-mr)/4, base=H-mb;
+    s+='<line x1="'+ml+'" y1="'+base+'" x2="'+(W-mr)+'" y2="'+base+'" stroke="var(--ink)" stroke-width="1.4"/>';
+    bars.forEach(function(bb,i){
+      var h=(bb[1]/top)*(base-mt), x=ml+i*bw+bw*0.22, w=bw*0.56;
+      s+='<rect x="'+x+'" y="'+(base-h)+'" width="'+w+'" height="'+h+'" fill="'+bb[2]+'" rx="3"/>';
+      s+='<text x="'+(x+w/2)+'" y="'+(base-h-8)+'" text-anchor="middle" font-size="14" font-family="IBM Plex Mono, monospace" fill="var(--navy)">'+bb[1].toFixed(2)+'</text>';
+      s+='<text x="'+(x+w/2)+'" y="'+(base+20)+'" text-anchor="middle" font-size="13" fill="var(--muted)">'+bb[0]+'</text>';
+    });
+    s+='<text x="'+((ml+W-mr)/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="12" fill="var(--muted)">rate ('+unit+')</text>';
+    $('fig1').innerHTML=s;
+  }
+  ids.forEach(function(id){ $(id).addEventListener('input',draw); });
+  Array.prototype.forEach.call($('basis1').children,function(btn){
+    btn.addEventListener('click',function(){ Array.prototype.forEach.call($('basis1').children,function(b){b.classList.remove('on');}); btn.classList.add('on'); basis=btn.dataset.b; draw(); });
+  });
+  draw();
+})();
+
+/* ---------- 1.2 Arrhenius ---------- */
+(function(){
+  var k0=0.01,T0=300, mode='kt';
+  function kOf(Ea,T){ return k0*Math.exp((Ea/R)*(1/T0-1/T)); }
+  function draw(){
+    var Ea=+$('Ea').value*1000, T=+$('T2').value;
+    $('Eav').textContent=(Ea/1000).toFixed(0)+' kJ/mol'; $('Tv').textContent=T.toFixed(0)+' K';
+    var k=kOf(Ea,T);
+    $('ro_k').textContent=fmt(k,3); $('ro_kr').textContent=fmt(k/k0,3);
+    $('ro_slope').textContent=fmt(-Ea/R,4)+' K';
+    if(mode==='kt'){
+      var pts=[], kmax=kOf(Ea,450);
+      for(var Tt=280;Tt<=450;Tt+=2) pts.push([Tt,kOf(Ea,Tt)]);
+      plot($('fig2'),{H:380,x:[280,450],y:[0,Math.max(kmax*1.05,k*1.1,0.02)],
+        xlabel:'temperature T (K)', ylabel:'rate constant k',
+        series:[{pts:pts,color:'var(--navy)',w:2.6}],
+        guides:[{x:T,color:'var(--muted)'},{y:k,color:'var(--muted)'}],
+        marks:[{x:T,y:k,color:'var(--accent)'}] });
+      $('arr_mode_lbl').textContent='k vs T';
+    } else {
+      var pts2=[];
+      for(var Tt2=280;Tt2<=450;Tt2+=2){ var kk=kOf(Ea,Tt2); pts2.push([1/Tt2, Math.log(kk)]); }
+      var lnk=Math.log(k);
+      plot($('fig2'),{H:380,x:[1/450,1/280],y:[Math.log(kOf(Ea,280))-0.4,Math.log(kOf(Ea,450))+0.4],
+        xlabel:'1/T (K⁻¹)', ylabel:'ln k',
+        xfmt:function(v){return v.toExponential(1);},
+        yfmt:function(v){return v.toFixed(1);},
+        series:[{pts:pts2,color:'var(--navy)',w:2.6}],
+        guides:[{x:1/T,color:'var(--muted)'}],
+        marks:[{x:1/T,y:lnk,color:'var(--accent)'}] });
+      $('arr_mode_lbl').textContent='ln k vs 1/T (linearised)';
+    }
+  }
+  ['Ea','T2'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  Array.prototype.forEach.call($('arrtabs').children,function(btn){
+    btn.addEventListener('click',function(){ Array.prototype.forEach.call($('arrtabs').children,function(b){b.classList.remove('on');}); btn.classList.add('on'); mode=btn.dataset.m; draw(); });
+  });
+  draw();
+})();
+
+/* ---------- 1.3 selectivity (kD=kU=1) ---------- */
+(function(){
+  function S(CA,a1,a2){ return Math.pow(CA,a1-a2); }
+  function draw(){
+    var a1=+$('al1').value,a2=+$('al2').value,CA=+$('ca3').value;
+    $('a1v').textContent=a1.toFixed(1); $('a2v').textContent=a2.toFixed(1); $('cav').textContent=CA.toFixed(1)+' mol/L';
+    var sv=S(CA,a1,a2); $('ro_S').textContent=fmt(sv,3); $('ro_da').textContent=(a1-a2).toFixed(1);
+    var strat = (a1-a2)>0.05?'run concentrated':(a1-a2)<-0.05?'run dilute':'C-independent';
+    $('ro_strat').textContent=strat;
+    var pts=[],ymax=Math.max(S(5,a1,a2),S(0.1,a1,a2),sv,1)*1.1;
+    for(var c=0.1;c<=5.001;c+=0.05) pts.push([c,S(c,a1,a2)]);
+    plot($('fig3'),{x:[0,5],y:[0,Math.min(ymax,30)],xlabel:'operating C_A (mol/L)',ylabel:'selectivity S_C/U',
+      series:[{pts:pts,color:'var(--accent)',w:2.6}],
+      guides:[{x:CA,color:'var(--muted)'}],
+      marks:[{x:CA,y:sv,color:'var(--navy)'}] });
+  }
+  ['al1','al2','ca3'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  draw();
+})();
+
+/* ---------- 2.1 elementary ---------- */
+(function(){
+  function ser(k,n,step){ var p=[]; for(var c=0;c<=5.001;c+=step) p.push([c,k*Math.pow(c,n)]); return p; }
+  function draw(){
+    var k=+$('k4').value,ord=+$('ord4').value,CA=+$('ca4').value;
+    $('k4v').textContent=k.toFixed(2); $('ord4v').textContent=ord.toFixed(1); $('ca4v').textContent=CA.toFixed(1)+' mol/L';
+    var rv=k*Math.pow(CA,ord); $('ro_r4').textContent=fmt(rv,3);
+    var slope=(ord===0)?0:k*ord*Math.pow(Math.max(CA,1e-6),ord-1);
+    $('ro_slope4').textContent=fmt(slope,3);
+    $('ro_shape4').textContent=ord<0.15?'flat (zero order)':Math.abs(ord-1)<0.12?'linear':ord<1?'concave':'accelerating';
+    var ymax=Math.max(k*Math.pow(5,ord), k*Math.pow(5,2), 0.5)*1.05;
+    plot($('fig4'),{x:[0,5],y:[0,Math.min(ymax,k*25+1)],xlabel:'C_A (mol/L)',ylabel:'−r_A',
+      series:[
+        {pts:ser(k,0,0.1),color:'var(--line)',w:1.6,dash:'4 4'},
+        {pts:ser(k,1,0.1),color:'var(--line)',w:1.6,dash:'4 4'},
+        {pts:ser(k,2,0.1),color:'var(--line)',w:1.6,dash:'4 4'},
+        {pts:ser(k,ord,0.04),color:'var(--navy)',w:2.8}
+      ],
+      guides:[{x:CA,color:'var(--muted)'}], marks:[{x:CA,y:rv,color:'var(--accent)'}],
+      legend:[{color:'var(--line)',dash:'4 4',label:'orders 0, 1, 2 (reference)'},{color:'var(--navy)',label:'chosen order α'}] });
+  }
+  ['k4','ord4','ca4'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  draw();
+})();
+
+/* ---------- 2.2 step-stack ---------- */
+(function(){
+  var steps=document.querySelectorAll('#steps5 li');
+  Array.prototype.forEach.call(steps,function(st){
+    st.addEventListener('click',function(){
+      Array.prototype.forEach.call(steps,function(s){s.classList.remove('on');});
+      st.classList.add('on');
+    });
+  });
+})();
+
+/* ---------- 2.3 Michaelis-Menten ---------- */
+(function(){
+  var mode='sat';
+  function draw(){
+    var Vmax=+$('vmax6').value,KM=+$('km6').value,CS=+$('cs6').value;
+    $('vmaxv').textContent=Vmax.toFixed(2); $('kmv').textContent=KM.toFixed(1)+' mol/L'; $('cs6v').textContent=CS.toFixed(1)+' mol/L';
+    function r(c){return Vmax*c/(KM+c);}
+    var rv=r(CS); $('ro_rp6').textContent=fmt(rv,3); $('ro_half6').textContent=fmt(Vmax/2,3);
+    $('ro_pct6').textContent=Math.round(rv/Vmax*100)+'%';
+    if(mode==='sat'){
+      var pts=[];for(var c=0;c<=10.001;c+=0.1)pts.push([c,r(c)]);
+      plot($('fig6'),{x:[0,10],y:[0,Vmax*1.08],xlabel:'substrate C_S (mol/L)',ylabel:'r_P',
+        series:[{pts:pts,color:'var(--navy)',w:2.7}],
+        guides:[{y:Vmax,color:'var(--accent)'},{x:KM,color:'var(--muted)'},{y:Vmax/2,color:'var(--muted)'}],
+        marks:[{x:CS,y:rv,color:'var(--accent)'}],
+        legend:[{color:'var(--accent)',label:'V_max'},{color:'var(--muted)',dash:'5 4',label:'K_M → V_max/2'}] });
+      $('mm_mode_lbl').textContent='saturation curve';
+    } else {
+      var pts2=[];for(var x=0.1;x<=5.001;x+=0.05)pts2.push([x, 1/(Vmax*(1/x)/(KM+1/x))]);
+      // 1/r vs 1/CS : x=1/CS from 0.1..5 -> CS 0.2..10
+      var lb=[];for(var xi=0.1;xi<=5.001;xi+=0.05){var cs=1/xi; lb.push([xi, 1/r(cs)]);}
+      var xr=[0,5], ymaxlb=1/r(1/5)*1.05;
+      plot($('fig6'),{x:xr,y:[0,ymaxlb],xlabel:'1/C_S (L/mol)',ylabel:'1/r_P',
+        series:[{pts:lb,color:'var(--navy)',w:2.7}],
+        marks:[{x:1/CS,y:1/rv,color:'var(--accent)'}],
+        legend:[{color:'var(--navy)',label:'slope=K_M/V_max, intercept=1/V_max'}] });
+      $('mm_mode_lbl').textContent='Lineweaver–Burk';
+    }
+  }
+  ['vmax6','km6','cs6'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  Array.prototype.forEach.call($('mmtabs').children,function(btn){
+    btn.addEventListener('click',function(){ Array.prototype.forEach.call($('mmtabs').children,function(b){b.classList.remove('on');}); btn.classList.add('on'); mode=btn.dataset.m; draw(); });
+  });
+  draw();
+})();
+
+/* ---------- 2.4 Monod ---------- */
+(function(){
+  function draw(){
+    var mm=+$('mumax7').value,KS=+$('ks7').value,CS=+$('cs7').value;
+    $('mumaxv').textContent=mm.toFixed(2)+' h⁻¹'; $('ksv').textContent=KS.toFixed(0)+' mg/dm³'; $('cs7v').textContent=CS.toFixed(0)+' mg/dm³';
+    function mu(c){return mm*c/(KS+c);}
+    var v=mu(CS); $('ro_mu7').textContent=fmt(v,3)+' h⁻¹'; $('ro_half7').textContent=fmt(mm/2,3);
+    $('ro_pct7').textContent=Math.round(v/mm*100)+'%';
+    var pts=[];for(var c=0;c<=120.001;c+=1)pts.push([c,mu(c)]);
+    plot($('fig7'),{H:350,x:[0,120],y:[0,mm*1.08],xlabel:'substrate C_S (mg/dm³)',ylabel:'μ (h⁻¹)',
+      series:[{pts:pts,color:'var(--navy)',w:2.7}],
+      guides:[{y:mm,color:'var(--accent)'},{x:KS,color:'var(--muted)'},{y:mm/2,color:'var(--muted)'}],
+      marks:[{x:CS,y:v,color:'var(--accent)'}],
+      legend:[{color:'var(--accent)',label:'μ_max'},{color:'var(--muted)',dash:'5 4',label:'C_S=K_S → μ_max/2'}] });
+  }
+  ['mumax7','ks7','cs7'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  draw();
+})();
+
+/* ---------- 2.5 Andrews ---------- */
+(function(){
+  var mode='both';
+  function draw(){
+    var mm=+$('mumax8').value,KS=+$('ks8').value,KI=+$('ki8').value;
+    $('mumax8v').textContent=mm.toFixed(2)+' h⁻¹'; $('ks8v').textContent=KS.toFixed(0); $('ki8v').textContent=KI.toFixed(0);
+    function monod(c){return mm*c/(KS+c);}
+    function andrews(c){return mm*c/(KS+c+c*c/KI);}
+    var peak=Math.sqrt(KS*KI), mupk=andrews(peak);
+    $('ro_peak8').textContent=fmt(peak,3); $('ro_mupk8').textContent=fmt(mupk,3); $('ro_sqrt8').textContent=fmt(peak,3);
+    var xmax=120, pa=[],pm=[];
+    for(var c=0;c<=xmax+0.001;c+=1){ pa.push([c,andrews(c)]); pm.push([c,monod(c)]); }
+    var series=[{pts:pa,color:'var(--accent)',w:2.8}];
+    var leg=[{color:'var(--accent)',label:'Andrews'}];
+    if(mode==='both'){ series.unshift({pts:pm,color:'var(--navy)',w:2.2,dash:'6 4'}); leg.unshift({color:'var(--navy)',dash:'6 4',label:'Monod'}); }
+    plot($('fig8'),{H:350,x:[0,xmax],y:[0,mm*1.08],xlabel:'substrate C_S',ylabel:'μ (h⁻¹)',
+      series:series, guides:[{x:peak,color:'var(--muted)'}], marks:[{x:peak,y:mupk,color:'var(--navy)'}], legend:leg });
+  }
+  ['mumax8','ks8','ki8'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  Array.prototype.forEach.call($('andtabs').children,function(btn){
+    btn.addEventListener('click',function(){ Array.prototype.forEach.call($('andtabs').children,function(b){b.classList.remove('on');}); btn.classList.add('on'); mode=btn.dataset.m; draw(); });
+  });
+  draw();
+})();
+
+/* ---------- 3.1 seven steps ---------- */
+(function(){
+  var steps=[
+    {n:'1',t:'External diffusion',k:'physical',d:'A diffuses from the bulk fluid to the outer catalyst surface. A transport step — fast when mixing is good.'},
+    {n:'2',t:'Internal diffusion',k:'physical',d:'A diffuses through the pores to reach interior active sites. Transport; slowed in small pores.'},
+    {n:'3',t:'Adsorption',k:'chemical',d:'A chemisorbs onto a vacant site: A + S ⇌ A·S. A real bond forms — this is a chemical-rate step.'},
+    {n:'4',t:'Surface reaction',k:'chemical',d:'The adsorbed species reacts on the surface: A·S ⇌ B·S. Usually the slow step (~75% of cases).'},
+    {n:'5',t:'Desorption',k:'chemical',d:'Product releases from the site: B·S ⇌ B + S, freeing the site. Chemical-rate step.'},
+    {n:'6',t:'Internal diffusion',k:'physical',d:'Product B diffuses back out through the pores. Transport.'},
+    {n:'7',t:'External diffusion',k:'physical',d:'Product B diffuses from the surface back into the bulk. Transport.'}
+  ];
+  function draw(sel){
+    var W=660,H=260, n=steps.length, gap=8, bw=(W-20-gap*(n-1))/n, s='';
+    s+='<text x="330" y="20" text-anchor="middle" font-size="12" fill="var(--muted)">reactant A  →  through 7 steps in series  →  product B</text>';
+    steps.forEach(function(st,i){
+      var x=10+i*(bw+gap), y=42, h=120;
+      var fill=st.k==='chemical'?'#fdf6ec':'#eef2f6', stroke=st.k==='chemical'?'var(--accent)':'var(--navy)';
+      var on=(sel===i);
+      s+='<g class="stpblk" data-i="'+i+'" style="cursor:pointer">';
+      s+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="8" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(on?3:1.3)+'"/>';
+      s+='<text x="'+(x+bw/2)+'" y="'+(y+24)+'" text-anchor="middle" font-size="15" font-family="IBM Plex Mono, monospace" fill="'+stroke+'" font-weight="600">'+st.n+'</text>';
+      var words=st.t.split(' ');
+      words.forEach(function(w,j){ s+='<text x="'+(x+bw/2)+'" y="'+(y+48+j*15)+'" text-anchor="middle" font-size="11.5" fill="var(--ink)">'+w+'</text>'; });
+      s+='<text x="'+(x+bw/2)+'" y="'+(y+h-10)+'" text-anchor="middle" font-size="10" fill="'+stroke+'">'+st.k+'</text>';
+      s+='</g>';
+      if(i<n-1){ var ax=x+bw+gap/2; s+='<text x="'+ax+'" y="'+(y+h/2+4)+'" text-anchor="middle" font-size="14" fill="var(--muted)">›</text>'; }
+    });
+    // legend
+    s+='<rect x="10" y="182" width="12" height="12" fill="#fdf6ec" stroke="var(--accent)"/><text x="28" y="192" font-size="12" fill="var(--muted)">chemical-rate steps (3)</text>';
+    s+='<rect x="200" y="182" width="12" height="12" fill="#eef2f6" stroke="var(--navy)"/><text x="218" y="192" font-size="12" fill="var(--muted)">physical/transport steps (4)</text>';
+    $('fig9').innerHTML=s;
+    Array.prototype.forEach.call($('fig9').querySelectorAll('.stpblk'),function(g){
+      g.addEventListener('click',function(){ var i=+g.dataset.i; draw(i);
+        $('step9-lbl').textContent='Step '+steps[i].n+' · '+steps[i].t;
+        $('step9-desc').textContent=steps[i].d; });
+    });
+  }
+  draw(-1);
+})();
+
+/* ---------- 3.3 cumene ---------- */
+(function(){
+  var mode='surf';
+  var EQ={ surf:"$$-r'_C=\\dfrac{k\\,P_C}{1+K_C P_C}\\quad\\text{(surface reaction limiting — saturating)}$$",
+    ads:"$$-r'_C=k^{*}P_C\\quad\\text{(adsorption limiting, low conversion — linear)}$$",
+    des:"$$-r'_C=\\dfrac{k\\,P_C}{1+K_B P_B+K_C P_C}\\quad\\text{(desorption limiting — product B blocks sites, saturates early)}$$" };
+  function rate(PC,KC){ if(mode==='ads')return PC; if(mode==='des')return PC/(1.6+KC*PC); return PC/(1+KC*PC); }
+  function draw(){
+    var PC=+$('pc11').value,KC=+$('kc11').value;
+    $('pc11v').textContent=PC.toFixed(1)+' atm'; $('kc11v').textContent=KC.toFixed(1);
+    var eqEl=$('cum_eq'); eqEl.innerHTML=EQ[mode]; renderEq(eqEl);
+    var rv=rate(PC,KC); $('ro_rc11').textContent=fmt(rv,3);
+    $('ro_beh11').textContent = mode==='ads'?'linear in P_C':mode==='des'?'saturates early':'saturating';
+    var pts=[],ymax=0;
+    for(var p=0;p<=10.001;p+=0.1){ var y=rate(p,KC); pts.push([p,y]); if(y>ymax)ymax=y; }
+    plot($('fig11'),{H:340,x:[0,10],y:[0,ymax*1.08||1],xlabel:'partial pressure P_C (atm)',ylabel:"−r'_C",
+      series:[{pts:pts,color:'var(--navy)',w:2.8}],
+      guides:[{x:PC,color:'var(--muted)'}], marks:[{x:PC,y:rv,color:'var(--accent)'}] });
+  }
+  ['pc11','kc11'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  Array.prototype.forEach.call($('cumtabs').children,function(btn){
+    btn.addEventListener('click',function(){ Array.prototype.forEach.call($('cumtabs').children,function(b){b.classList.remove('on');}); btn.classList.add('on'); mode=btn.dataset.m; draw(); });
+  });
+  draw();
+})();
+
+/* ---------- 3.4 Problem II fit ---------- */
+(function(){
+  var data=[[1,0,0.6667],[2,0,1.0],[3,0,1.2],[6,0,1.6],[14,0,1.75],[19,0,1.8095],[25,0,1.8519],[30,0,1.875],
+    [1,1,0.1053],[1,2,0.0571],[1,3,0.0392],[1,7,0.0174],[1,13,0.0095],[1,20,0.0062],[1,25,0.0050],[1,30,0.0041]];
+  var mode='a';
+  function pred(Pa,Pb,k,Ka,Kb){ return k*Pa/(1+Ka*Pa+Kb*Pb); }
+  function draw(){
+    var k=+$('k12').value,Ka=+$('ka12').value,Kb=+$('kb12').value;
+    $('k12v').textContent=k.toFixed(2); $('ka12v').textContent=Ka.toFixed(2); $('kb12v').textContent=Kb.toFixed(1);
+    var sse=0; data.forEach(function(d){ var e=pred(d[0],d[1],k,Ka,Kb)-d[2]; sse+=e*e; });
+    $('ro_sse12').textContent=fmt(sse,3); $('ro_sat12').textContent=fmt(k/Ka,3);
+    if(mode==='a'){
+      var sc=data.filter(function(d){return d[1]===0;}).map(function(d){return [d[0],d[2]];});
+      var pts=[];for(var pa=0;pa<=31;pa+=0.25)pts.push([pa,pred(pa,0,k,Ka,Kb)]);
+      plot($('fig12'),{x:[0,31],y:[0,2.0],xlabel:'P_a (kPa),  P_b = 0',ylabel:"−r'_a (mol/g·h)",
+        series:[{pts:pts,color:'var(--navy)',w:2.6}], scatter:[{pts:sc,color:'var(--accent)',r:4.5}] });
+    } else {
+      var sc2=data.filter(function(d){return d[0]===1;}).map(function(d){return [d[1],d[2]];});
+      var pts2=[];for(var pb=0;pb<=31;pb+=0.25)pts2.push([pb,pred(1,pb,k,Ka,Kb)]);
+      plot($('fig12'),{x:[0,31],y:[0,0.72],xlabel:'P_b (kPa),  P_a = 1',ylabel:"−r'_a (mol/g·h)",
+        series:[{pts:pts2,color:'var(--navy)',w:2.6}], scatter:[{pts:sc2,color:'var(--accent)',r:4.5}] });
+    }
+  }
+  ['k12','ka12','kb12'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  Array.prototype.forEach.call($('p2tabs').children,function(btn){
+    btn.addEventListener('click',function(){ Array.prototype.forEach.call($('p2tabs').children,function(b){b.classList.remove('on');}); btn.classList.add('on'); mode=btn.dataset.m; draw(); });
+  });
+  draw();
+})();
+
+/* ---------- 3.5 MEK ---------- */
+(function(){
+  var data=[[2.00,0.044],[0.10,0.040],[0.50,0.069],[1.00,0.060],[2.00,0.043],[1.00,0.059]];
+  function pred(P,k,K){ return k*P/Math.pow(1+K*P,2); }
+  function draw(){
+    var k=+$('k13').value,K=+$('kK13').value;
+    $('k13v').textContent=k.toFixed(4); $('k13K').textContent=K.toFixed(3);
+    var peak=1/K, rmax=k/(4*K);
+    $('ro_peak13').textContent=fmt(peak,3); $('ro_rmax13').textContent=fmt(rmax,3);
+    var sse=0; data.forEach(function(d){ var e=pred(d[0],k,K)-d[1]; sse+=e*e; });
+    $('ro_sse13').textContent=fmt(sse,2);
+    var pts=[];for(var p=0;p<=2.2;p+=0.02)pts.push([p,pred(p,k,K)]);
+    plot($('fig13'),{H:350,x:[0,2.2],y:[0,0.085],xlabel:'P_Bu (atm)',ylabel:"r'_MEK (mol/h·g)",
+      series:[{pts:pts,color:'var(--navy)',w:2.7}],
+      scatter:[{pts:data.map(function(d){return [d[0],d[1]];}),color:'var(--accent)',r:5}],
+      guides:[{x:peak,color:'var(--muted)'}], marks:[{x:peak,y:rmax,color:'var(--navy)'}],
+      legend:[{color:'var(--navy)',label:'dual-site model'},{color:'var(--accent)',label:'experimental data'}] });
+  }
+  ['k13','kK13'].forEach(function(id){ $(id).addEventListener('input',draw); });
+  draw();
+})();
+
+/* ---------- 3.6 deactivation lab ---------- */
+(function(){
+  var running=false,t=0,raf=null,Tmax=25,last=0;
+  function aOf(tt,kd,p){ return p===1? Math.exp(-kd*tt) : 1/(1+kd*tt); }
+  function drawSVG(kd,p){
+    var pts=[];for(var tt=0;tt<=Tmax;tt+=0.25)pts.push([tt,aOf(tt,kd,p)]);
+    var a=aOf(t,kd,p);
+    plot($('fig14'),{W:340,H:240,ml:44,x:[0,Tmax],y:[0,1.02],xlabel:'time on stream',ylabel:'activity a = rate/fresh',
+      series:[{pts:pts,color:'var(--accent)',w:2.6}],
+      guides:[{x:t,color:'var(--muted)'}], marks:[{x:t,y:a,color:'var(--navy)'}] });
+  }
+  function drawCanvas(kd,p){
+    var cv=$('lab14'),g=cv.getContext('2d'),W=cv.width,H=cv.height;
+    g.clearRect(0,0,W,H);
+    var a=aOf(t,kd,p);
+    // pellet
+    var cx=130,cy=130,Rr=95;
+    g.fillStyle='#efe9df'; g.strokeStyle='#123a5c'; g.lineWidth=2;
+    g.beginPath(); g.arc(cx,cy,Rr,0,Math.PI*2); g.fill(); g.stroke();
+    // active sites (grid of dots), lit fraction = a
+    var idx=0,total=0,cols=7,rows=7,lit=[];
+    for(var i=0;i<cols;i++)for(var j=0;j<rows;j++){ var x=cx-Rr+18+i*(2*(Rr-18)/(cols-1)); var y=cy-Rr+18+j*(2*(Rr-18)/(rows-1)); if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=(Rr-14)*(Rr-14)){ total++; lit.push([x,y]); } }
+    var nlit=Math.round(a*total);
+    lit.forEach(function(pt,k2){ g.beginPath(); g.arc(pt[0],pt[1],4.2,0,Math.PI*2);
+      g.fillStyle = k2<nlit ? '#d97706' : '#b9b2a6'; g.fill(); });
+    g.fillStyle='#5c6b7a'; g.font='12px IBM Plex Mono, monospace'; g.textAlign='center';
+    g.fillText('active sites: '+nlit+'/'+total, cx, cy+Rr+22);
+    // rate gauge bar (right)
+    var bx=290,by=30,bw=40,bh=200;
+    g.strokeStyle='#e3ddd2'; g.lineWidth=1; g.strokeRect(bx,by,bw,bh);
+    g.fillStyle='#123a5c'; var fh=a*bh; g.fillRect(bx,by+bh-fh,bw,fh);
+    g.fillStyle='#5c6b7a'; g.fillText('rate', bx+bw/2, by-8); g.fillText(Math.round(a*100)+'%', bx+bw/2, by+bh+18);
+  }
+  function refresh(){
+    var kd=+$('kd14').value,p=+$('p14').value;
+    $('kd14v').textContent=kd.toFixed(2); $('p14v').textContent=(p===1?'1 (exponential)':'2 (sintering)');
+    var a=aOf(t,kd,p);
+    $('ro_t14').textContent=t.toFixed(1); $('ro_a14').textContent=a.toFixed(3);
+    $('ro_rr14').textContent=Math.round(a*100)+'%';
+    var thalf = p===1? Math.LN2/kd : 1/kd;
+    $('ro_half14').textContent=fmt(thalf,3);
+    drawSVG(kd,p); drawCanvas(kd,p);
+  }
+  function tick(ts){
+    if(!last)last=ts; var dt=Math.min(0.05,(ts-last)/1000); last=ts;
+    t+=dt*3; if(t>=Tmax){ t=Tmax; running=false; $('lab14start').textContent='Start'; }
+    refresh(); if(running) raf=requestAnimationFrame(tick);
+  }
+  $('lab14start').addEventListener('click',function(){
+    if(t>=Tmax){ t=0; }
+    running=!running; this.textContent=running?'Pause':'Start'; last=0;
+    if(running) raf=requestAnimationFrame(tick); else if(raf)cancelAnimationFrame(raf);
+  });
+  $('lab14reset').addEventListener('click',function(){ running=false; if(raf)cancelAnimationFrame(raf); t=0; $('lab14start').textContent='Start'; refresh(); });
+  ['kd14','p14'].forEach(function(id){ $(id).addEventListener('input',refresh); });
+  refresh();
+})();
+
+/* ---------- quiz ---------- */
+(function(){
+  var Q=[
+   {q:"For a solid-catalytic reaction, which basis makes the reaction rate an intrinsic (scale-free) property?",
+    ch:["Per unit reactor volume","Per mass of catalyst","Per mole of feed","Per unit time only"],a:1,
+    ex:{1:"Correct — for heterogeneous catalytic reactions we normalise by catalyst mass W, giving −r′_A in mol·g⁻¹·s⁻¹.",
+        0:"Volume basis is for homogeneous single-phase reactions; for a solid catalyst the active material is measured by mass (or area).",
+        2:"Per mole of feed is a conversion-type quantity, not a rate basis.",
+        3:"Dividing by time alone still scales with reactor size — not intrinsic."}},
+   {q:"On an Arrhenius plot of ln k versus 1/T, what does the slope equal?",
+    ch:["+E_a/R","−E_a/R","ln A","−A/R"],a:1,
+    ex:{1:"Correct — ln k = ln A − (E_a/R)(1/T), so the slope is −E_a/R and the intercept is ln A.",
+        0:"The sign is negative: k rises as T rises, i.e. as 1/T falls.",
+        2:"ln A is the intercept (at 1/T → 0), not the slope.",
+        3:"A appears only in the intercept, and not divided by R."}},
+   {q:"Two parallel paths: desired r_C = k_D C_A² and waste r_U = k_U C_A. To raise selectivity toward C, you should…",
+    ch:["Run at high C_A (concentrated)","Run at low C_A (dilute)","Selectivity can't be changed by C_A","Lower the temperature only"],a:0,
+    ex:{0:"Correct — S_C/U = (k_D/k_U)·C_A^(2−1) rises with C_A, so a concentrated feed favours the higher-order desired path.",
+        1:"Dilute would help only if the desired path were the lower-order one.",
+        2:"It can — the order difference (α₁−α₂ = 1 here) makes selectivity concentration-dependent.",
+        3:"Temperature shifts k_D/k_U but the question is about the concentration lever; C_A clearly matters here."}},
+   {q:"When are you allowed to set the reaction orders equal to the stoichiometric coefficients?",
+    ch:["For any reaction at steady state","Only for an elementary (single-step) reaction","Whenever the reaction is irreversible","Only for gas-phase reactions"],a:1,
+    ex:{1:"Correct — the power-law-from-stoichiometry rule holds only for elementary steps. Overall reactions need orders from data or a derived mechanism.",
+        0:"Steady state says nothing about elementarity.",
+        2:"Irreversibility doesn't make a multi-step reaction elementary.",
+        3:"Phase is irrelevant; elementarity is the condition."}},
+   {q:"In Michaelis–Menten kinetics, what is the rate when C_S = K_M?",
+    ch:["Zero","V_max","V_max/2","2 V_max"],a:2,
+    ex:{2:"Correct — r = V_max·K_M/(K_M+K_M) = V_max/2. That is the operational definition of K_M.",
+        0:"Rate is zero only at C_S = 0.",
+        1:"V_max is approached only as C_S → ∞.",
+        3:"The rate can never exceed V_max."}},
+   {q:"How does the Monod growth model relate to Michaelis–Menten?",
+    ch:["It is mathematically identical in form","It is the reciprocal of it","It has no saturation","It is always second order"],a:0,
+    ex:{0:"Correct — μ = μ_max C_S/(K_S+C_S) maps term-for-term onto V_max C_S/(K_M+C_S); μ_max↔V_max, K_S↔K_M.",
+        1:"It's the same form, not a reciprocal (that's Lineweaver–Burk's trick).",
+        2:"It saturates at μ_max exactly like MM saturates at V_max.",
+        3:"It transitions from ~first-order to zero-order, not fixed second order."}},
+   {q:"In an LHHW rate law, what does the exponent n on the denominator (1 + ΣK_iC_i)ⁿ represent?",
+    ch:["The overall reaction order","The number of catalyst sites in the limiting step","The number of products","The activation energy"],a:1,
+    ex:{1:"Correct — the denominator's power equals the number of sites participating in the rate-limiting step (e.g. n = 2 for a dual-site surface reaction).",
+        0:"Overall order is an emergent property, not the denominator exponent.",
+        2:"Products appear as terms inside the bracket only if they adsorb, not as the exponent.",
+        3:"E_a lives in the rate constant k, not the denominator."}},
+   {q:"The MEK-from-butanol rate rises then falls as P_Bu increases. What does this signature imply?",
+    ch:["First-order kinetics","A single-site mechanism","A dual-site mechanism, r = kP/(1+KP)²","Mass-transfer control"],a:2,
+    ex:{2:"Correct — a maximum can only come from a squared (dual-site) denominator; the peak sits at P_Bu = 1/K.",
+        0:"First order rises monotonically — no peak.",
+        1:"Single-site kP/(1+KP) saturates but never turns over.",
+        3:"This is a chemical-rate-limited surface reaction; the peak is mechanistic, not transport."}}
+  ];
+  var answered=0,score=0;
+  function build(){
+    answered=0;score=0; var mount=$('quizmount'); mount.innerHTML=''; $('scorebar').style.display='none';
+    Q.forEach(function(item,qi){
+      var card=document.createElement('div'); card.className='qcard';
+      var h='<div class="qq"><span class="qn">Q'+(qi+1)+'</span>'+item.q+'</div><ul class="choices">';
+      item.ch.forEach(function(c,ci){ h+='<li data-q="'+qi+'" data-c="'+ci+'">'+c+'</li>'; });
+      h+='</ul><div class="exp" id="exp'+qi+'"></div>';
+      card.innerHTML=h; mount.appendChild(card);
+    });
+    Array.prototype.forEach.call(mount.querySelectorAll('.choices li'),function(li){
+      li.addEventListener('click',function(){
+        var qi=+li.dataset.q, ci=+li.dataset.c, item=Q[qi];
+        var ul=li.parentNode; if(ul.dataset.done)return; ul.dataset.done='1';
+        Array.prototype.forEach.call(ul.children,function(x){ x.classList.add('dis'); var c=+x.dataset.c;
+          if(c===item.a)x.classList.add('correct'); });
+        if(ci!==item.a)li.classList.add('wrong');
+        var exp=$('exp'+qi); var right=(ci===item.a); if(right)score++;
+        var html='<span class="'+(right?'ok':'no')+'">'+(right?'✓ Correct.':'✗ Not quite.')+'</span> '+item.ex[ci];
+        if(!right) html+='<br><span class="ok">Why '+item.ch[item.a]+' is right:</span> '+item.ex[item.a];
+        exp.innerHTML=html; exp.classList.add('show');
+        answered++;
+        if(answered===Q.length){ $('scoreval').textContent=score+'/'+Q.length;
+          var pct=Math.round(score/Q.length*100);
+          $('scoremsg').textContent = pct>=88?'Excellent — you own this material.':pct>=63?'Solid. Revisit the ones you missed above.':'Worth another pass through the sections, then retry.';
+          $('scorebar').style.display='block'; }
+      });
+    });
+  }
+  $('quizreset').addEventListener('click',function(){ build(); document.getElementById('s15').scrollIntoView({behavior:'smooth'}); });
+  build();
+})();
+
+/* ---------- sources ---------- */
+(function(){
+  var src=[
+   "Lecture 1 — <em>Reviews to Reaction Kinetics</em>, 2105604 Adv Che Kinetics (Soottitantawat): rate definitions, stoichiometric rate ratios, basis of rate (volume / catalyst mass / surface area), conversion–selectivity–yield.",
+   "Lecture 2 — <em>Reaction Rate Expression</em>: elementary power laws & order (slide 5); Arrhenius k(T)=A·e^(−Ea/RT) and two-point form (slide 6); Michaelis–Menten r_P = V_max C_S/(K_M+C_S) & Lineweaver–Burk (slides 33–35); Monod μ = μ_max C_S/(K_S+C_S) with deck values μ_max=0.7 h⁻¹, K_S=10 mg/dm³ (slides 47–51); Andrews/Haldane substrate inhibition (slide 37, 68).",
+   "Lecture 3 — <em>Rate Expression for Solid Catalytic Reaction (chemical-rate controlled)</em>: seven elementary steps (slides 5–8); adsorption/surface/desorption rate forms & site balance C_t = C_S + ΣC_i·S (slides 11–19); cumene C→B+P by limiting step (slides 20–38); LHHW/Hougen–Watson form and site-counting rules (slides 43–46); catalyst deactivation a(t), −da/dt = k_d aᵖ (slides 54–59).",
+   "Worked data — Problem II differential-reactor set, 16 runs, fitted −r′_a = k P_a/(1+K_a P_a+K_b P_b) with k=1.0, K_a=0.5, K_b=8.0 (Lecture 3, slide 88); Problem IV MEK-from-butanol at 490 °C over ZnO, r′_MEK = k P_Bu/(1+K_Bu P_Bu)², deck regression k=0.4939, K_Bu=1.869 (Lecture 3, slides 100–105; data from Ind. Eng. Chem. Res. 27, 2050, 1988).",
+   "Course structure — <em>Course Syllabus, Adv Kinetic 2025</em>: Weeks 1–3 cover reaction rate expression for elementary, bio, and solid-catalytic (chemical-rate-limited) reactions — the scope of this lesson.",
+   "Constants: R = 8.314 J·mol⁻¹·K⁻¹. Arrhenius demo anchored at k₀ = 0.01 @ 300 K (illustrative). All curves computed in-page from the equations shown; no values are traced from images."
+  ];
+  var ol=$('srclist'); src.forEach(function(x){ var li=document.createElement('li'); li.innerHTML=x; ol.appendChild(li); });
+})();
+
+/* ---------- nav scrollspy ---------- */
+(function(){
+  var links=Array.prototype.slice.call(document.querySelectorAll('#pills a'));
+  var map={}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)]=a; });
+  var obs=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ var id=e.target.id;
+      links.forEach(function(a){a.classList.remove('active');});
+      if(map[id]){ map[id].classList.add('active');
+        map[id].scrollIntoView({inline:'center',block:'nearest'}); } } });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('section').forEach(function(s){obs.observe(s);});
+})();
+
+})();
+</script>
+</body>
+</html>
