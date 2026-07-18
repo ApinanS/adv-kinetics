@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 4 — Rate Expression for Solid Catalytic Reaction (Mass-Transfer Limited)</title>
+
+<!-- Fonts: Montserrat (Latin) + Prompt (Thai) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --navy:#1F497D; --blue:#4F81BD; --red:#C00000; --green:#1A8038; --orange:#D97706;
+  --ink:#1F2937; --muted:#6B7280; --line:#E5E7EB; --card:#F7F9FC; --bg:#FFFFFF;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; background:#ECEFF3; overflow:hidden;
+  font-family:'Montserrat','Prompt',system-ui,sans-serif; color:var(--ink)}
+
+#stage{width:1280px; height:720px; position:absolute; top:50%; left:50%;
+  transform-origin:center; background:var(--bg); box-shadow:0 10px 40px rgba(31,73,125,.18); overflow:hidden}
+
+.slide{position:absolute; inset:0; display:none; flex-direction:column;
+  padding:52px 68px 62px; background:var(--bg); overflow:hidden}
+.slide svg{max-width:100%; max-height:440px}
+.slide.active{display:flex}
+.s-head{margin-bottom:20px}
+.kicker{font-size:14px; font-weight:600; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin-bottom:7px}
+.s-head h2{font-size:33px; font-weight:700; color:var(--navy); line-height:1.18}
+.s-foot{position:absolute; left:68px; right:68px; bottom:24px; display:flex; justify-content:space-between; gap:20px;
+  font-size:14px; font-weight:500; color:var(--muted)}
+.grow{flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0}
+.s-foot .s-sec{color:var(--blue)}
+.badge{display:inline-block; font-size:12px; font-weight:700; letter-spacing:.08em; color:#fff; background:var(--blue);
+  border-radius:6px; padding:3px 10px; vertical-align:middle; margin-left:10px}
+
+.title-slide{justify-content:center; align-items:flex-start; border-top:6px solid var(--navy)}
+.title-slide .pill{display:inline-block; font-size:15px; font-weight:600; letter-spacing:.12em;
+  color:var(--navy); border:1.5px solid var(--navy); border-radius:999px; padding:6px 18px; margin-bottom:28px}
+.title-slide .lecno{font-size:22px; font-weight:600; color:var(--blue); margin-bottom:10px}
+.title-slide h1{font-size:50px; font-weight:800; color:var(--navy); line-height:1.14; margin-bottom:24px; max-width:1050px}
+.title-slide .rule{width:88px; height:4px; background:var(--blue); margin-bottom:24px}
+.title-slide .who{font-size:17px; color:var(--muted); line-height:1.7}
+.title-slide .who b{color:var(--ink); font-weight:600}
+
+.section-slide{justify-content:center; background:var(--bg)}
+.section-slide .big{position:absolute; top:22px; right:52px; font-size:148px; font-weight:800;
+  color:var(--navy); opacity:.08; line-height:1}
+.section-slide .lbl{font-size:19px; font-weight:700; letter-spacing:.14em; color:var(--blue);
+  text-transform:uppercase; margin-bottom:16px}
+.section-slide .q{font-size:40px; font-weight:700; color:var(--red); line-height:1.24; max-width:1010px}
+.section-slide .sub{font-size:19px; color:var(--muted); margin-top:18px; max-width:840px; line-height:1.5}
+
+.agenda{display:flex; flex-direction:column; gap:11px; max-width:1110px}
+a.agenda-item{display:flex; align-items:center; gap:22px; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 24px}
+a.agenda-item:hover{border-color:var(--navy); box-shadow:0 4px 14px rgba(31,73,125,.12)}
+.agenda-item .no{flex:0 0 58px; font-size:22px; font-weight:800; color:var(--navy)}
+.agenda-item .qq{font-size:19px; font-weight:500; line-height:1.32}
+.agenda-item .go{margin-left:auto; color:var(--blue); font-size:22px}
+
+.cards{display:grid; gap:20px; grid-auto-columns:1fr; grid-auto-flow:column}
+.cards.wrap{grid-auto-flow:row; grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px 22px}
+.card h3{font-size:20px; font-weight:600; color:var(--navy); margin-bottom:9px}
+.card p{font-size:18px; line-height:1.48}
+.card .ic{width:32px; height:32px; margin-bottom:10px}
+.card-red{border-top:4px solid var(--red)} .card-green{border-top:4px solid var(--green)}
+.card-blue{border-top:4px solid var(--blue)} .card-orange{border-top:4px solid var(--orange)}
+
+.eq-box{background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:22px 30px; text-align:center; font-size:27px; margin:6px 0}
+.eq-note{font-size:17px; margin-top:10px; text-align:center}
+.eq-note.green{color:var(--green)} .eq-note.orange{color:var(--orange)} .eq-note.red{color:var(--red)}
+.eq-step{display:flex; align-items:center; gap:30px; padding:11px 6px; border-bottom:1px solid var(--line); font-size:21px}
+.eq-step:last-child{border-bottom:none}
+.eq-step .why{font-size:16px; color:var(--muted); flex:1; text-align:right}
+
+table.compare{width:100%; border-collapse:collapse; font-size:19px}
+.compare th{background:var(--card); color:var(--navy); font-weight:700; padding:12px 15px;
+  border:1px solid var(--line); text-align:center}
+.compare td{padding:12px 15px; border:1px solid var(--line); text-align:center}
+.compare td:first-child{font-weight:600; text-align:left}
+table.compare.sm{font-size:17px}
+.compare.sm td,.compare.sm th{padding:9px 12px}
+
+.callout{border-left:5px solid var(--navy); background:var(--card); border-radius:0 12px 12px 0;
+  padding:14px 20px; font-size:19px; margin:10px 0; line-height:1.45}
+.callout.q{border-color:var(--red)} .callout.note{border-color:var(--green)} .callout.aside{border-color:var(--orange)}
+
+.two-col{display:grid; grid-template-columns:11fr 9fr; gap:38px; align-items:center; flex:1}
+.two-col.even{grid-template-columns:1fr 1fr}
+.stack>*+*{margin-top:16px}
+ul.clean{list-style:none} ul.clean li{font-size:20px; line-height:1.48; padding-left:28px; position:relative; margin-bottom:11px}
+ul.clean li::before{content:''; position:absolute; left:0; top:.55em; width:9px; height:9px; border-radius:3px; background:var(--blue)}
+
+.sim{display:grid; grid-template-columns:2fr 3fr; grid-template-rows:minmax(0,1fr); gap:34px; align-items:center; flex:1; min-height:0}
+.sim-controls .sl{margin-bottom:18px}
+.sim-controls label{display:flex; justify-content:space-between; font-size:18px; font-weight:500; margin-bottom:7px}
+.val{font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--navy); height:30px; cursor:pointer}
+.sim-controls{align-self:center; min-width:0}
+.sim-out{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; text-align:center;
+  display:flex; flex-direction:column; justify-content:center; align-self:stretch; min-height:0; overflow:hidden}
+.sim-out svg{max-height:100%; min-height:0}
+.bignum{font-size:40px; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums; line-height:1.1}
+.readrow{display:flex; justify-content:space-around; gap:12px; margin-top:8px; flex-wrap:wrap}
+.readrow .rd{font-size:16px; color:var(--muted)} .readrow .rd b{display:block; font-size:23px; color:var(--navy); font-variant-numeric:tabular-nums}
+.chart-box{position:relative; flex:1 1 auto; min-height:170px; max-height:430px; min-width:0}
+.chart-box>canvas{position:absolute; inset:0; width:100% !important; height:100% !important}
+.pill-tag{display:inline-block; padding:5px 15px; border-radius:999px; font-size:16px; font-weight:700; margin-top:6px}
+.pill-red{background:#FBEDED; color:var(--red)} .pill-green{background:#EDF7F0; color:var(--green)} .pill-orange{background:#FDF3E7; color:var(--orange)}
+.seg{display:inline-flex; border:1.5px solid var(--line); border-radius:10px; overflow:hidden; margin-top:4px}
+.seg button{font:inherit; font-size:16px; font-weight:600; padding:8px 16px; background:#fff; border:none; cursor:pointer; color:var(--muted)}
+.seg button.on{background:var(--navy); color:#fff}
+
+.reveal-btn{font:inherit; font-size:18px; font-weight:600; color:var(--navy); background:var(--bg);
+  border:2px solid var(--navy); border-radius:10px; padding:9px 24px; cursor:pointer}
+.reveal-btn:hover{background:var(--navy); color:#fff}
+.reveal-body{display:none; margin-top:14px}
+.reveal.open .reveal-body{display:block} .reveal.open .reveal-btn{display:none}
+
+.quiz-q{max-width:1030px}
+.q-text{font-size:22px; font-weight:600; margin-bottom:18px; line-height:1.42}
+.q-opt{display:block; width:100%; text-align:left; font:inherit; font-size:19px; padding:12px 20px;
+  margin-bottom:10px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; cursor:pointer}
+.q-opt:hover{border-color:var(--navy)}
+.q-opt.right{border-color:var(--green); background:#EDF7F0; color:var(--green); font-weight:600}
+.q-opt.wrong{border-color:var(--red); background:#FBEDED; color:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-explain{display:none; border-left:5px solid var(--blue); background:var(--card);
+  padding:14px 20px; border-radius:0 12px 12px 0; font-size:17px; line-height:1.5; margin-top:12px}
+.q-explain.show{display:block}
+.quiz-score{font-size:20px; font-weight:700; color:var(--navy)}
+
+.tk{display:flex; gap:20px; align-items:flex-start; margin-bottom:16px}
+.tk .n{flex:0 0 38px; height:38px; border-radius:50%; background:var(--navy); color:#fff;
+  font-weight:700; font-size:18px; display:flex; align-items:center; justify-content:center}
+.tk p{font-size:21px; line-height:1.38; padding-top:5px}
+
+#hud{position:fixed; right:18px; bottom:14px; display:flex; gap:8px; z-index:50}
+#hud button{width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff;
+  font-size:18px; color:var(--navy); cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#hud button:hover{background:var(--card)}
+#progress{position:fixed; left:0; bottom:0; height:4px; background:var(--blue); width:0; z-index:60; transition:width .2s}
+#toc{position:fixed; inset:0; background:rgba(15,25,40,.55); display:none; z-index:100; align-items:center; justify-content:center}
+#toc.open{display:flex}
+#toc .panel{background:#fff; border-radius:16px; padding:30px 38px; max-height:82vh; overflow:auto; min-width:440px}
+#toc h3{color:var(--navy); font-size:19px; margin-bottom:16px; letter-spacing:.08em}
+#toc a{display:block; padding:7px 6px; font-size:15px; color:var(--ink); text-decoration:none; border-radius:8px}
+#toc a:hover{background:var(--card)} #toc a.cur{color:var(--navy); font-weight:700}
+#toc .sec{margin-top:10px; font-weight:700; color:var(--blue); font-size:13px; letter-spacing:.1em; text-transform:uppercase}
+
+.katex{font-size:1.04em}
+svg text{font-family:'Montserrat','Prompt',sans-serif}
+
+@media print{
+  html,body{overflow:visible; background:#fff}
+  #stage{position:static; transform:none !important; width:1280px; height:auto; box-shadow:none}
+  .slide{display:flex !important; position:relative; width:1280px; height:720px; page-break-after:always; border-bottom:1px solid var(--line)}
+  #hud,#progress,#toc{display:none !important}
+}
+@page{size:landscape}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+<!-- 1. Title -->
+<section class="slide title-slide" data-title="Title">
+  <span class="pill">2105604 ADV CHE KINETICS</span>
+  <p class="lecno">Lecture 4</p>
+  <h1>Rate Expression for Solid Catalytic Reaction<br><span style="color:var(--red); font-size:.72em; font-weight:700">— when mass transfer controls the rate</span></h1>
+  <div class="rule"></div>
+  <p class="who"><b>Assoc. Prof. Dr. Apinan Soottitantawat</b><br>
+    Department of Chemical Engineering, Faculty of Engineering<br>
+    Chulalongkorn University · apinan.s@chula.ac.th</p>
+</section>
+
+<!-- 2. Agenda -->
+<section class="slide" data-title="Agenda — the seven questions">
+  <div class="s-head"><p class="kicker">Today — guiding questions</p><h2>What we will answer</h2></div>
+  <div class="grow agenda">
+    <a class="agenda-item" href="#/4"><span class="no">4-1</span><span class="qq">How do we determine the <b>external</b> mass-transfer rate (convection)?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/12"><span class="no">4-2</span><span class="qq">How do we determine the <b>internal</b> mass-transfer rate (diffusion)?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/19"><span class="no">4-3</span><span class="qq">Rate expression when <b>external</b> mass transfer is limiting?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/27"><span class="no">4-4</span><span class="qq">Rate expression when <b>internal</b> mass transfer is limiting?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/36"><span class="no">4-5</span><span class="qq">Why do we need the <b>effectiveness factor</b> $\eta$?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/44"><span class="no">4-6</span><span class="qq">Which step is the <b>controlling mechanism</b>?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/53"><span class="no">4-7</span><span class="qq"><b>Class Activity</b> — worked problems &amp; quiz</span><span class="go">&#8594;</span></a>
+  </div>
+</section>
+
+<!-- 3. Overview 7 steps -->
+<section class="slide" data-title="Seven elementary steps">
+  <div class="s-head"><p class="kicker">The big picture</p><h2>Seven elementary steps of a solid-catalyzed reaction</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <p style="font-size:20px; line-height:1.5">A reactant must travel <b>into</b> the catalyst, react, and its product must travel back <b>out</b>. The slowest step is the <b style="color:var(--red)">rate-limiting step</b>.</p>
+      <ul class="clean">
+        <li><b>1, 7</b> — External diffusion (bulk ⇄ surface) <span style="color:var(--orange)">physical</span></li>
+        <li><b>2, 6</b> — Internal diffusion (in/out of pores) <span style="color:var(--orange)">physical</span></li>
+        <li><b>3, 4, 5</b> — Adsorption · Surface reaction · Desorption <span style="color:var(--green)">chemical</span></li>
+      </ul>
+      <div class="callout aside">Lecture 3 covered the chemical steps (3–5). Lecture 4 tackles the <b>physical</b> transport steps (1, 2, 6, 7).</div>
+    </div>
+    <svg viewBox="0 0 400 340" style="width:100%">
+      <rect x="20" y="20" width="360" height="90" rx="8" fill="#FDF3E7"/>
+      <rect x="20" y="110" width="360" height="90" rx="8" fill="#EAF1FA"/>
+      <rect x="20" y="200" width="360" height="110" rx="8" fill="#FBEDED"/>
+      <text x="30" y="40" font-size="14" fill="var(--orange)" font-weight="700">External film</text>
+      <text x="30" y="130" font-size="14" fill="var(--blue)" font-weight="700">Pore (internal)</text>
+      <text x="30" y="220" font-size="14" fill="var(--red)" font-weight="700">Catalyst surface</text>
+      <circle cx="120" cy="60" r="12" fill="var(--green)"/><text x="120" y="65" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">A</text>
+      <text x="152" y="62" font-size="13" fill="var(--orange)" font-weight="700">1</text>
+      <text x="152" y="152" font-size="13" fill="var(--blue)" font-weight="700">2</text>
+      <text x="120" y="262" font-size="12" fill="var(--red)">3 adsorb</text>
+      <text x="200" y="286" font-size="12" fill="var(--red)" text-anchor="middle">4  A→B (surface rxn)</text>
+      <text x="256" y="262" font-size="12" fill="var(--red)">5 desorb</text>
+      <text x="240" y="152" font-size="13" fill="var(--blue)" font-weight="700">6</text>
+      <text x="240" y="62" font-size="13" fill="var(--orange)" font-weight="700">7</text>
+      <circle cx="290" cy="60" r="12" fill="var(--navy)"/><text x="290" y="65" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">B</text>
+      <line x1="120" y1="76" x2="120" y2="240" stroke="var(--green)" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <line x1="290" y1="244" x2="290" y2="78" stroke="var(--navy)" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker></defs>
+    </svg>
+  </div>
+</section>
+
+<!-- 4. SEC 4-1 -->
+<section class="slide section-slide" data-title="Lecture 4-1" data-sec="Lecture 4-1">
+  <div class="big">4-1</div>
+  <p class="lbl">Lecture 4-1</p>
+  <p class="q">How do we determine the external mass-transfer rate (convection)?</p>
+  <p class="sub">Transport of A from the bulk fluid to the outer surface of the catalyst — a purely physical step driven by a concentration difference.</p>
+</section>
+
+<!-- 5. External MT concept -->
+<section class="slide" data-title="External mass transfer">
+  <div class="s-head"><p class="kicker">Lecture 4-1 · convection</p><h2>External mass transfer: bulk → surface</h2></div>
+  <div class="grow stack">
+    <div class="eq-box">$$M_A = k_c A\,(C_{Ab}-C_{As})\qquad W_A=\dfrac{M_A}{A}=k_c\,(C_{Ab}-C_{As})$$</div>
+    <div class="cards">
+      <div class="card card-blue"><h3>$k_c$ — MT coefficient</h3><p>Units $[\text{m/s}]$. Set by hydrodynamics: velocity, particle size, fluid properties.</p></div>
+      <div class="card card-red"><h3>Driving force</h3><p>$C_{Ab}-C_{As}$: the bulk-to-surface gap. No gap ⇒ no transfer.</p></div>
+      <div class="card card-green"><h3>$W_A$ — molar flux</h3><p>$\left[\tfrac{\text{mol A}}{\text{m}^2\cdot\text{s}}\right]$ — rate per unit outer area.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Chemical-rate recap (LHHW) -->
+<section class="slide" data-title="Recap — chemical-rate control">
+  <div class="s-head"><p class="kicker">Lecture 4-1 · recap from Lecture 3</p><h2>The chemical rate (surface-reaction control)</h2></div>
+  <div class="grow stack">
+    <div class="cards">
+      <div class="card"><h3>Per catalyst mass</h3><p>$-r'_A=\dfrac{k'_r C_A}{1+K_A C_A+K_B C_B}\;\left[\tfrac{\text{mol A}}{\text{kg}\cdot\text{s}}\right]$</p></div>
+      <div class="card"><h3>Per catalyst area</h3><p>$-r''_A=\dfrac{k''_r C_A}{1+K_A C_A+K_B C_B}\;\left[\tfrac{\text{mol A}}{\text{m}^2\cdot\text{s}}\right]$</p></div>
+    </div>
+    <div class="eq-box" style="font-size:24px">$$\text{weak adsorption: }K_A C_A+K_B C_B\ll1\;\Rightarrow\;-r'_A=k'_{r,n}C_A^{\,n}\qquad k'_r=S_a\,k''_r$$</div>
+    <p class="eq-note orange">$S_a=$ surface area per mass of catalyst $[\text{m}^2/\text{kg}]$. In this lecture we mostly use the first-order simplification $-r'_A=k'_r C_A$.</p>
+  </div>
+</section>
+
+<!-- 7. Flux to r' units -->
+<section class="slide" data-title="Flux in units of r'">
+  <div class="s-head"><p class="kicker">Lecture 4-1 · matching units</p><h2>Writing the flux as a rate per catalyst mass</h2></div>
+  <div class="grow">
+    <div class="eq-step">$-r'_A \;\Longleftrightarrow\; \dfrac{W_A\,A}{m_{cat}} = W_A\, a$ <span class="why">rate per kg uses the specific area $a$</span></div>
+    <div class="eq-step">$a=\dfrac{A}{m_{cat}}=\dfrac{\pi d_p^2}{\rho_c\,\pi d_p^3/6}=\dfrac{6}{\rho_c\,d_p}$ <span class="why">sphere: outer area ÷ mass, $[\text{m}^2/\text{kg}]$</span></div>
+    <div class="eq-step">$-r'_A = k_c\,a\,(C_{Ab}-C_{As})$ <span class="why">external-MT rate in reaction-rate units</span></div>
+    <div class="callout note">Smaller particles ($d_p\!\downarrow$) give a larger specific area $a$ — more surface per kilogram, so faster external transfer.</div>
+  </div>
+</section>
+
+<!-- 8. Dimensionless numbers -->
+<section class="slide" data-title="Dimensionless groups (Sh, Re, Sc)">
+  <div class="s-head"><p class="kicker">Lecture 4-1 · how to get $k_c$</p><h2>Three dimensionless groups give $k_c$</h2></div>
+  <div class="grow stack">
+    <div class="cards">
+      <div class="card card-blue"><h3>Sherwood</h3><p>$\mathrm{Sh}=\dfrac{k_c d_p}{D}=\dfrac{\text{convective MT}}{\text{molecular diffusion}}$</p></div>
+      <div class="card card-orange"><h3>Reynolds</h3><p>$\mathrm{Re}=\dfrac{\rho\,d_p v}{\mu}=\dfrac{\text{inertial}}{\text{viscous}}$</p></div>
+      <div class="card card-green"><h3>Schmidt</h3><p>$\mathrm{Sc}=\dfrac{\mu}{\rho D}=\dfrac{\text{momentum diff.}}{\text{mass diff.}}$</p></div>
+    </div>
+    <div class="eq-box" style="font-size:25px">$$\mathrm{Sh}=f(\mathrm{Re},\mathrm{Sc})=A+B\,\mathrm{Re}^{m}\mathrm{Sc}^{n}$$</div>
+    <p class="eq-note orange">A general correlation: the constants depend on the geometry and flow regime.</p>
+  </div>
+</section>
+
+<!-- 9. Frössling + kc scaling -->
+<section class="slide" data-title="Frössling correlation">
+  <div class="s-head"><p class="kicker">Lecture 4-1 · single sphere</p><h2>Frössling correlation and how $k_c$ scales</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:26px">$$\mathrm{Sh}=2+0.6\,\mathrm{Re}^{1/2}\mathrm{Sc}^{1/3}$$</div>
+    <div class="eq-step">MT-limited ($0.6\,\mathrm{Re}^{1/2}\mathrm{Sc}^{1/3}\gg2$): $\;\dfrac{k_c d_p}{D}\cong0.6\left(\dfrac{d_p\rho u}{\mu}\right)^{1/2}\!\left(\dfrac{\mu}{\rho D}\right)^{1/3}$ <span class="why">drop the "2"</span></div>
+    <div class="eq-step">$k_c\;\propto\;D^{2/3}\,\dfrac{\rho^{1/6}}{\mu^{1/6}}\,\dfrac{u^{1/2}}{d_p^{1/2}}$ <span class="why">so $k_c\!\propto\!u^{1/2}$ and $k_c\!\propto\!d_p^{-1/2}$</span></div>
+    <p class="eq-note green">Faster flow and smaller particles both speed external transfer — the basis of the diagnostic tests in Lecture 4-3.</p>
+  </div>
+</section>
+
+<!-- 10. [I] External kc calculator -->
+<section class="slide" data-title="Interactive — external MT coefficient" id="slide-kc">
+  <div class="s-head"><p class="kicker">Interactive 1 — drag the sliders</p><h2>External mass-transfer coefficient $k_c$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Velocity $u$ (m/s) <span class="val" id="kcU"></span></label>
+        <input type="range" id="kcUr" min="0.05" max="3" step="0.05" value="0.5"></div>
+      <div class="sl"><label>Particle $d_p$ (mm) <span class="val" id="kcDp"></span></label>
+        <input type="range" id="kcDpr" min="0.2" max="6" step="0.1" value="2"></div>
+      <div class="sl"><label>Schmidt $\mathrm{Sc}$ <span class="val" id="kcSc"></span></label>
+        <input type="range" id="kcScr" min="0.5" max="1000" step="0.5" value="2"></div>
+      <div class="callout note" style="font-size:17px">$\mathrm{Sh}=2+0.6\,\mathrm{Re}^{1/2}\mathrm{Sc}^{1/3}$</div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">mass-transfer coefficient</div>
+      <div class="bignum" id="kcOut"></div>
+      <div class="readrow">
+        <div class="rd">Re<b id="kcRe"></b></div>
+        <div class="rd">Sh<b id="kcSh"></b></div>
+        <div class="rd">a (m²/kg)<b id="kcA"></b></div>
+      </div>
+      <p style="font-size:15px; color:var(--muted); margin-top:12px">assumed $D=2\times10^{-9}$ m²/s, $\nu=1\times10^{-6}$ m²/s, $\rho_c=1500$ kg/m³</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11. [I] Specific area calculator -->
+<section class="slide" data-title="Interactive — specific area" id="slide-area">
+  <div class="s-head"><p class="kicker">Interactive 2 — drag the sliders</p><h2>Specific outer area $a=\dfrac{6}{\rho_c d_p}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Particle $d_p$ (mm) <span class="val" id="arDp"></span></label>
+        <input type="range" id="arDpr" min="0.1" max="10" step="0.1" value="3"></div>
+      <div class="sl"><label>Catalyst density $\rho_c$ (kg/m³) <span class="val" id="arRho"></span></label>
+        <input type="range" id="arRhor" min="800" max="3000" step="50" value="1500"></div>
+      <div class="callout aside" style="font-size:17px">Halving $d_p$ <b>doubles</b> the surface area per kilogram.</div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">specific outer area</div>
+      <div class="bignum" id="arOut"></div>
+      <div style="font-size:18px; color:var(--muted)">m² per kg of catalyst</div>
+      <svg id="arBar" viewBox="0 0 400 60" style="width:100%; margin-top:16px">
+        <rect x="10" y="20" width="380" height="22" rx="6" fill="var(--line)"/>
+        <rect id="arFill" x="10" y="20" width="120" height="22" rx="6" fill="var(--navy)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 12. SEC 4-2 -->
+<section class="slide section-slide" data-title="Lecture 4-2" data-sec="Lecture 4-2">
+  <div class="big">4-2</div>
+  <p class="lbl">Lecture 4-2</p>
+  <p class="q">How do we determine the internal mass-transfer rate (diffusion)?</p>
+  <p class="sub">Once at the surface, A must diffuse through the tortuous pore network to reach active sites inside the pellet.</p>
+</section>
+
+<!-- 13. Fick's law -->
+<section class="slide" data-title="Fick's law for pore diffusion">
+  <div class="s-head"><p class="kicker">Lecture 4-2 · internal diffusion</p><h2>Pore diffusion follows Fick's law</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box">$$W_A=-D_e\dfrac{dC_A}{dr}\quad\left[\dfrac{\text{mol A}}{\text{m}^2\cdot\text{s}}\right]$$</div>
+      <div class="callout note">Assume transport only in the radial ($r$) direction inside a spherical pellet.</div>
+      <div class="callout aside">$D_e$ is the <b>effective</b> diffusivity — pores are narrow, winding, and only partly open.</div>
+    </div>
+    <svg viewBox="0 0 320 300" style="width:100%">
+      <circle cx="160" cy="150" r="120" fill="#EAF1FA" stroke="var(--blue)" stroke-width="2"/>
+      <circle cx="160" cy="150" r="5" fill="var(--navy)"/>
+      <text x="160" y="138" font-size="13" fill="var(--navy)" text-anchor="middle">centre</text>
+      <line x1="160" y1="150" x2="280" y2="150" stroke="var(--navy)" stroke-width="2" marker-end="url(#ar2)"/>
+      <text x="228" y="142" font-size="14" fill="var(--navy)">r</text>
+      <text x="250" y="180" font-size="13" fill="var(--muted)">R</text>
+      <path d="M40 90 q40 30 0 60 q-30 40 20 70" fill="none" stroke="var(--orange)" stroke-width="2" stroke-dasharray="3 3"/>
+      <text x="26" y="80" font-size="12" fill="var(--orange)">pore path</text>
+      <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--navy)"/></marker></defs>
+    </svg>
+  </div>
+</section>
+
+<!-- 14. Binary diffusivity orders -->
+<section class="slide" data-title="Binary diffusivity — orders of magnitude">
+  <div class="s-head"><p class="kicker">Lecture 4-2 · magnitudes</p><h2>Diffusivity depends strongly on the phase</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th>Medium</th><th>Typical $D_{AB}$ (m²/s)</th><th>Why</th></tr>
+      <tr><td>Gas, 1 atm</td><td style="color:var(--green)">$\sim10^{-5}$</td><td>molecules far apart, fast</td></tr>
+      <tr><td>Gas, 10 atm</td><td>$\sim10^{-6}$</td><td>denser → more collisions</td></tr>
+      <tr><td>Liquid</td><td style="color:var(--orange)">$\sim10^{-9}$</td><td>close-packed molecules</td></tr>
+      <tr><td>Solid</td><td style="color:var(--red)">$\sim10^{-12}$ and below</td><td>lattice hopping</td></tr>
+    </table>
+    <div class="callout aside" style="margin-top:16px">Gas $D_{AB}\propto T^{3/2}/P$; liquid $D_{AB}\propto T/\mu$. In pores the free-fluid value is only the starting point.</div>
+  </div>
+</section>
+
+<!-- 15. Pore diffusion regimes -->
+<section class="slide" data-title="Regimes of pore diffusion">
+  <div class="s-head"><p class="kicker">Lecture 4-2 · which diffusivity?</p><h2>The pore size decides the diffusion regime</h2></div>
+  <div class="grow stack">
+    <div class="cards">
+      <div class="card card-blue"><h3>Bulk (molecular)</h3><p>$\ell \ll \delta$: molecule–molecule collisions dominate — ordinary $D_{AB}$.</p></div>
+      <div class="card card-orange"><h3>Knudsen</h3><p>$\ell \gg \delta$: molecules hit walls more than each other — $D_K\propto d_{pore}\sqrt{T/M}$.</p></div>
+      <div class="card card-red"><h3>Configurational</h3><p>Pore ≈ molecule size (zeolites) — diffusivity falls by orders of magnitude.</p></div>
+    </div>
+    <div class="callout aside">$\ell=$ mean free path, $\delta=$ pore diameter. Higher pressure or narrower pores move you bulk → Knudsen → configurational, and $D$ drops.</div>
+  </div>
+</section>
+
+<!-- 16. [I] Diffusivity regime explorer -->
+<section class="slide" data-title="Interactive — diffusion regime" id="slide-diffreg">
+  <div class="s-head"><p class="kicker">Interactive 3 — drag the pore size</p><h2>Bulk vs Knudsen diffusion in a pore</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Pore diameter $\delta$ (nm) <span class="val" id="drD"></span></label>
+        <input type="range" id="drDr" min="1" max="1000" step="1" value="50"></div>
+      <div class="sl"><label>Pressure $P$ (atm) <span class="val" id="drP"></span></label>
+        <input type="range" id="drPr" min="1" max="30" step="1" value="1"></div>
+      <div class="callout note" style="font-size:17px">$\dfrac{1}{D_{pore}}=\dfrac{1}{D_{bulk}}+\dfrac{1}{D_K}$ (series)</div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">effective pore diffusivity</div>
+      <div class="bignum" id="drOut"></div>
+      <div style="font-size:17px; color:var(--muted)">m²/s</div>
+      <div id="drTag" class="pill-tag"></div>
+      <div class="readrow">
+        <div class="rd">D_bulk<b id="drDb"></b></div>
+        <div class="rd">D_Knudsen<b id="drDk"></b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17. Effective diffusivity -->
+<section class="slide" data-title="Effective diffusivity">
+  <div class="s-head"><p class="kicker">Lecture 4-2 · correcting for real pores</p><h2>Effective diffusivity $D_e$</h2></div>
+  <div class="grow">
+    <div class="eq-box" style="font-size:31px">$$D_e=\dfrac{D\,\phi_p\,\sigma}{\tau}$$</div>
+    <div class="cards" style="margin-top:12px">
+      <div class="card"><h3>$\phi_p$ — porosity</h3><p>Fraction of pellet volume that is open pore.</p></div>
+      <div class="card"><h3>$\sigma$ — constriction</h3><p>Corrects for pores that narrow and widen.</p></div>
+      <div class="card"><h3>$\tau$ — tortuosity</h3><p>$\dfrac{\text{actual path}}{\text{straight path}}$; winding ⇒ larger $\tau$ ⇒ smaller $D_e$.</p></div>
+    </div>
+    <p class="eq-note green">All three make $D_e$ smaller than the free-fluid $D$ — often by 5–10×.</p>
+  </div>
+</section>
+
+<!-- 18. [I] Effective diffusivity calculator -->
+<section class="slide" data-title="Interactive — effective diffusivity" id="slide-de">
+  <div class="s-head"><p class="kicker">Interactive 4 — drag the sliders</p><h2>Build the effective diffusivity</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Porosity $\phi_p$ <span class="val" id="deP"></span></label>
+        <input type="range" id="dePr" min="0.2" max="0.7" step="0.01" value="0.4"></div>
+      <div class="sl"><label>Constriction $\sigma$ <span class="val" id="deS"></span></label>
+        <input type="range" id="deSr" min="0.5" max="1" step="0.01" value="0.8"></div>
+      <div class="sl"><label>Tortuosity $\tau$ <span class="val" id="deT"></span></label>
+        <input type="range" id="deTr" min="1" max="8" step="0.1" value="3"></div>
+      <div class="callout aside" style="font-size:17px">$D=1\times10^{-5}$ m²/s (gas) assumed</div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">effective diffusivity $D_e$</div>
+      <div class="bignum" id="deOut"></div>
+      <div style="font-size:17px; color:var(--muted)">m²/s</div>
+      <div class="readrow"><div class="rd">$D_e/D$<b id="deRatio"></b></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19. SEC 4-3 -->
+<section class="slide section-slide" data-title="Lecture 4-3" data-sec="Lecture 4-3">
+  <div class="big">4-3</div>
+  <p class="lbl">Lecture 4-3</p>
+  <p class="q">What is the rate expression when external mass transfer is the limiting step?</p>
+  <p class="sub">Transport to the surface and reaction happen in series. Combine the resistances, then take the limiting case.</p>
+</section>
+
+<!-- 20. Series resistance -->
+<section class="slide" data-title="Two resistances in series">
+  <div class="s-head"><p class="kicker">Lecture 4-3 · combining steps</p><h2>External transfer and reaction act in series</h2></div>
+  <div class="grow stack">
+    <div class="eq-step">$r'=W_A a = k_c a\,(C_{Ab}-C_{As})$ <span class="why">Step 1 — supply of A</span></div>
+    <div class="eq-step">$r'=k'_r C_{As}$ <span class="why">Step 3–5 — first-order surface reaction</span></div>
+    <div class="eq-step">$C_{As}=\dfrac{k_c a\,C_{Ab}}{k'_r+k_c a}$ <span class="why">$C_{As}$ can't be measured — eliminate it</span></div>
+    <div class="eq-box" style="font-size:26px; margin-top:4px">$$r'=\dfrac{k'_r\,k_c a\,C_{Ab}}{k'_r+k_c a}$$</div>
+    <p class="eq-note red">At steady state the two rates are equal; the smaller coefficient controls.</p>
+  </div>
+</section>
+
+<!-- 21. Two limits -->
+<section class="slide" data-title="Two limiting cases">
+  <div class="s-head"><p class="kicker">Lecture 4-3 · take the limit</p><h2>Both limits are first order — in different constants</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th>Case</th><th style="color:var(--red)">External MT limited</th><th style="color:var(--green)">Chemical-rate limited</th></tr>
+      <tr><td>Condition</td><td>$k_c a \ll k'_r$</td><td>$k_c a \gg k'_r$</td></tr>
+      <tr><td>Rate expression</td><td>$r'=k_c a\,C_{Ab}$</td><td>$r'=k'_r\,C_{Ab}$</td></tr>
+      <tr><td>Controlled by</td><td>transport ($k_c$)</td><td>kinetics ($k'_r$)</td></tr>
+      <tr><td>Effect of velocity $u$</td><td style="color:var(--red)">strong ($k_c\!\propto\!u^{1/2}$)</td><td style="color:var(--green)">none</td></tr>
+      <tr><td>Effect of temperature</td><td style="color:var(--red)">weak</td><td style="color:var(--green)">strong (Arrhenius)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 22. [I] Series resistance sim -->
+<section class="slide" data-title="Interactive — series resistance" id="slide-series">
+  <div class="s-head"><p class="kicker">Interactive 5 — drag the sliders</p><h2>Which resistance controls the rate?</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Transport $k_c a$ <span class="val" id="kcaVal"></span></label>
+        <input type="range" id="kca" min="0.05" max="5" step="0.05" value="2"></div>
+      <div class="sl"><label>Reaction $k'_r$ <span class="val" id="krVal"></span></label>
+        <input type="range" id="kr" min="0.05" max="5" step="0.05" value="2"></div>
+      <div class="callout note" style="font-size:17px">$r'=\dfrac{k'_r\,k_c a}{k'_r+k_c a}\,C_{Ab}$ &nbsp;($C_{Ab}=1$)</div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">overall specific rate</div>
+      <div class="bignum" id="rOut"></div>
+      <div id="regimeTag" class="pill-tag"></div>
+      <svg id="resBar" viewBox="0 0 460 70" style="width:100%; margin-top:12px">
+        <text x="10" y="18" font-size="13" fill="var(--muted)">resistance share</text>
+        <rect x="10" y="28" width="440" height="24" rx="6" fill="#EDF7F0" stroke="var(--line)"/>
+        <rect id="barExt" x="10" y="28" width="220" height="24" rx="6" fill="var(--red)" opacity="0.85"/>
+        <text id="barLbl1" x="18" y="45" font-size="12" fill="#fff" font-weight="700"></text>
+        <text id="barLbl2" x="442" y="45" font-size="12" fill="var(--green)" font-weight="700" text-anchor="end"></text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 23. External diagnosis text -->
+<section class="slide" data-title="Diagnosing external MT limitation">
+  <div class="s-head"><p class="kicker">Lecture 4-3 · experimental tests</p><h2>How do we know external MT is limiting?</h2></div>
+  <div class="grow stack">
+    <div class="cards">
+      <div class="card card-red"><h3>Change velocity $u$</h3><p>External-MT limited: rate rises with $u$, then plateaus. Reaction limited: rate flat.</p></div>
+      <div class="card card-orange"><h3>Change particle size $d_p$</h3><p>External-MT limited: rate falls as $d_p$ grows ($k_c a\!\propto\!d_p^{-3/2}$). Reaction limited: flat.</p></div>
+    </div>
+    <div class="callout aside">$k_c\!\propto\!u^{1/2}$ and $k_c a\!\propto\!d_p^{-3/2}$: doubling $u$ raises $k_c$ by only ≈ 41%.</div>
+    <p style="font-size:20px">The next two interactives let you see both curves change live.</p>
+  </div>
+</section>
+
+<!-- 24. [I] Rate vs velocity -->
+<section class="slide" data-title="Interactive — rate vs velocity" id="slide-uvel">
+  <div class="s-head"><p class="kicker">Interactive 6 — drag the reaction constant</p><h2>Observed rate versus fluid velocity</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reaction constant $k'_r$ <span class="val" id="uvKr"></span></label>
+        <input type="range" id="uvKrr" min="0.2" max="8" step="0.1" value="1"></div>
+      <div class="callout note" style="font-size:17px">$k_c a=C\,u^{1/2}$; $\;r'=\dfrac{k'_r k_c a}{k'_r+k_c a}C_{Ab}$</div>
+      <div class="callout aside" style="font-size:17px">Small $k'_r$ → rate is flat (reaction limited). Large $k'_r$ → rate climbs with $u$ (external limited).</div>
+    </div>
+    <div class="sim-out" style="padding:16px">
+      <div class="chart-box"><canvas id="uChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 25. [I] Rate vs particle size -->
+<section class="slide" data-title="Interactive — rate vs particle size" id="slide-dp">
+  <div class="s-head"><p class="kicker">Interactive 7 — drag the sliders</p><h2>Observed rate versus particle diameter</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Regime <span class="val" id="dpModeLbl"></span></label>
+        <div class="seg" id="dpSeg">
+          <button data-m="ext" class="on">External MT</button>
+          <button data-m="int">Internal diff.</button>
+          <button data-m="rxn">Reaction</button>
+        </div></div>
+      <div class="callout note" style="font-size:17px">External: $r'\!\propto\!d_p^{-3/2}$ · Internal: $r'\!\propto\!d_p^{-1}$ · Reaction: independent of $d_p$.</div>
+    </div>
+    <div class="sim-out" style="padding:16px">
+      <div class="chart-box"><canvas id="dpChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 26. Experimental results faithful -->
+<section class="slide" data-title="Experimental results">
+  <div class="s-head"><p class="kicker">Lecture 4-3 · reading the data</p><h2>Reaction limited vs external-MT limited</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <p style="font-size:20px; line-height:1.5">Plot the observed rate $r'$ against $u^{1/2}/d_p^{3/2}$ (the group $k_c a$ scales with):</p>
+      <ul class="clean">
+        <li><b style="color:var(--green)">Low $k_c a$ (left):</b> external MT limited — rate rises steeply with the group.</li>
+        <li><b style="color:var(--red)">High $k_c a$ (right):</b> reaction limited — rate plateaus at $k'_r C_{Ab}$.</li>
+      </ul>
+      <div class="callout aside">The knee separates the two regimes — operate to the right of it to remove the transport artefact.</div>
+    </div>
+    <svg viewBox="0 0 380 300" style="width:100%">
+      <line x1="45" y1="255" x2="360" y2="255" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="45" y1="255" x2="45" y2="20" stroke="var(--muted)" stroke-width="2"/>
+      <path d="M45 250 Q120 90 220 65 Q300 55 355 52" fill="none" stroke="var(--blue)" stroke-width="3"/>
+      <line x1="220" y1="255" x2="220" y2="65" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="120" y="150" font-size="13" fill="var(--green)">external MT</text>
+      <text x="270" y="45" font-size="13" fill="var(--red)">reaction limited</text>
+      <text x="200" y="290" font-size="14" fill="var(--muted)" text-anchor="middle">u^(1/2) / d_p^(3/2)  →</text>
+      <text x="22" y="140" font-size="14" fill="var(--muted)" transform="rotate(-90 22 140)" text-anchor="middle">r'</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 27. SEC 4-4 -->
+<section class="slide section-slide" data-title="Lecture 4-4" data-sec="Lecture 4-4">
+  <div class="big">4-4</div>
+  <p class="lbl">Lecture 4-4</p>
+  <p class="q">What is the rate expression when internal mass transfer is the limiting step?</p>
+  <p class="sub">We need the concentration profile of A inside the pellet — it tells us whether diffusion or reaction controls.</p>
+</section>
+
+<!-- 28. Need the profile -->
+<section class="slide" data-title="Why the concentration profile?">
+  <div class="s-head"><p class="kicker">Lecture 4-4 · the idea</p><h2>The profile of A tells us who is slower</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="callout q">How do we know whether internal diffusion or the reaction is the slower step?</div>
+      <p style="font-size:20px; line-height:1.5">We need the <b>concentration profile of A inside the catalyst</b>. From its shape we can tell which rate controls:</p>
+      <ul class="clean">
+        <li><b style="color:var(--green)">Flat profile</b> → A reaches the centre → reaction controls.</li>
+        <li><b style="color:var(--red)">Steep profile</b> → A consumed near the surface → diffusion controls.</li>
+      </ul>
+    </div>
+    <svg viewBox="0 0 340 300" style="width:100%">
+      <line x1="40" y1="250" x2="320" y2="250" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="40" y1="250" x2="40" y2="25" stroke="var(--muted)" stroke-width="2"/>
+      <path d="M40 60 L320 55" fill="none" stroke="var(--green)" stroke-width="3"/>
+      <path d="M40 235 Q220 220 320 60" fill="none" stroke="var(--red)" stroke-width="3"/>
+      <text x="120" y="48" font-size="13" fill="var(--green)">reaction limited</text>
+      <text x="120" y="200" font-size="13" fill="var(--red)">diffusion limited</text>
+      <text x="180" y="285" font-size="13" fill="var(--muted)" text-anchor="middle">centre → surface</text>
+      <text x="24" y="140" font-size="13" fill="var(--muted)" transform="rotate(-90 24 140)" text-anchor="middle">C_A</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 29. Shell balance -->
+<section class="slide" data-title="Shell balance on a pellet">
+  <div class="s-head"><p class="kicker">Lecture 4-4 · steady-state diffusion</p><h2>Shell balance on a spherical pellet</h2></div>
+  <div class="grow stack">
+    <div class="callout" style="font-size:18px">$[\text{A in at }r]-[\text{A out at }r+\Delta r]+[\text{generation}]=0$</div>
+    <div class="eq-step">$\dfrac{d(W_{Ar}r^2)}{dr}-r'\rho_c r^2=0$ <span class="why">divide by $4\pi\Delta r$, let $\Delta r\to0$</span></div>
+    <div class="eq-step">$W_A=-D_e\dfrac{dC_A}{dr},\quad r'=k'_{r,n}C_A^{\,n}$ <span class="why">insert Fick's law and the rate law</span></div>
+    <div class="eq-box" style="font-size:24px">$$\dfrac{d^2C_A}{dr^2}+\dfrac{2}{r}\dfrac{dC_A}{dr}-\dfrac{\rho_c}{D_e}k'_{r,n}C_A^{\,n}=0$$</div>
+  </div>
+</section>
+
+<!-- 30. Greek/dimensionless notation -->
+<section class="slide" data-title="Dimensionless notation">
+  <div class="s-head"><p class="kicker">Lecture 4-4 · the symbols</p><h2>Three dimensionless variables</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th>Symbol</th><th>Definition</th><th>Meaning</th></tr>
+      <tr><td>$\lambda$</td><td>$\lambda=\dfrac{r}{R}$</td><td>dimensionless radius (0 = centre, 1 = surface)</td></tr>
+      <tr><td>$\psi$</td><td>$\psi=\dfrac{C_A}{C_{As}}$</td><td>dimensionless concentration</td></tr>
+      <tr><td>$\phi_n$ (Thiele)</td><td>$\phi_n=\sqrt{\dfrac{k'_n\rho_c R^2 C_{As}^{\,n-1}}{D_e}}$</td><td>reaction rate ÷ diffusion rate</td></tr>
+      <tr><td>$\eta$ (Weisz)</td><td>$\eta=\dfrac{r'_{avg}}{r'_s}$</td><td>effectiveness factor (Lecture 4-5)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 31. Non-dimensionalize -->
+<section class="slide" data-title="Thiele modulus">
+  <div class="s-head"><p class="kicker">Lecture 4-4 · non-dimensionalize</p><h2>One dimensionless group: the Thiele modulus</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:24px">$$\dfrac{d^2\psi}{d\lambda^2}+\dfrac{2}{\lambda}\dfrac{d\psi}{d\lambda}-\phi_n^{\,2}\psi^{\,n}=0$$</div>
+    <div class="eq-step">$\phi_n^{\,2}=\dfrac{k'_{n}\rho_c R^2 C_{As}^{\,n-1}}{D_e}=\dfrac{\text{reaction rate @ surface}}{\text{diffusion rate}}$ <span class="why">the Thiele modulus squared</span></div>
+    <p class="eq-note"><span style="color:var(--red)">$\phi_n\gg1\Rightarrow$ internal-diffusion control</span> &nbsp;·&nbsp; <span style="color:var(--green)">$\phi_n\to0\Rightarrow$ surface-reaction control</span></p>
+    <div class="callout note">Boundary conditions: $C_A$ finite at $\lambda=0$ (centre), $C_A=C_{As}$ at $\lambda=1$ (surface).</div>
+  </div>
+</section>
+
+<!-- 32. First-order profile solution -->
+<section class="slide" data-title="First-order profile solution">
+  <div class="s-head"><p class="kicker">Lecture 4-4 · analytic solution</p><h2>Concentration profile for a first-order reaction</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:27px">$$\psi=\dfrac{C_A}{C_{As}}=\dfrac{1}{\lambda}\,\dfrac{\sinh(\phi_1\lambda)}{\sinh\phi_1}$$</div>
+    <div class="cards">
+      <div class="card card-green"><h3>Small $\phi_1$</h3><p>$\psi\approx1$ everywhere — A fills the whole pellet.</p></div>
+      <div class="card card-red"><h3>Large $\phi_1$</h3><p>$\psi$ decays fast — A only near the surface; the core is dead.</p></div>
+    </div>
+    <p class="eq-note orange">See the next interactive: drag $\phi_1$ and watch the profile steepen.</p>
+  </div>
+</section>
+
+<!-- 33. [I] Concentration profile n=1 -->
+<section class="slide" data-title="Interactive — concentration profile" id="slide-profile">
+  <div class="s-head"><p class="kicker">Interactive 8 — drag $\phi_1$</p><h2>Concentration profile inside the pellet (first order)</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Thiele modulus $\phi_1$ <span class="val" id="phiPval"></span></label>
+        <input type="range" id="phiP" min="0.3" max="15" step="0.1" value="2"></div>
+      <div class="callout note" style="font-size:17px">$\psi=\dfrac{1}{\lambda}\dfrac{\sinh(\phi_1\lambda)}{\sinh\phi_1}$</div>
+      <div class="callout aside" style="font-size:17px">Centre value $\psi(0)$: <span class="val" id="psi0"></span></div>
+    </div>
+    <div class="sim-out" style="padding:14px">
+      <div class="chart-box"><canvas id="profChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 34. [I] Profile order comparison -->
+<section class="slide" data-title="Interactive — order comparison" id="slide-profile2">
+  <div class="s-head"><p class="kicker">Interactive 9 — reaction order</p><h2>Does the reaction order change the profile?</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Thiele modulus $\phi$ <span class="val" id="p2Phi"></span></label>
+        <input type="range" id="p2Phir" min="0.5" max="8" step="0.1" value="3"></div>
+      <div class="callout note" style="font-size:17px">Solid = 1st order (analytic) · Dashed = 2nd order (numerical shooting).</div>
+      <div class="callout aside" style="font-size:17px">For $n>1$ the profile is even steeper near the surface at the same $\phi$.</div>
+    </div>
+    <div class="sim-out" style="padding:14px">
+      <div class="chart-box"><canvas id="prof2Chart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 35. [I] Thiele modulus calculator -->
+<section class="slide" data-title="Interactive — Thiele modulus" id="slide-thiele">
+  <div class="s-head"><p class="kicker">Interactive 10 — drag the sliders</p><h2>Build the Thiele modulus $\phi_1$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Radius $R$ (mm) <span class="val" id="thR"></span></label>
+        <input type="range" id="thRr" min="0.1" max="6" step="0.1" value="2"></div>
+      <div class="sl"><label>Rate constant $k'_1\rho_c$ (1/s) <span class="val" id="thK"></span></label>
+        <input type="range" id="thKr" min="0.1" max="50" step="0.1" value="5"></div>
+      <div class="sl"><label>Eff. diff. $D_e$ (×10⁻⁶ m²/s) <span class="val" id="thD"></span></label>
+        <input type="range" id="thDr" min="0.2" max="20" step="0.2" value="1.5"></div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">Thiele modulus $\phi_1=\sqrt{k'_1\rho_c R^2/D_e}$</div>
+      <div class="bignum" id="thOut"></div>
+      <div id="thTag" class="pill-tag"></div>
+      <div class="readrow"><div class="rd">effectiveness $\eta$<b id="thEta"></b></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 36. SEC 4-5 -->
+<section class="slide section-slide" data-title="Lecture 4-5" data-sec="Lecture 4-5">
+  <div class="big">4-5</div>
+  <p class="lbl">Lecture 4-5</p>
+  <p class="q">Why do we need the effectiveness factor $\eta$?</p>
+  <p class="sub">How large must $\phi$ be to call it diffusion-limited? A single 0–1 number makes the judgement easy.</p>
+</section>
+
+<!-- 37. Effectiveness factor definition -->
+<section class="slide" data-title="Effectiveness factor definition">
+  <div class="s-head"><p class="kicker">Lecture 4-5 · definition</p><h2>What the effectiveness factor measures</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:26px">$$\eta=\dfrac{\text{actual overall rate}}{\text{rate at surface conditions}}=\dfrac{r'_{\text{avg}}}{r'_s}=\dfrac{M_A}{r'_s W_c}$$</div>
+    <div class="cards">
+      <div class="card card-green"><h3>$\eta\to1$</h3><p>Interior fully bathed in A — reaction controls, no diffusion penalty.</p></div>
+      <div class="card card-red"><h3>$\eta\ll1$</h3><p>A consumed near the surface — most of the pellet is starved.</p></div>
+      <div class="card card-blue"><h3>Then</h3><p>$r'=\eta\,r'_s$ — one factor rescales the surface-kinetics rate to reality.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 38. Overall rate derivation -->
+<section class="slide" data-title="Overall rate derivation">
+  <div class="s-head"><p class="kicker">Lecture 4-5 · from flux to rate</p><h2>The overall rate is the flux at the surface</h2></div>
+  <div class="grow stack">
+    <div class="eq-step">$M_A=r'_{avg}\,W_c=W_{Ar}\big|_{r=R}\times4\pi R^2$ <span class="why">all A entering the pellet reacts</span></div>
+    <div class="eq-step">$M_A=4\pi R^2 D_e\dfrac{dC_A}{dr}\Big|_{r=R}=4\pi R D_e C_{As}\dfrac{d\psi}{d\lambda}\Big|_{\lambda=1}$ <span class="why">Fick's law at the surface</span></div>
+    <div class="eq-step">$\eta=\dfrac{M_A}{r'_s W_c}=\dfrac{3}{\phi_1^{\,2}}\left(\phi_1\coth\phi_1-1\right)$ <span class="why">use the first-order profile slope</span></div>
+    <p class="eq-note green">The whole result comes from one quantity — the concentration gradient at the surface.</p>
+  </div>
+</section>
+
+<!-- 39. First-order sphere eta -->
+<section class="slide" data-title="First-order sphere η(φ)">
+  <div class="s-head"><p class="kicker">Lecture 4-5 · first-order sphere</p><h2>Closed form for a first-order spherical pellet</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:29px">$$\eta=\dfrac{3}{\phi_1^{\,2}}\big(\phi_1\coth\phi_1-1\big)$$</div>
+    <div class="cards">
+      <div class="card card-green"><h3>Small $\phi_1\;(<0.4)$</h3><p>$\eta\approx1$ — reaction limited. Whole pellet is used.</p></div>
+      <div class="card card-red"><h3>Large $\phi_1\;(>20)$</h3><p>$\eta\approx\dfrac{3}{\phi_1}$ — diffusion limited. Only a thin outer shell reacts.</p></div>
+    </div>
+    <p class="eq-note orange">Diffusion-limited rate: $r'=\dfrac{3}{R}\sqrt{\dfrac{D_e k'_1}{\rho_c}}\;C_{Ab}$ — now depends on $\sqrt{k'_1}$ and on $1/R$.</p>
+  </div>
+</section>
+
+<!-- 40. [I] eta vs phi -->
+<section class="slide" data-title="Interactive — η versus φ" id="slide-eta">
+  <div class="s-head"><p class="kicker">Interactive 11 — drag $\phi_1$</p><h2>Effectiveness factor versus Thiele modulus</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Thiele modulus $\phi_1$ <span class="val" id="phiEval"></span></label>
+        <input type="range" id="phiE" min="0.1" max="50" step="0.1" value="1"></div>
+      <div class="callout aside" style="font-size:17px">Effectiveness $\eta$: <span class="val" id="etaOut"></span></div>
+      <div id="etaTag" class="pill-tag"></div>
+    </div>
+    <div class="sim-out" style="padding:14px">
+      <div class="chart-box"><canvas id="etaChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 41. [I] shape effect -->
+<section class="slide" data-title="Interactive — pellet shape" id="slide-shape">
+  <div class="s-head"><p class="kicker">Interactive 12 — pellet geometry</p><h2>Does the pellet shape matter?</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Thiele modulus $\phi$ <span class="val" id="shPhi"></span></label>
+        <input type="range" id="shPhir" min="0.1" max="20" step="0.1" value="2"></div>
+      <div class="callout note" style="font-size:16px">Slab $\dfrac{\tanh\phi}{\phi}$ · Cylinder $\dfrac{2}{\phi}\dfrac{I_1}{I_0}$ · Sphere $\dfrac{3}{\phi^2}(\phi\coth\phi-1)$</div>
+      <div class="readrow">
+        <div class="rd">slab<b id="shSlab"></b></div>
+        <div class="rd">cyl<b id="shCyl"></b></div>
+        <div class="rd">sphere<b id="shSph"></b></div>
+      </div>
+    </div>
+    <div class="sim-out" style="padding:14px">
+      <div class="chart-box"><canvas id="shapeChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 42. Factors affecting eta -->
+<section class="slide" data-title="What raises the effectiveness factor">
+  <div class="s-head"><p class="kicker">Lecture 4-5 · design levers</p><h2>What raises $\eta$ (diffusion-limited pellet)</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th>Change</th><th>Effect on $\eta$</th><th>Why</th></tr>
+      <tr><td>Pellet size $R\downarrow$</td><td style="color:var(--green)">↑</td><td>shorter diffusion path, smaller $\phi$</td></tr>
+      <tr><td>Diffusivity $D_e\uparrow$</td><td style="color:var(--green)">↑</td><td>A penetrates deeper</td></tr>
+      <tr><td>Rate constant $k'\uparrow$ / $T\uparrow$</td><td style="color:var(--red)">↓</td><td>A consumed before it diffuses in</td></tr>
+      <tr><td>Concentration $C_{As}\uparrow$ ($n>1$)</td><td style="color:var(--red)">↓</td><td>faster local consumption</td></tr>
+    </table>
+    <div class="callout aside" style="margin-top:14px">Temperature is subtle: raising $T$ speeds reaction far more than diffusion, so $\eta$ usually <b>falls</b>.</div>
+  </div>
+</section>
+
+<!-- 43. Rate expression internal limited -->
+<section class="slide" data-title="Rate expression — internal limited">
+  <div class="s-head"><p class="kicker">Lecture 4-5 · putting it together</p><h2>Rate expression in each regime (first order)</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th></th><th style="color:var(--red)">Internal-diffusion limited</th><th style="color:var(--green)">Chemical-rate limited</th></tr>
+      <tr><td>Condition</td><td>$\phi_1>20\Rightarrow\eta\approx3/\phi_1$</td><td>$\phi_1<0.4\Rightarrow\eta\approx1$</td></tr>
+      <tr><td>Rate</td><td>$r'=\dfrac{3}{R}\sqrt{\dfrac{D_e k'_1}{\rho_c}}\,C_{Ab}$</td><td>$r'=k'_1 C_{Ab}$</td></tr>
+      <tr><td>Depends on $T$</td><td style="color:var(--orange)">$\sqrt{k'_1}$ → half the $E$</td><td style="color:var(--green)">$k'_1$ → full $E$</td></tr>
+      <tr><td>Depends on $R$</td><td style="color:var(--red)">$\propto1/R$</td><td style="color:var(--green)">none</td></tr>
+    </table>
+    <p class="eq-note green" style="margin-top:12px">Both raise the rate with $T$ and $C$; only the diffusion-limited case improves when you shrink the pellet.</p>
+  </div>
+</section>
+
+<!-- 44. SEC 4-6 -->
+<section class="slide section-slide" data-title="Lecture 4-6" data-sec="Lecture 4-6">
+  <div class="big">4-6</div>
+  <p class="lbl">Lecture 4-6</p>
+  <p class="q">Which step is the controlling mechanism?</p>
+  <p class="sub">The apparent activation energy plus the Weisz–Prater and Mears criteria tell us which resistance dominates.</p>
+</section>
+
+<!-- 45. Rate-limiting overview -->
+<section class="slide" data-title="Factors affecting the rate">
+  <div class="s-head"><p class="kicker">Lecture 4-6 · overview</p><h2>Each regime has a different fingerprint</h2></div>
+  <div class="grow">
+    <table class="compare sm">
+      <tr><th>Regime</th><th>Velocity $u$</th><th>Particle $d_p$</th><th>Temperature ($E_{app}$)</th></tr>
+      <tr><td style="color:var(--red)">External MT</td><td>strong ↑</td><td>strong ↓</td><td>weak (&lt;10 kJ/mol)</td></tr>
+      <tr><td style="color:var(--orange)">Internal diffusion</td><td>none</td><td>moderate ↓</td><td>$\approx E/2$</td></tr>
+      <tr><td style="color:var(--green)">Reaction</td><td>none</td><td>none</td><td>full $E$ (&gt;50 kJ/mol)</td></tr>
+    </table>
+    <div class="callout aside" style="margin-top:16px">Use these three levers experimentally to pin down which step controls, then pick the right rate expression.</div>
+  </div>
+</section>
+
+<!-- 46. Temperature effect -->
+<section class="slide" data-title="Apparent activation energy">
+  <div class="s-head"><p class="kicker">Lecture 4-6 · temperature fingerprint</p><h2>The Arrhenius slope reveals the regime</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:24px">$$k(T)=A\,e^{-E_a/RT}\;\Rightarrow\;\ln(\text{rate})\text{ vs }1/T\text{ gives } E_{app}$$</div>
+    <ul class="clean">
+      <li><b style="color:var(--green)">Reaction limited:</b> slope $=-E/R$, $\;E_{app}>50$ kJ/mol</li>
+      <li><b style="color:var(--orange)">Pore-diffusion limited:</b> slope $=-E/2R$, $\;E_{app}\approx\tfrac12 E$</li>
+      <li><b style="color:var(--red)">Bulk-diffusion limited:</b> slope shallow, $\;E_{app}<10$ kJ/mol</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 47. [I] Arrhenius eapp -->
+<section class="slide" data-title="Interactive — apparent Eₐ" id="slide-arr">
+  <div class="s-head"><p class="kicker">Interactive 13 — drag the intrinsic energy</p><h2>How the regime halves the apparent activation energy</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Intrinsic $E$ (kJ/mol) <span class="val" id="arE"></span></label>
+        <input type="range" id="arEr" min="20" max="200" step="5" value="100"></div>
+      <div class="callout note" style="font-size:17px">Plot: $\ln(\text{rate})$ vs $1000/T$. Steeper slope = larger $E_{app}$.</div>
+      <div class="readrow">
+        <div class="rd">rxn<b id="arErxn"></b></div>
+        <div class="rd">pore<b id="arEpore"></b></div>
+        <div class="rd">bulk<b id="arEbulk"></b></div>
+      </div>
+    </div>
+    <div class="sim-out" style="padding:14px">
+      <div class="chart-box"><canvas id="arrChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- 48. Weisz-Prater -->
+<section class="slide" data-title="Weisz–Prater criterion">
+  <div class="s-head"><p class="kicker">Lecture 4-6 · internal diffusion test</p><h2>Weisz–Prater criterion (internal)</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:26px">$$C_{WP}=\eta\,\phi_1^{\,2}=\dfrac{r'_s(\text{obs})\,\rho_c R^2}{D_e\,C_{As}}$$</div>
+    <div class="cards">
+      <div class="card card-green"><h3>$C_{WP}\ll1$</h3><p>e.g. $0.0001$ — no internal-diffusion limit. Reaction controls.</p></div>
+      <div class="card card-red"><h3>$C_{WP}\gg1$</h3><p>e.g. $50$ — severe internal-diffusion limitation.</p></div>
+      <div class="card card-blue"><h3>All observable</h3><p>Uses the <b>measured</b> rate, known $\rho_c,R$, and an estimated $D_e$.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 49. [I] Weisz-Prater calc -->
+<section class="slide" data-title="Interactive — Weisz–Prater" id="slide-wp">
+  <div class="s-head"><p class="kicker">Interactive 14 — size the diffusion effect</p><h2>Weisz–Prater calculator</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Radius $R$ (mm) <span class="val" id="wpRval"></span></label>
+        <input type="range" id="wpR" min="0.1" max="6" step="0.1" value="2"></div>
+      <div class="sl"><label>Effective diff. $D_e$ (×10⁻⁶ m²/s) <span class="val" id="wpDval"></span></label>
+        <input type="range" id="wpD" min="0.2" max="20" step="0.2" value="1.5"></div>
+      <div class="sl"><label>Obs. rate $r'_s\rho_c$ (mol/m³·s) <span class="val" id="wpRateval"></span></label>
+        <input type="range" id="wpRate" min="1" max="500" step="1" value="60"></div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">Weisz–Prater number $C_{WP}$</div>
+      <div class="bignum" id="wpOut"></div>
+      <div id="wpTag" class="pill-tag"></div>
+      <p style="font-size:15px; color:var(--muted); margin-top:10px">$C_{As}=1\ \text{mol/m}^3$ · $C_{WP}=\dfrac{(r'_s\rho_c)R^2}{D_e C_{As}}$</p>
+    </div>
+  </div>
+</section>
+
+<!-- 50. Mears -->
+<section class="slide" data-title="Mears' criterion">
+  <div class="s-head"><p class="kicker">Lecture 4-6 · external diffusion test</p><h2>Mears' criterion (external)</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:26px">$$\dfrac{-r'_A\,\rho_c\,R\,n}{k_c\,C_{Ab}}<0.15$$</div>
+    <p class="eq-note green">If satisfied, external mass transfer is <b>not</b> limiting, so $C_{As}=C_{Ab}$.</p>
+    <div class="callout aside">$n$ = order, $R$ = radius, $\rho_c$ = catalyst density, $k_c$ = MT coefficient, $C_{Ab}$ = bulk concentration.</div>
+    <div class="callout note">For most catalytic reactions, <b>internal</b> diffusion matters more than external — check Weisz–Prater first.</div>
+  </div>
+</section>
+
+<!-- 51. [I] Mears calc -->
+<section class="slide" data-title="Interactive — Mears' criterion" id="slide-mears">
+  <div class="s-head"><p class="kicker">Interactive 15 — external diffusion check</p><h2>Mears' criterion calculator</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Obs. rate $-r'_A\rho_c$ (mol/m³·s) <span class="val" id="meRate"></span></label>
+        <input type="range" id="meRater" min="1" max="500" step="1" value="60"></div>
+      <div class="sl"><label>Radius $R$ (mm) <span class="val" id="meR"></span></label>
+        <input type="range" id="meRr" min="0.1" max="6" step="0.1" value="2"></div>
+      <div class="sl"><label>MT coeff. $k_c$ (×10⁻³ m/s) <span class="val" id="meKc"></span></label>
+        <input type="range" id="meKcr" min="0.5" max="50" step="0.5" value="10"></div>
+      <div class="sl"><label>Order $n$ <span class="val" id="meN"></span></label>
+        <input type="range" id="meNr" min="0" max="3" step="1" value="1"></div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">Mears number</div>
+      <div class="bignum" id="meOut"></div>
+      <div id="meTag" class="pill-tag"></div>
+      <p style="font-size:15px; color:var(--muted); margin-top:10px">$C_{Ab}=1\ \text{mol/m}^3$ · threshold $0.15$</p>
+    </div>
+  </div>
+</section>
+
+<!-- 52. Criteria summary -->
+<section class="slide" data-title="Which step controls — decision guide">
+  <div class="s-head"><p class="kicker">Lecture 4-6 · summary</p><h2>A decision guide for the controlling step</h2></div>
+  <div class="grow">
+    <table class="compare sm">
+      <tr><th>Test</th><th>Quantity</th><th>Verdict</th></tr>
+      <tr><td>Vary velocity $u$</td><td>rate rises with $u$?</td><td style="color:var(--red)">yes → external MT limits</td></tr>
+      <tr><td>Mears</td><td>$\dfrac{-r'_A\rho_c R n}{k_c C_{Ab}}$</td><td style="color:var(--green)">&lt; 0.15 → external OK</td></tr>
+      <tr><td>Weisz–Prater</td><td>$C_{WP}=\dfrac{r'_s\rho_c R^2}{D_e C_{As}}$</td><td style="color:var(--orange)">&gt; 1 → internal diffusion limits</td></tr>
+      <tr><td>Apparent $E_{app}$</td><td>Arrhenius slope</td><td>full $E$ → reaction; $E/2$ → pore; small → bulk</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 53. SEC 4-7 Class Activity -->
+<section class="slide section-slide" data-title="Class Activity" data-sec="Class Activity">
+  <div class="big">4-7</div>
+  <p class="lbl">Week 4 · Class Activity</p>
+  <p class="q" style="color:var(--navy)">Worked problems — put the criteria to work</p>
+  <p class="sub">Try each one yourself first, then reveal the reasoning. Problems adapted from the Week 4 activity set.</p>
+</section>
+
+<!-- 54. Problem 1 -->
+<section class="slide" data-title="Problem 1 — do curves coincide?">
+  <div class="s-head"><p class="kicker">Class Activity · Problem 1</p><h2>Problem 1 — is there a mass-transfer effect?</h2></div>
+  <div class="grow stack">
+    <div class="callout q">Conversion is plotted against $W/F$ for two particle sizes (a) and (b). In case (a) the two curves <b>coincide</b>; in case (b) the high-velocity curve lies above the low-velocity one. Which case shows a mass-transfer effect?</div>
+    <div class="reveal"><button class="reveal-btn">Show reasoning &amp; answer</button>
+      <div class="reveal-body stack">
+        <div class="callout note" style="font-size:18px"><b>(a) coincide → no external MT effect.</b> If changing particle size / velocity does not move the conversion curve, transport is not limiting — the intrinsic kinetics control.</div>
+        <div class="callout" style="font-size:18px; border-color:var(--navy)"><b>(b) curves split by velocity → external MT effect present.</b> Higher velocity raises $k_c$ and hence conversion, the signature of external-diffusion limitation.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 55. Problem 2 -->
+<section class="slide" data-title="Problem 2 — SO₂ oxidation">
+  <div class="s-head"><p class="kicker">Class Activity · Problem 2</p><h2>Problem 2 — Dowden &amp; Bridger SO₂ → SO₃</h2></div>
+  <div class="grow stack">
+    <div class="callout q">Oxidation of SO₂ was studied at 400 and 470 °C with two pellet sizes (2.36 &amp; 1.14 mm) and varying mass velocity. Conversion rises with mass velocity and with smaller pellets. Interpret.</div>
+    <div class="reveal"><button class="reveal-btn">Show interpretation</button>
+      <div class="reveal-body stack">
+        <div class="callout note" style="font-size:18px">Sensitivity to <b>mass velocity</b> ⇒ <b>external</b> mass transfer is limiting (more velocity → larger $k_c$).</div>
+        <div class="callout note" style="font-size:18px">Sensitivity to <b>pellet size</b> at fixed velocity ⇒ <b>internal</b> diffusion also matters (smaller $R$ → smaller $\phi$ → larger $\eta$).</div>
+        <div class="callout" style="font-size:18px; border-color:var(--navy)"><b>Conclusion:</b> the data are transport-controlled, not intrinsic-kinetics-controlled — both external and internal diffusion contribute.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 56. Problem 3 -->
+<section class="slide" data-title="Problem 3 — rate at 448 K">
+  <div class="s-head"><p class="kicker">Class Activity · Problem 3</p><h2>Problem 3 — first-order pellet, find the rate at 448 K</h2></div>
+  <div class="grow stack">
+    <div class="callout q">A first-order reaction A→B runs in an $R=0.20$ cm sphere, $D_e=0.015$ cm²/s. At 398 K the observed rate is $2.63\times10^{-5}$ mol/(cm³·s) with $C_A=3.25\times10^{-5}$ mol/cm³ and $E=20$ kcal/mol. Find the rate at 448 K.</div>
+    <div class="reveal"><button class="reveal-btn">Show the reasoning &amp; answer</button>
+      <div class="reveal-body stack">
+        <div class="callout note" style="font-size:17px">Arrhenius: $k_{448}=k_{398}\exp\!\left[\tfrac{E}{R}\!\left(\tfrac1{398}-\tfrac1{448}\right)\right]$ raises $k'$ from ≈ 0.81 to ≈ 13.6 s⁻¹ (≈ 17×).</div>
+        <div class="callout note" style="font-size:17px">Higher $k'$ raises $\phi_1=\sqrt{k'_1\rho_c R^2/D_e}$, so $\eta$ drops — recompute $\eta=\tfrac{3}{\phi_1^2}(\phi_1\coth\phi_1-1)$ at 448 K.</div>
+        <div class="callout" style="font-size:18px; border-color:var(--navy)"><b>Answer:</b> $r_{448}\approx4.43\times10^{-4}$ mol/(cm³·s) — about <b>17×</b> the 398 K rate, tempered by the falling $\eta$.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 57. [I] Problem 3 solver -->
+<section class="slide" data-title="Interactive — Problem 3 solver" id="slide-p3">
+  <div class="s-head"><p class="kicker">Interactive 16 — Problem 3 live solver</p><h2>Scale the rate to any temperature</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Target temperature $T$ (K) <span class="val" id="p3T"></span></label>
+        <input type="range" id="p3Tr" min="398" max="500" step="1" value="448"></div>
+      <div class="sl"><label>Activation energy $E$ (kcal/mol) <span class="val" id="p3E"></span></label>
+        <input type="range" id="p3Er" min="10" max="40" step="1" value="20"></div>
+      <div class="callout aside" style="font-size:16px">Base: 398 K, $k'_{398}=0.81$ s⁻¹, $R=0.2$ cm, $D_e=0.015$ cm²/s, $C_A=3.25\times10^{-5}$</div>
+    </div>
+    <div class="sim-out">
+      <div style="font-size:18px; color:var(--muted)">reaction rate at $T$</div>
+      <div class="bignum" id="p3R"></div>
+      <div style="font-size:16px; color:var(--muted)">mol/(cm³·s)</div>
+      <div class="readrow">
+        <div class="rd">k' (1/s)<b id="p3k"></b></div>
+        <div class="rd">$\phi_1$<b id="p3phi"></b></div>
+        <div class="rd">$\eta$<b id="p3eta"></b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 58. Problem 4 -->
+<section class="slide" data-title="Problem 4 — identify the regions">
+  <div class="s-head"><p class="kicker">Class Activity · Problem 4</p><h2>Problem 4 — read the rate-vs-flow curves</h2></div>
+  <div class="grow stack">
+    <div class="callout q">A differential packed bed is run at several temperatures, flow rates, and particle sizes. Which conditions are external-MT limited, reaction limited, and internal-diffusion controlled?</div>
+    <div class="reveal"><button class="reveal-btn">Show how to read it</button>
+      <div class="reveal-body stack">
+        <div class="callout note" style="font-size:17px"><b>External MT:</b> rate still rising with flow rate at fixed $T$ — not yet on the plateau.</div>
+        <div class="callout note" style="font-size:17px"><b>Reaction limited:</b> rate independent of flow rate and of particle size, strong $T$ dependence (full $E$).</div>
+        <div class="callout note" style="font-size:17px"><b>Internal diffusion:</b> rate independent of flow but rises when particles are made smaller; $E_{app}\approx E/2$.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 59. Problem 6 -->
+<section class="slide" data-title="Problem 6 — ethyl acetate">
+  <div class="s-head"><p class="kicker">Class Activity · Problem 6</p><h2>Problem 6 — effectiveness factor &amp; Weisz–Prater</h2></div>
+  <div class="grow stack">
+    <div class="callout q">Ethyl-acetate synthesis on a 3.5 mm spherical resin, first order in ethanol, pseudo-zero-order in acetic acid, $\rho_c=2000$ kg/m³, bed void 0.50, $D_e\approx2\times10^{-8}$ m²/s. Find the effectiveness factor and decide (Weisz–Prater) whether pore diffusion matters.</div>
+    <div class="reveal"><button class="reveal-btn">Show the method</button>
+      <div class="reveal-body stack">
+        <div class="callout note" style="font-size:17px"><b>Step 1</b> — Weisz–Prater: $C_{WP}=\dfrac{r'_s\rho_c R^2}{D_e C_{As}}$ from the measured rate. If $C_{WP}\gtrsim1$, pore diffusion is important.</div>
+        <div class="callout note" style="font-size:17px"><b>Step 2</b> — back out $\phi_1$ from $C_{WP}=\eta\phi_1^2$, then $\eta=\dfrac{3}{\phi_1^2}(\phi_1\coth\phi_1-1)$.</div>
+        <div class="callout" style="font-size:17px; border-color:var(--navy)">Use Interactive 14 (Weisz–Prater) and Interactive 10 (Thiele) to get $C_{WP}$ and $\eta$ for these numbers.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 60. Problem 7 -->
+<section class="slide" data-title="Problem 7 — sketch the profile">
+  <div class="s-head"><p class="kicker">Class Activity · Problem 7</p><h2>Problem 7 — sketch A, B, C inside the pellet</h2></div>
+  <div class="grow stack">
+    <div class="callout q">Gas reaction $\mathrm{A}+2\mathrm{B}\to3\mathrm{C}$ on a spherical catalyst, $d_p=0.4$ mm, film ≈ 0.1 mm. Sketch $C_A,C_B,C_C$ from the centre to the bulk when (a) external MT ≫ internal ≫ reaction, and (b) reaction ≫ external MT.</div>
+    <div class="reveal"><button class="reveal-btn">Show the sketches</button>
+      <div class="reveal-body stack">
+        <div class="callout note" style="font-size:17px"><b>(a) External MT fast, reaction slow:</b> almost flat profiles — $C_{Ab}\approx C_{As}\approx C_A(\text{centre})$; reactants penetrate fully, product barely accumulates.</div>
+        <div class="callout note" style="font-size:17px"><b>(b) Reaction fast vs external MT:</b> big drop across the film, reactants depleted near the surface; product $C$ peaks inside and diffuses out.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 61. Quiz 1 -->
+<section class="slide" data-title="Quiz 1">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — external vs reaction</h2></div>
+  <div class="quiz-q" data-qid="q1">
+    <p class="q-text">You double the fluid velocity and the measured rate barely changes. What does this suggest?</p>
+    <button class="q-opt" data-explain="If external MT were limiting, more velocity would raise $k_c$ and thus the rate. A flat response points the other way.">External mass transfer is limiting</button>
+    <button class="q-opt" data-correct data-explain="Correct. Velocity only affects the external film ($k_c\propto u^{1/2}$). If the rate is insensitive to $u$, the film is not the bottleneck.">External mass transfer is NOT limiting</button>
+    <button class="q-opt" data-explain="Velocity does not change the pore structure, so this test alone can't confirm internal diffusion — use Weisz–Prater.">Internal diffusion is limiting</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 62. Quiz 2 -->
+<section class="slide" data-title="Quiz 2">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — Thiele &amp; effectiveness</h2></div>
+  <div class="quiz-q" data-qid="q2">
+    <p class="q-text">A catalyst pellet has a large Thiele modulus, $\phi_1\gg1$. What is true?</p>
+    <button class="q-opt" data-explain="Large $\phi_1$ means reaction outpaces diffusion, so A is consumed near the surface — the interior is starved.">$\eta\approx1$; the whole pellet is used</button>
+    <button class="q-opt" data-correct data-explain="Correct. For $\phi_1\gg1$, $\eta\approx3/\phi_1\ll1$: only a thin outer shell reacts. Smaller pellets recover effectiveness.">$\eta\approx3/\phi_1\ll1$; only a thin outer shell reacts</button>
+    <button class="q-opt" data-explain="Diffusion is weakly $T$-dependent; the apparent activation energy drops to about $E/2$, not doubles.">The apparent activation energy doubles</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 63. Quiz 3 -->
+<section class="slide" data-title="Quiz 3">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — temperature fingerprint</h2></div>
+  <div class="quiz-q" data-qid="q3">
+    <p class="q-text">An experiment gives an apparent activation energy of about 45% of the intrinsic value. Which regime is it?</p>
+    <button class="q-opt" data-explain="Reaction-limited operation shows the full intrinsic $E$ (slope $-E/R$), not half.">Reaction-rate limited</button>
+    <button class="q-opt" data-correct data-explain="Correct. Pore-diffusion limitation halves the apparent activation energy (slope $-E/2R$), because the rate then depends on $\sqrt{k}$.">Internal pore-diffusion limited</button>
+    <button class="q-opt" data-explain="Bulk (external) diffusion gives a very small $E_{app}$ (&lt; 10 kJ/mol), essentially flat — not half.">Bulk external-diffusion limited</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 64. Quiz 4 -->
+<section class="slide" data-title="Quiz 4">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — applying the criteria</h2></div>
+  <div class="quiz-q" data-qid="q4">
+    <p class="q-text">A measured Weisz–Prater number is $C_{WP}=0.002$. What can you conclude?</p>
+    <button class="q-opt" data-correct data-explain="Correct. $C_{WP}\ll1$ means the reaction is much slower than pore diffusion — no internal-diffusion limitation, so $\eta\approx1$ and $C_A$ is nearly uniform.">No internal-diffusion limitation; $\eta\approx1$</button>
+    <button class="q-opt" data-explain="Severe internal diffusion needs $C_{WP}\gg1$ (e.g. 50). $0.002$ is the opposite case.">Severe internal-diffusion limitation</button>
+    <button class="q-opt" data-explain="Weisz–Prater tests internal diffusion, not the external film. Use Mears' criterion for external transfer.">External mass transfer is limiting</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 65. Key takeaways -->
+<section class="slide" data-title="Key takeaways">
+  <div class="s-head"><p class="kicker">Exit ticket</p><h2>Key Takeaways</h2></div>
+  <div class="grow">
+    <div class="tk"><div class="n">1</div><p>Transport and reaction act in series: $r'=\dfrac{k'_r k_c a}{k'_r+k_c a}C_{Ab}$ — the smaller coefficient controls.</p></div>
+    <div class="tk"><div class="n">2</div><p>The Thiele modulus $\phi$ compares reaction to diffusion; $\eta=\tfrac{3}{\phi^2}(\phi\coth\phi-1)$ rescales the rate.</p></div>
+    <div class="tk"><div class="n">3</div><p>Diagnose the regime: velocity &amp; particle-size tests, Mears (external), Weisz–Prater (internal), apparent $E_{app}$.</p></div>
+    <div class="tk"><div class="n">4</div><p>To beat diffusion limits, shrink the pellet ($R\downarrow$) — it lowers $\phi$ and lifts $\eta$.</p></div>
+    <p class="quiz-score"></p>
+    <p style="color:var(--muted); font-size:17px; margin-top:14px">Write down one question you still have — bring it to the next class.</p>
+  </div>
+</section>
+
+</div>
+
+<div id="progress"></div>
+<div id="hud">
+  <button id="btnToc" title="Contents (T)">☰</button>
+  <button id="btnPrev" title="Previous (←)">‹</button>
+  <button id="btnNext" title="Next (→)">›</button>
+</div>
+<div id="toc"><div class="panel"><h3>CONTENTS</h3><div id="tocList"></div></div></div>
+
+<script>
+/* ================= Deck engine ================= */
+const DECK_META = { course: '2105604 ADV CHE KINETICS' };
+
+const el = id => document.getElementById(id);
+const cs = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function fmt(x, d = 3){
+  if (!isFinite(x)) return '–';
+  if (x !== 0 && (Math.abs(x) < 1e-3 || Math.abs(x) >= 1e5)) return x.toExponential(d - 1);
+  return parseFloat(x.toPrecision(d)).toString();
+}
+function mix(c1, c2, t){
+  const p = c => [1,3,5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const a = p(c1), b = p(c2);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+const Deck = (() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = -1;
+  const enterCbs = [];
+
+  let _sec = '';
+  slides.forEach((s, i) => {
+    if (s.dataset.sec) _sec = s.dataset.sec;
+    if (s.classList.contains('title-slide') || s.classList.contains('section-slide') || s.dataset.nofooter !== undefined) return;
+    const f = document.createElement('div');
+    f.className = 's-foot';
+    f.innerHTML = `<span>${DECK_META.course}</span><span class="s-sec">${_sec}</span><span>${i + 1} / ${slides.length}</span>`;
+    s.appendChild(f);
+  });
+
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    location.hash = '#/' + (cur + 1);
+    el('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+    [...document.querySelectorAll('#tocList a')].forEach((a, j) => a.classList.toggle('cur', j === cur));
+    fireEnter(false);
+  }
+  function fireEnter(onlyUnfired){
+    enterCbs.forEach(c => {
+      const hit = (typeof c.key === 'number') ? c.key === cur : slides[cur].id === c.key;
+      if (!hit) return;
+      if (onlyUnfired && c.fired) return;
+      if (c.once && c.fired) return;
+      try{ c.fn(); c.fired = true; }catch(e){ console.error(e); }
+    });
+  }
+  addEventListener('load', () => fireEnter(true));
+  function onEnter(key, fn, opts = {}){ enterCbs.push({ key, fn, once: !!opts.once, fired: false }); }
+
+  const list = el('tocList');
+  slides.forEach((s, i) => {
+    if (s.dataset.sec){ const h = document.createElement('div'); h.className = 'sec'; h.textContent = s.dataset.sec; list.appendChild(h); }
+    const a = document.createElement('a');
+    a.href = '#/' + (i + 1);
+    a.textContent = (i + 1) + '. ' + (s.dataset.title || s.querySelector('h1,h2,.q')?.textContent.slice(0, 60) || 'Slide');
+    a.onclick = e => { e.preventDefault(); goTo(i); toc(false); };
+    list.appendChild(a);
+  });
+  function toc(open){ el('toc').classList.toggle('open', open ?? !el('toc').classList.contains('open')); }
+  el('toc').addEventListener('click', e => { if (e.target === el('toc')) toc(false); });
+  el('btnToc').onclick = () => toc();
+  el('btnPrev').onclick = () => goTo(cur - 1);
+  el('btnNext').onclick = () => goTo(cur + 1);
+
+  addEventListener('keydown', e => {
+    if (['ArrowRight',' ','PageDown'].includes(e.key)){ e.preventDefault(); goTo(cur + 1); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); goTo(cur - 1); }
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End') goTo(slides.length - 1);
+    else if (e.key.toLowerCase() === 't') toc();
+    else if (e.key === 'Escape') toc(false);
+    else if (e.key.toLowerCase() === 'f'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+    else if (e.key.toLowerCase() === 'o') debugOverflow();
+  });
+
+  function debugOverflow(){
+    const st = el('stage').getBoundingClientRect();
+    const sc = st.width / 1280;
+    const report = [];
+    slides.forEach((s, i) => {
+      const wasActive = s.classList.contains('active');
+      if (!wasActive) s.classList.add('active');
+      s.querySelectorAll('*').forEach(n => {
+        const r = n.getBoundingClientRect();
+        if ((!r.width && !r.height) || n.closest('.q-explain')) return;
+        const past = Math.max(r.bottom - st.bottom, r.right - st.right) / sc;
+        if (past > 2){
+          n.style.outline = '3px solid red';
+          report.push(`slide ${i + 1}: <${n.tagName.toLowerCase()} class="${n.className}"> ${Math.round(past)}px past edge`);
+        }
+      });
+      if (!wasActive) s.classList.remove('active');
+    });
+    if (report.length){ console.warn('OVERFLOW REPORT\n' + report.join('\n')); }
+    window.__overflowReport = report;
+    alert(report.length ? report.length + ' overflowing element(s) outlined red - see console' : 'No overflow - all slides fit 1280x720');
+    return report;
+  }
+
+  let x0 = null;
+  addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 60) goTo(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
+
+  function fit(){
+    const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.98;
+    el('stage').style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  function hashIndex(){ const m = location.hash.match(/#\/(\d+)/); return m ? +m[1] - 1 : NaN; }
+  addEventListener('hashchange', () => { const i = hashIndex(); if (!isNaN(i) && i !== cur) goTo(i); });
+  const h0 = hashIndex();
+  goTo(isNaN(h0) ? 0 : h0);
+
+  return { goTo, onEnter, get current(){ return cur; }, get count(){ return slides.length; } };
+})();
+
+/* ================= KaTeX ================= */
+const KATEX_OPTS = { delimiters: [
+  { left: '$$', right: '$$', display: true },
+  { left: '$', right: '$', display: false },
+  { left: '\\(', right: '\\)', display: false },
+  { left: '\\[', right: '\\]', display: true }
+], throwOnError: false };
+document.addEventListener('DOMContentLoaded', () => {
+  const tryRender = () => window.renderMathInElement
+    ? renderMathInElement(document.body, KATEX_OPTS)
+    : setTimeout(tryRender, 120);
+  tryRender();
+});
+
+/* ================= Quiz engine ================= */
+const Quiz = { score: 0, answered: 0, total: document.querySelectorAll('.quiz-q').length };
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const exp = q.querySelector('.q-explain');
+  q.querySelectorAll('.q-opt').forEach(opt => opt.addEventListener('click', () => {
+    if (q.dataset.done) return;
+    q.dataset.done = '1';
+    const ok = opt.hasAttribute('data-correct');
+    opt.classList.add(ok ? 'right' : 'wrong');
+    q.querySelectorAll('.q-opt[data-correct]').forEach(c => c.classList.add('right'));
+    q.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+    if (exp){
+      exp.innerHTML = opt.getAttribute('data-explain') || '';
+      exp.classList.add('show');
+      if (window.renderMathInElement) renderMathInElement(exp, KATEX_OPTS);
+    }
+    Quiz.answered++; if (ok) Quiz.score++;
+    document.querySelectorAll('.quiz-score').forEach(s =>
+      s.textContent = `Quiz score: ${Quiz.score} / ${Quiz.total}` + (Quiz.answered < Quiz.total ? ` (${Quiz.total - Quiz.answered} unanswered)` : ''));
+  }));
+});
+
+/* ================= Reveal blocks ================= */
+document.querySelectorAll('.reveal-btn').forEach(b =>
+  b.addEventListener('click', () => b.closest('.reveal').classList.add('open')));
+
+/* ================= Helpers ================= */
+if (window.Chart){
+  Chart.defaults.font.family = "'Montserrat','Prompt',sans-serif";
+  Chart.defaults.font.size = 14;
+  Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+}
+function etaSphere(phi){ if (phi < 1e-4) return 1; return (3 / (phi * phi)) * (phi / Math.tanh(phi) - 1); }
+function coth(x){ return 1 / Math.tanh(x); }
+// modified Bessel ratio I1(x)/I0(x), overflow-safe
+function besselRatio(x){
+  if (x < 1e-6) return x / 2;
+  if (x > 12) return 1 - 1 / (2 * x) - 1 / (8 * x * x);
+  let t0 = 1, I0 = 1, t1 = x / 2, I1 = x / 2;
+  for (let k = 0; k < 60; k++){
+    t0 *= (x * x / 4) / ((k + 1) * (k + 1)); I0 += t0;
+    t1 *= (x * x / 4) / ((k + 1) * (k + 2)); I1 += t1;
+    if (t0 < 1e-14 && t1 < 1e-14) break;
+  }
+  return I1 / I0;
+}
+
+/* ================= I1 — external kc calculator ================= */
+(() => {
+  const D = 2e-9, nu = 1e-6, rhoc = 1500;
+  function upd(){
+    const u = +el('kcUr').value, dp = +el('kcDpr').value / 1000, Sc = +el('kcScr').value;
+    el('kcU').textContent = fmt(u); el('kcDp').textContent = fmt(+el('kcDpr').value); el('kcSc').textContent = fmt(Sc);
+    const Re = u * dp / nu;
+    const Sh = 2 + 0.6 * Math.sqrt(Re) * Math.cbrt(Sc);
+    const kc = Sh * D / dp;
+    const a = 6 / (rhoc * dp);
+    el('kcOut').textContent = fmt(kc) + ' m/s';
+    el('kcRe').textContent = fmt(Re); el('kcSh').textContent = fmt(Sh); el('kcA').textContent = fmt(a);
+  }
+  if (el('kcUr')){ ['kcUr','kcDpr','kcScr'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I2 — specific area ================= */
+(() => {
+  function upd(){
+    const dp = +el('arDpr').value / 1000, rho = +el('arRhor').value;
+    el('arDp').textContent = fmt(+el('arDpr').value); el('arRho').textContent = rho;
+    const a = 6 / (rho * dp);
+    el('arOut').textContent = fmt(a);
+    const w = Math.max(6, Math.min(380, a / 40 * 380));
+    el('arFill').setAttribute('width', w.toFixed(0));
+  }
+  if (el('arDpr')){ ['arDpr','arRhor'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I3 — diffusion regime ================= */
+(() => {
+  function upd(){
+    const dnm = +el('drDr').value, P = +el('drPr').value;
+    el('drD').textContent = dnm; el('drP').textContent = P;
+    const Dbulk = 1e-5 / P;                    // m2/s, falls with pressure
+    const dpore = dnm * 1e-9;                   // m
+    const Dk = 9700 * (dpore / 2) * Math.sqrt(300 / 0.030); // Knudsen, ~ m2/s (rough)
+    const Dp = 1 / (1 / Dbulk + 1 / Dk);
+    el('drOut').textContent = fmt(Dp);
+    el('drDb').textContent = fmt(Dbulk); el('drDk').textContent = fmt(Dk);
+    const tag = el('drTag');
+    if (Dk < Dbulk / 3){ tag.textContent = 'Knudsen-controlled (narrow pore)'; tag.className = 'pill-tag pill-orange'; }
+    else if (Dk > Dbulk * 3){ tag.textContent = 'Bulk-controlled (wide pore)'; tag.className = 'pill-tag pill-green'; }
+    else { tag.textContent = 'Transition regime'; tag.className = 'pill-tag pill-red'; }
+  }
+  if (el('drDr')){ ['drDr','drPr'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I4 — effective diffusivity ================= */
+(() => {
+  const D = 1e-5;
+  function upd(){
+    const p = +el('dePr').value, s = +el('deSr').value, t = +el('deTr').value;
+    el('deP').textContent = fmt(p); el('deS').textContent = fmt(s); el('deT').textContent = fmt(t);
+    const De = D * p * s / t;
+    el('deOut').textContent = fmt(De);
+    el('deRatio').textContent = fmt(De / D);
+  }
+  if (el('dePr')){ ['dePr','deSr','deTr'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I5 — series resistance ================= */
+(() => {
+  function upd(){
+    const kca = +el('kca').value, kr = +el('kr').value;
+    el('kcaVal').textContent = fmt(kca); el('krVal').textContent = fmt(kr);
+    const r = (kr * kca) / (kr + kca);
+    el('rOut').textContent = fmt(r);
+    const Rext = 1 / kca, Rrxn = 1 / kr, fExt = Rext / (Rext + Rrxn);
+    el('barExt').setAttribute('width', (440 * fExt).toFixed(1));
+    el('barLbl1').textContent = 'external ' + Math.round(fExt * 100) + '%';
+    el('barLbl2').textContent = 'reaction ' + Math.round((1 - fExt) * 100) + '%';
+    const tag = el('regimeTag');
+    if (kca < kr / 2){ tag.textContent = 'External mass-transfer limited'; tag.className = 'pill-tag pill-red'; }
+    else if (kca > kr * 2){ tag.textContent = 'Chemical-reaction limited'; tag.className = 'pill-tag pill-green'; }
+    else { tag.textContent = 'Mixed control'; tag.className = 'pill-tag pill-orange'; }
+  }
+  if (el('kca')){ ['kca','kr'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I6 — rate vs velocity ================= */
+(() => {
+  let chart;
+  const us = []; for (let u = 0; u <= 3.0001; u += 0.1) us.push(+u.toFixed(2));
+  const C = 1.2;
+  function curve(kr){ return us.map(u => { const kca = C * Math.sqrt(u); return (kr * kca) / (kr + kca); }); }
+  function upd(){
+    const kr = +el('uvKrr').value; el('uvKr').textContent = fmt(kr);
+    if (chart){ chart.data.datasets[0].data = curve(kr); chart.update('none'); }
+  }
+  Deck.onEnter('slide-uvel', () => {
+    chart = new Chart(el('uChart'), {
+      type: 'line',
+      data: { labels: us, datasets: [
+        { label: "r'", data: curve(+el('uvKrr').value), borderColor: cs('--red'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3, tension: .3 }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: { x: { title: { display: true, text: 'fluid velocity  u  (m/s)' }, grid: { display: false }, ticks: { maxTicksLimit: 7 } },
+                  y: { title: { display: true, text: "observed rate  r'" }, min: 0, grid: { color: cs('--line') } } } }
+    });
+    upd();
+  }, { once: true });
+  if (el('uvKrr')) el('uvKrr').addEventListener('input', upd);
+})();
+
+/* ================= I7 — rate vs particle size ================= */
+(() => {
+  let chart, mode = 'ext';
+  const dps = []; for (let d = 0.3; d <= 6.0001; d += 0.15) dps.push(+d.toFixed(2));
+  function curve(m){
+    return dps.map(d => {
+      if (m === 'ext') return 2.2 / Math.pow(d, 1.5);
+      if (m === 'int') return 1.6 / d;
+      return 0.9; // reaction
+    });
+  }
+  const coler = { ext: '--red', int: '--orange', rxn: '--green' };
+  function upd(){
+    el('dpModeLbl').textContent = mode === 'ext' ? 'external' : mode === 'int' ? 'internal' : 'reaction';
+    if (chart){
+      chart.data.datasets[0].data = curve(mode);
+      chart.data.datasets[0].borderColor = cs(coler[mode]);
+      chart.update('none');
+    }
+  }
+  el('dpSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    mode = b.dataset.m;
+    [...el('dpSeg').children].forEach(x => x.classList.toggle('on', x === b));
+    upd();
+  });
+  Deck.onEnter('slide-dp', () => {
+    chart = new Chart(el('dpChart'), {
+      type: 'line',
+      data: { labels: dps, datasets: [
+        { label: "r'", data: curve(mode), borderColor: cs('--red'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3, tension: .3 }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: { x: { title: { display: true, text: 'particle diameter  d_p  (mm)' }, grid: { display: false }, ticks: { maxTicksLimit: 7 } },
+                  y: { title: { display: true, text: "observed rate  r'" }, min: 0, grid: { color: cs('--line') } } } }
+    });
+    upd();
+  }, { once: true });
+})();
+
+/* ================= I8 — concentration profile n=1 ================= */
+(() => {
+  let chart;
+  const lam = []; for (let l = 0; l <= 1.0001; l += 0.02) lam.push(+l.toFixed(3));
+  function psi(l, phi){ if (l < 1e-6) return phi / Math.sinh(phi); return (1 / l) * Math.sinh(phi * l) / Math.sinh(phi); }
+  function curve(phi){ return lam.map(l => psi(l, phi)); }
+  function upd(){
+    const phi = +el('phiP').value; el('phiPval').textContent = fmt(phi); el('psi0').textContent = fmt(psi(0, phi));
+    if (chart){ chart.data.datasets[0].data = curve(phi); chart.update('none'); }
+  }
+  Deck.onEnter('slide-profile', () => {
+    chart = new Chart(el('profChart'), {
+      type: 'line',
+      data: { labels: lam, datasets: [
+        { label: 'psi', data: curve(+el('phiP').value), borderColor: cs('--blue'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3, tension: .25 }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: { x: { title: { display: true, text: 'lambda = r/R  (0 centre, 1 surface)' }, grid: { display: false }, ticks: { maxTicksLimit: 6 } },
+                  y: { title: { display: true, text: 'psi = C_A / C_As' }, min: 0, max: 1, grid: { color: cs('--line') } } } }
+    });
+    upd();
+  }, { once: true });
+  if (el('phiP')) el('phiP').addEventListener('input', upd);
+})();
+
+/* ================= I9 — profile order comparison (shooting) ================= */
+(() => {
+  let chart;
+  const NG = 100;
+  function analytic1(phi){ const a = []; for (let i = 0; i <= NG; i++){ const l = i / NG; a.push(l < 1e-6 ? phi / Math.sinh(phi) : (1 / l) * Math.sinh(phi * l) / Math.sinh(phi)); } return a; }
+  function integrate(phi, n, c){
+    const N = 600, h = 1 / N; let lam = 1e-3;
+    let psi = c + (phi * phi * Math.pow(c, n) / 6) * lam * lam;
+    let dpsi = (phi * phi * Math.pow(c, n) / 3) * lam;
+    const xs = [0], ys = [c];
+    const f = (l, y, dy) => phi * phi * Math.pow(Math.max(y, 1e-9), n) - (2 / l) * dy;
+    const steps = Math.round((1 - lam) / h);
+    for (let i = 0; i < steps; i++){
+      const k1y = dpsi, k1d = f(lam, psi, dpsi);
+      const k2y = dpsi + 0.5 * h * k1d, k2d = f(lam + 0.5 * h, psi + 0.5 * h * k1y, dpsi + 0.5 * h * k1d);
+      const k3y = dpsi + 0.5 * h * k2d, k3d = f(lam + 0.5 * h, psi + 0.5 * h * k2y, dpsi + 0.5 * h * k2d);
+      const k4y = dpsi + h * k3d, k4d = f(lam + h, psi + h * k3y, dpsi + h * k3d);
+      psi += h / 6 * (k1y + 2 * k2y + 2 * k3y + k4y);
+      dpsi += h / 6 * (k1d + 2 * k2d + 2 * k3d + k4d);
+      lam += h; xs.push(lam); ys.push(psi);
+      if (!isFinite(psi) || psi > 1e6){        // overflow guard: treat as "too high", keep bisection valid
+        while (xs.length <= steps){ xs.push(lam); ys.push(1e6); }
+        return { xs, ys, end: 1e6 };
+      }
+    }
+    return { xs, ys, end: psi };
+  }
+  function solve(phi, n){
+    let lo = 1e-4, hi = 1;
+    for (let it = 0; it < 50; it++){ const mid = (lo + hi) / 2; (integrate(phi, n, mid).end > 1) ? hi = mid : lo = mid; }
+    const sol = integrate(phi, n, (lo + hi) / 2), sc = 1 / sol.end;
+    // resample to NG grid
+    const out = []; let j = 0;
+    for (let i = 0; i <= NG; i++){
+      const target = i / NG;
+      while (j < sol.xs.length - 1 && sol.xs[j] < target) j++;
+      out.push(Math.min(1.02, sol.ys[j] * sc));
+    }
+    return out;
+  }
+  function upd(){
+    const phi = +el('p2Phir').value; el('p2Phi').textContent = fmt(phi);
+    if (chart){
+      chart.data.datasets[0].data = analytic1(phi);
+      chart.data.datasets[1].data = solve(phi, 2);
+      chart.update('none');
+    }
+  }
+  Deck.onEnter('slide-profile2', () => {
+    const labels = []; for (let i = 0; i <= NG; i++) labels.push(+(i / NG).toFixed(2));
+    chart = new Chart(el('prof2Chart'), {
+      type: 'line',
+      data: { labels, datasets: [
+        { label: '1st order', data: analytic1(+el('p2Phir').value), borderColor: cs('--blue'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 },
+        { label: '2nd order', data: solve(+el('p2Phir').value, 2), borderColor: cs('--red'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3, borderDash: [7, 5] }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'bottom' }, tooltip: { enabled: true } },
+        scales: { x: { title: { display: true, text: 'lambda = r/R' }, grid: { display: false }, ticks: { maxTicksLimit: 6 } },
+                  y: { title: { display: true, text: 'psi = C_A / C_As' }, min: 0, max: 1.05, grid: { color: cs('--line') } } } }
+    });
+    upd();
+  }, { once: true });
+  if (el('p2Phir')) el('p2Phir').addEventListener('input', upd);
+})();
+
+/* ================= I10 — Thiele modulus calculator ================= */
+(() => {
+  function upd(){
+    const Rmm = +el('thRr').value, k = +el('thKr').value, De6 = +el('thDr').value;
+    el('thR').textContent = fmt(Rmm); el('thK').textContent = fmt(k); el('thD').textContent = fmt(De6);
+    const R = Rmm / 1000, De = De6 * 1e-6;
+    const phi = Math.sqrt(k * R * R / De);
+    el('thOut').textContent = fmt(phi);
+    el('thEta').textContent = fmt(etaSphere(phi));
+    const tag = el('thTag');
+    if (phi < 0.4){ tag.textContent = 'Reaction limited'; tag.className = 'pill-tag pill-green'; }
+    else if (phi > 5){ tag.textContent = 'Internal-diffusion limited'; tag.className = 'pill-tag pill-red'; }
+    else { tag.textContent = 'Transition region'; tag.className = 'pill-tag pill-orange'; }
+  }
+  if (el('thRr')){ ['thRr','thKr','thDr'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I11 — eta vs phi ================= */
+(() => {
+  let chart;
+  const phis = []; for (let e = -1; e <= 2.0001; e += 0.05) phis.push(+Math.pow(10, e).toFixed(4));
+  const etaCurve = phis.map(etaSphere);
+  function nearest(phi){ let bi = 0, bd = 1e9; phis.forEach((p, i) => { const d = Math.abs(Math.log10(p) - Math.log10(phi)); if (d < bd){ bd = d; bi = i; } }); return bi; }
+  function upd(){
+    const phi = +el('phiE').value; el('phiEval').textContent = fmt(phi);
+    const e = etaSphere(phi); el('etaOut').textContent = fmt(e);
+    const tag = el('etaTag');
+    if (e > 0.9){ tag.textContent = 'Reaction limited (eta ~ 1)'; tag.className = 'pill-tag pill-green'; }
+    else if (e < 0.3){ tag.textContent = 'Diffusion limited (eta << 1)'; tag.className = 'pill-tag pill-red'; }
+    else { tag.textContent = 'Transition region'; tag.className = 'pill-tag pill-orange'; }
+    if (chart){ const d = phis.map(() => null); d[nearest(phi)] = e; chart.data.datasets[1].data = d; chart.update('none'); }
+  }
+  Deck.onEnter('slide-eta', () => {
+    chart = new Chart(el('etaChart'), {
+      type: 'line',
+      data: { labels: phis, datasets: [
+        { label: 'eta', data: etaCurve, borderColor: cs('--navy'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3, tension: .2 },
+        { label: 'operating point', data: phis.map(() => null), borderColor: cs('--red'), backgroundColor: cs('--red'), pointRadius: 7, showLine: false }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: { x: { type: 'logarithmic', title: { display: true, text: 'Thiele modulus  phi  (log)' }, grid: { color: cs('--line') } },
+                  y: { title: { display: true, text: 'effectiveness factor  eta' }, min: 0, max: 1.05, grid: { color: cs('--line') } } } }
+    });
+    upd();
+  }, { once: true });
+  if (el('phiE')) el('phiE').addEventListener('input', upd);
+})();
+
+/* ================= I12 — shape effect ================= */
+(() => {
+  let chart;
+  const etaSlab = phi => phi < 1e-6 ? 1 : Math.tanh(phi) / phi;
+  const etaCyl = phi => phi < 1e-6 ? 1 : (2 / phi) * besselRatio(phi);
+  const phis = []; for (let e = -1; e <= 1.3011; e += 0.04) phis.push(+Math.pow(10, e).toFixed(4));
+  function upd(){
+    const phi = +el('shPhir').value; el('shPhi').textContent = fmt(phi);
+    el('shSlab').textContent = fmt(etaSlab(phi));
+    el('shCyl').textContent = fmt(etaCyl(phi));
+    el('shSph').textContent = fmt(etaSphere(phi));
+    if (chart){
+      const mark = (fn) => phis.map(p => Math.abs(Math.log10(p) - Math.log10(phi)) < 0.02 ? fn(phi) : null);
+      chart.data.datasets[3].data = phis.map((p, i) => {
+        const near = Math.abs(Math.log10(p) - Math.log10(phi));
+        let best = 1e9, bi = -1; phis.forEach((q, j) => { const d = Math.abs(Math.log10(q) - Math.log10(phi)); if (d < best){ best = d; bi = j; } });
+        return i === bi ? etaSphere(phi) : null;
+      });
+      chart.update('none');
+    }
+  }
+  Deck.onEnter('slide-shape', () => {
+    chart = new Chart(el('shapeChart'), {
+      type: 'line',
+      data: { labels: phis, datasets: [
+        { label: 'slab', data: phis.map(etaSlab), borderColor: cs('--green'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 },
+        { label: 'cylinder', data: phis.map(etaCyl), borderColor: cs('--orange'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 },
+        { label: 'sphere', data: phis.map(etaSphere), borderColor: cs('--navy'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 },
+        { label: 'op', data: phis.map(() => null), borderColor: cs('--red'), backgroundColor: cs('--red'), pointRadius: 7, showLine: false }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'bottom', labels: { filter: item => item.text !== 'op' } }, tooltip: { enabled: true } },
+        scales: { x: { type: 'logarithmic', title: { display: true, text: 'Thiele modulus  phi  (log)' }, grid: { color: cs('--line') } },
+                  y: { title: { display: true, text: 'eta' }, min: 0, max: 1.05, grid: { color: cs('--line') } } } }
+    });
+    upd();
+  }, { once: true });
+  if (el('shPhir')) el('shPhir').addEventListener('input', upd);
+})();
+
+/* ================= I13 — Arrhenius apparent Ea ================= */
+(() => {
+  let chart;
+  const xs = []; for (let x = 2.2; x <= 3.4001; x += 0.05) xs.push(+x.toFixed(2));
+  function line(slopeK){ return xs.map(x => -slopeK * (x - 2.2) + 3); } // ln(rate) ~ -Eapp/R * (1000/T)
+  function upd(){
+    const E = +el('arEr').value; el('arE').textContent = E;
+    el('arErxn').textContent = E; el('arEpore').textContent = fmt(E / 2); el('arEbulk').textContent = '~8';
+    // slope proportional to Eapp/R; scale factor to keep on chart
+    const sc = 0.012;
+    if (chart){
+      chart.data.datasets[0].data = line(E * sc);
+      chart.data.datasets[1].data = line(E / 2 * sc);
+      chart.data.datasets[2].data = line(8 * sc);
+      chart.update('none');
+    }
+  }
+  Deck.onEnter('slide-arr', () => {
+    const sc = 0.012, E = +el('arEr').value;
+    chart = new Chart(el('arrChart'), {
+      type: 'line',
+      data: { labels: xs, datasets: [
+        { label: 'reaction (E)', data: line(E * sc), borderColor: cs('--green'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 },
+        { label: 'pore (E/2)', data: line(E / 2 * sc), borderColor: cs('--orange'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 },
+        { label: 'bulk (small)', data: line(8 * sc), borderColor: cs('--red'), backgroundColor: 'transparent', pointRadius: 0, borderWidth: 3 }
+      ]},
+      options: { animation: false, responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 16, font: { size: 12 } } }, tooltip: { enabled: false } },
+        scales: { x: { title: { display: true, text: '1000 / T  (1/K)' }, grid: { display: false }, ticks: { maxTicksLimit: 6 } },
+                  y: { title: { display: true, text: 'ln(rate)' }, grid: { color: cs('--line') }, ticks: { display: false } } } }
+    });
+    upd();
+  }, { once: true });
+  if (el('arEr')) el('arEr').addEventListener('input', upd);
+})();
+
+/* ================= I14 — Weisz-Prater calculator ================= */
+(() => {
+  function upd(){
+    const Rmm = +el('wpR').value, De6 = +el('wpD').value, rate = +el('wpRate').value;
+    el('wpRval').textContent = fmt(Rmm) + ' mm'; el('wpDval').textContent = fmt(De6); el('wpRateval').textContent = fmt(rate);
+    const R = Rmm / 1000, De = De6 * 1e-6;
+    const Cwp = (rate * R * R) / (De * 1);
+    el('wpOut').textContent = fmt(Cwp);
+    const tag = el('wpTag');
+    if (Cwp < 0.3){ tag.textContent = 'No internal-diffusion limit'; tag.className = 'pill-tag pill-green'; }
+    else if (Cwp > 3){ tag.textContent = 'Severe internal-diffusion limit'; tag.className = 'pill-tag pill-red'; }
+    else { tag.textContent = 'Intermediate — diffusion starts to matter'; tag.className = 'pill-tag pill-orange'; }
+  }
+  if (el('wpR')){ ['wpR','wpD','wpRate'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I15 — Mears criterion ================= */
+(() => {
+  function upd(){
+    const rate = +el('meRater').value, Rmm = +el('meRr').value, kc3 = +el('meKcr').value, n = +el('meNr').value;
+    el('meRate').textContent = fmt(rate); el('meR').textContent = fmt(Rmm); el('meKc').textContent = fmt(kc3); el('meN').textContent = n;
+    const R = Rmm / 1000, kc = kc3 * 1e-3;
+    const M = (rate * R * n) / (kc * 1);
+    el('meOut').textContent = fmt(M);
+    const tag = el('meTag');
+    if (M < 0.15){ tag.textContent = 'External MT NOT limiting (C_As = C_Ab)'; tag.className = 'pill-tag pill-green'; }
+    else { tag.textContent = 'External MT limitation present'; tag.className = 'pill-tag pill-red'; }
+  }
+  if (el('meRater')){ ['meRater','meRr','meKcr','meNr'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+
+/* ================= I16 — Problem 3 solver ================= */
+(() => {
+  const Rg = 1.987e-3;         // kcal/mol/K
+  const T0 = 398, k0 = 0.81;   // 1/s (k' rho_c)
+  const R = 0.2, De = 0.015, CA = 3.25e-5;  // cm units
+  function upd(){
+    const T = +el('p3Tr').value, Ekcal = +el('p3Er').value;
+    el('p3T').textContent = T; el('p3E').textContent = Ekcal;
+    const k = k0 * Math.exp((Ekcal / Rg) * (1 / T0 - 1 / T));
+    const phi = Math.sqrt(k * R * R / De);
+    const eta = etaSphere(phi);
+    const r = eta * k * CA;
+    el('p3R').textContent = fmt(r);
+    el('p3k').textContent = fmt(k); el('p3phi').textContent = fmt(phi); el('p3eta').textContent = fmt(eta);
+  }
+  if (el('p3Tr')){ ['p3Tr','p3Er'].forEach(id => el(id).addEventListener('input', upd)); upd(); }
+})();
+</script>
+</body>
+</html>

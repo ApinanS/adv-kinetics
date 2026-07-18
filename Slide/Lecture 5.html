@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 5 — Rate Expression for Multi-Phase Reaction</title>
+
+<!-- Fonts: Montserrat (Latin) + Prompt (Thai) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --navy:#1F497D; --blue:#4F81BD; --red:#C00000; --green:#1A8038; --orange:#D97706;
+  --ink:#1F2937; --muted:#6B7280; --line:#E5E7EB; --card:#F7F9FC; --bg:#FFFFFF;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; background:#ECEFF3; overflow:hidden;
+  font-family:'Montserrat','Prompt',system-ui,sans-serif; color:var(--ink)}
+
+/* ---------- Stage: fixed 1280x720, scaled to fit ---------- */
+#stage{width:1280px; height:720px; position:absolute; top:50%; left:50%;
+  transform-origin:center; background:var(--bg); box-shadow:0 10px 40px rgba(31,73,125,.18); overflow:hidden}
+
+/* ---------- Slides ---------- */
+.slide{position:absolute; inset:0; display:none; flex-direction:column;
+  padding:56px 72px 64px; background:var(--bg); overflow:hidden}
+.slide svg{max-width:100%; max-height:440px}
+.slide.active{display:flex}
+.s-head{margin-bottom:28px}
+.kicker{font-size:15px; font-weight:600; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin-bottom:8px}
+.s-head h2{font-size:36px; font-weight:700; color:var(--navy); line-height:1.2}
+.s-foot{position:absolute; left:72px; right:72px; bottom:26px; display:flex; justify-content:space-between; gap:20px;
+  font-size:15px; font-weight:500; color:var(--muted)}
+.grow{flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0}
+.s-foot .s-sec{color:var(--blue)}
+
+/* Title slide */
+.title-slide{justify-content:center; align-items:flex-start; border-top:6px solid var(--navy)}
+.title-slide .pill{display:inline-block; font-size:15px; font-weight:600; letter-spacing:.12em;
+  color:var(--navy); border:1.5px solid var(--navy); border-radius:999px; padding:6px 18px; margin-bottom:34px}
+.title-slide .lecno{font-size:22px; font-weight:600; color:var(--blue); margin-bottom:10px}
+.title-slide h1{font-size:60px; font-weight:800; color:var(--navy); line-height:1.12; margin-bottom:30px; max-width:1000px}
+.title-slide .rule{width:88px; height:4px; background:var(--blue); margin-bottom:30px}
+.title-slide .who{font-size:17px; color:var(--muted); line-height:1.7}
+.title-slide .who b{color:var(--ink); font-weight:600}
+
+/* Section divider */
+.section-slide{justify-content:center; background:var(--bg)}
+.section-slide .big{position:absolute; top:26px; right:56px; font-size:150px; font-weight:800;
+  color:var(--navy); opacity:.08; line-height:1}
+.section-slide .lbl{font-size:19px; font-weight:700; letter-spacing:.14em; color:var(--blue);
+  text-transform:uppercase; margin-bottom:18px}
+.section-slide .q{font-size:44px; font-weight:700; color:var(--red); line-height:1.25; max-width:980px}
+
+/* Agenda / chapter hub */
+.agenda{display:flex; flex-direction:column; gap:18px; max-width:1020px}
+a.agenda-item{display:flex; align-items:center; gap:26px; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 28px}
+a.agenda-item:hover{border-color:var(--navy); box-shadow:0 4px 14px rgba(31,73,125,.12)}
+.agenda-item .no{flex:0 0 70px; font-size:26px; font-weight:800; color:var(--navy)}
+.agenda-item .qq{font-size:22px; font-weight:500; line-height:1.4}
+.agenda-item .go{margin-left:auto; color:var(--blue); font-size:26px}
+
+/* Cards */
+.cards{display:grid; gap:24px; grid-auto-columns:1fr; grid-auto-flow:column}
+.cards.wrap{grid-auto-flow:row; grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:26px 26px}
+.card h3{font-size:22px; font-weight:600; color:var(--navy); margin-bottom:10px}
+.card p{font-size:20px; line-height:1.5}
+.card .ic{width:34px; height:34px; margin-bottom:14px}
+.card-red{border-top:4px solid var(--red)} .card-green{border-top:4px solid var(--green)}
+.card-blue{border-top:4px solid var(--blue)} .card-orange{border-top:4px solid var(--orange)}
+
+/* Equations */
+.eq-box{background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:30px 36px; text-align:center; font-size:30px; margin:8px 0}
+.eq-note{font-size:18px; margin-top:14px; text-align:center}
+.eq-note.green{color:var(--green)} .eq-note.orange{color:var(--orange)} .eq-note.red{color:var(--red)}
+.eq-step{display:flex; align-items:center; gap:34px; padding:14px 6px; border-bottom:1px solid var(--line); font-size:23px}
+.eq-step:last-child{border-bottom:none}
+.eq-step .why{font-size:18px; color:var(--muted); flex:1; text-align:right}
+
+/* Comparison table */
+table.compare{width:100%; border-collapse:collapse; font-size:21px}
+.compare th{background:var(--card); color:var(--navy); font-weight:700; padding:14px 18px;
+  border:1px solid var(--line); text-align:center}
+.compare td{padding:16px 18px; border:1px solid var(--line); text-align:center}
+.compare td:first-child{font-weight:600; text-align:left}
+
+/* Callouts */
+.callout{border-left:5px solid var(--navy); background:var(--card); border-radius:0 12px 12px 0;
+  padding:16px 22px; font-size:21px; margin:14px 0}
+.callout.q{border-color:var(--red)} .callout.note{border-color:var(--green)} .callout.aside{border-color:var(--orange)}
+
+/* Layout helpers */
+.two-col{display:grid; grid-template-columns:11fr 9fr; gap:44px; align-items:center; flex:1}
+.stack>*+*{margin-top:20px}
+ul.clean{list-style:none} ul.clean li{font-size:22px; line-height:1.5; padding-left:30px; position:relative; margin-bottom:14px}
+ul.clean li::before{content:''; position:absolute; left:0; top:.55em; width:10px; height:10px; border-radius:3px; background:var(--blue)}
+
+/* Simulation */
+.sim{display:grid; grid-template-columns:2fr 3fr; grid-template-rows:minmax(0,1fr); gap:40px; align-items:center; flex:1; min-height:0}
+.sim-controls .sl{margin-bottom:26px}
+.sim-controls label{display:flex; justify-content:space-between; font-size:20px; font-weight:500; margin-bottom:8px}
+.val{font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--navy); height:34px; cursor:pointer}
+.sim-controls{align-self:center; min-width:0}
+.sim-out{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; text-align:center;
+  display:flex; flex-direction:column; justify-content:center; align-self:stretch; min-height:0; overflow:hidden}
+.sim-out svg{max-height:100%; min-height:0}
+.bignum{font-size:52px; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums}
+.chart-box{position:relative; flex:1 1 auto; min-height:180px; max-height:430px; min-width:0}
+.chart-box>canvas{position:absolute; inset:0; width:100% !important; height:100% !important}
+
+/* Reveal */
+.reveal-btn{font:inherit; font-size:19px; font-weight:600; color:var(--navy); background:var(--bg);
+  border:2px solid var(--navy); border-radius:10px; padding:10px 26px; cursor:pointer}
+.reveal-btn:hover{background:var(--navy); color:#fff}
+.reveal-body{display:none; margin-top:18px}
+.reveal.open .reveal-body{display:block} .reveal.open .reveal-btn{display:none}
+
+/* Quiz */
+.quiz-q{max-width:1000px}
+.q-text{font-size:24px; font-weight:600; margin-bottom:22px; line-height:1.45}
+.q-opt{display:block; width:100%; text-align:left; font:inherit; font-size:21px; padding:14px 22px;
+  margin-bottom:12px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; cursor:pointer}
+.q-opt:hover{border-color:var(--navy)}
+.q-opt.right{border-color:var(--green); background:#EDF7F0; color:var(--green); font-weight:600}
+.q-opt.wrong{border-color:var(--red); background:#FBEDED; color:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-explain{display:none; border-left:5px solid var(--blue); background:var(--card);
+  padding:16px 22px; border-radius:0 12px 12px 0; font-size:19px; line-height:1.5; margin-top:14px}
+.q-explain.show{display:block}
+.quiz-score{font-size:21px; font-weight:700; color:var(--navy)}
+
+/* Takeaways */
+.tk{display:flex; gap:22px; align-items:flex-start; margin-bottom:24px}
+.tk .n{flex:0 0 40px; height:40px; border-radius:50%; background:var(--navy); color:#fff;
+  font-weight:700; font-size:19px; display:flex; align-items:center; justify-content:center}
+.tk p{font-size:23px; line-height:1.45; padding-top:5px}
+
+/* HUD (not scaled) */
+#hud{position:fixed; right:18px; bottom:14px; display:flex; gap:8px; z-index:50}
+#hud button{width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff;
+  font-size:18px; color:var(--navy); cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#hud button:hover{background:var(--card)}
+#progress{position:fixed; left:0; bottom:0; height:4px; background:var(--blue); width:0; z-index:60; transition:width .2s}
+#toc{position:fixed; inset:0; background:rgba(15,25,40,.55); display:none; z-index:100; align-items:center; justify-content:center}
+#toc.open{display:flex}
+#toc .panel{background:#fff; border-radius:16px; padding:34px 40px; max-height:80vh; overflow:auto; min-width:420px}
+#toc h3{color:var(--navy); font-size:20px; margin-bottom:18px; letter-spacing:.08em}
+#toc a{display:block; padding:9px 6px; font-size:16.5px; color:var(--ink); text-decoration:none; border-radius:8px}
+#toc a:hover{background:var(--card)} #toc a.cur{color:var(--navy); font-weight:700}
+#toc .sec{margin-top:10px; font-weight:700; color:var(--blue); font-size:14px; letter-spacing:.1em; text-transform:uppercase}
+
+.katex{font-size:1.06em}
+svg text{font-family:'Montserrat','Prompt',sans-serif}
+
+/* Print: one slide per landscape page */
+@media print{
+  html,body{overflow:visible; background:#fff}
+  #stage{position:static; transform:none !important; width:1280px; height:auto; box-shadow:none}
+  .slide{display:flex !important; position:relative; width:1280px; height:720px; page-break-after:always; border-bottom:1px solid var(--line)}
+  #hud,#progress,#toc{display:none !important}
+}
+@page{size:landscape}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+<!-- ============ LECTURE 5 SLIDES ============ -->
+<style id="deck-extra">
+.phb{font:inherit;font-size:18px;font-weight:600;text-align:left;padding:10px 16px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);cursor:pointer}
+.phb:hover{border-color:var(--navy)}
+.phb.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.reg-badge{display:inline-block;font-size:17px;font-weight:700;padding:5px 14px;border-radius:999px;margin-top:10px}
+.reg-mt{background:#EAF0F8;color:var(--blue)} .reg-rx{background:#FBEDED;color:var(--red)} .reg-bal{background:#EDF7F0;color:var(--green)}
+.lab-btn{font:inherit;font-size:18px;font-weight:600;padding:9px 20px;border-radius:10px;border:2px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer;margin-right:10px}
+.lab-btn:hover{background:var(--navy);color:#fff}
+.simnote{font-size:16px;color:var(--muted);margin-top:6px}
+</style>
+
+<!-- 1. Title -->
+<section class="slide title-slide" data-title="Title">
+  <span class="pill">2105604 ADV CHE KINETICS</span>
+  <p class="lecno">Lecture 5</p>
+  <h1>Rate Expression for Multi-Phase / Heterogeneous Reaction</h1>
+  <div class="rule"></div>
+  <p class="who"><b>Asst. Prof. Dr. Apinan Soottitantawat</b><br>
+    Department of Chemical Engineering, Faculty of Engineering · Chulalongkorn University<br>
+    Liquid–Gas–Solid / Liquid–Liquid–Solid systems</p>
+</section>
+
+<!-- 2. Agenda -->
+<section class="slide" data-title="Agenda">
+  <div class="s-head"><p class="kicker">Lecture 5 · Overview</p><h2>What we will answer in this lecture</h2></div>
+  <div class="grow agenda">
+    <a class="agenda-item" href="#/3"><span class="no">5-1</span><span class="qq">What is a heterogeneous phase reaction?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/8"><span class="no">5-2</span><span class="qq">Rate expression for a 2-phase L–L or G–L reaction</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/16"><span class="no">5-3</span><span class="qq">Rate expression for a 3-phase G–L–S or L–L–S reaction</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/26"><span class="no">5-4</span><span class="qq">Which rate expression do we use to design an industrial reactor?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/31"><span class="no">&#10003;</span><span class="qq">Check yourself — quiz &amp; key takeaways</span><span class="go">&#8594;</span></a>
+  </div>
+</section>
+
+<!-- 3. Section 5-1 -->
+<section class="slide section-slide" data-title="Lecture 5-1" data-sec="Lecture 5-1">
+  <div class="big">5-1</div>
+  <p class="lbl">Lecture 5-1</p>
+  <p class="q">What is a heterogeneous phase reaction?</p>
+</section>
+
+<!-- 4. Concept: core idea -->
+<section class="slide" data-title="Heterogeneous reaction — core idea">
+  <div class="s-head"><p class="kicker">Lecture 5-1 · Definition</p><h2>Reaction happens in one phase — reactants must meet first</h2></div>
+  <div class="grow stack">
+    <div class="callout">No matter how many phases are present, the reaction <b>mostly takes place in only one phase</b></div>
+    <div class="callout note">If the reactants sit in different phases, one must <b>dissolve into the other phase</b> before the reaction can occur</div>
+    <div class="callout aside">Consequence: the overall rate is a <b>series</b> of mass transfer and chemical reaction</div>
+  </div>
+</section>
+
+<!-- 5. INTERACTIVE 1: Phase-type explorer -->
+<section class="slide" data-title="Phase-type explorer" id="slide-explorer">
+  <div class="s-head"><p class="kicker">Lecture 5-1 · Interactive — click a system type</p><h2>The six types of heterogeneous reaction</h2></div>
+  <div class="sim" style="grid-template-columns:2fr 3fr">
+    <div class="sim-controls" id="phaseBtns" style="display:flex;flex-direction:column;gap:9px;align-self:stretch;justify-content:center">
+      <button class="phb on" data-k="LS">Liquid–Solid</button>
+      <button class="phb" data-k="GS">Gas–Solid</button>
+      <button class="phb" data-k="LL">Liquid–Liquid</button>
+      <button class="phb" data-k="GL">Gas–Liquid</button>
+      <button class="phb" data-k="LLS">Solid + Liquid–Liquid</button>
+      <button class="phb" data-k="GLS">Gas–Liquid–Solid</button>
+    </div>
+    <div class="sim-out" style="text-align:left;justify-content:flex-start;gap:6px">
+      <div id="phTitle" style="font-size:23px;font-weight:700;color:var(--navy)"></div>
+      <div style="font-size:18px"><b style="color:var(--muted)">Phases:</b> <span id="phPhases"></span></div>
+      <div style="font-size:18px"><b style="color:var(--green)">Reaction occurs in:</b> <span id="phWhere"></span></div>
+      <div style="font-size:18px"><b style="color:var(--red)">Must transport / dissolve:</b> <span id="phTrans"></span></div>
+      <div style="font-size:18px;margin-top:4px"><b style="color:var(--orange)">Real example:</b> <span id="phEx"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Cards: real systems -->
+<section class="slide" data-title="Real multiphase systems">
+  <div class="s-head"><p class="kicker">Lecture 5-1 · Real examples</p><h2>Multiphase systems found in industry</h2></div>
+  <div class="grow cards wrap">
+    <div class="card card-blue"><h3>Transesterification (L–L / L–L–S)</h3><p>Triglyceride + Methanol → Biodiesel + Glycerol, with homogeneous (NaOH) or heterogeneous (solid) catalyst</p></div>
+    <div class="card card-green"><h3>Hydrogenation (G–L)</h3><p>H₂ must dissolve into the liquid before reacting — also oxidation, chlorination, alkoxylation</p></div>
+    <div class="card card-orange"><h3>Hydrotreating / HDO (G–L–S)</h3><p>Hydrodeoxygenation of plant oil: H₂ (gas) + oil (liquid) + solid catalyst</p></div>
+    <div class="card card-red"><h3>Fermentation (G–L–S)</h3><p>O₂ dissolves into the liquid broth, then cells/enzymes catalyze the reaction — bioreaction</p></div>
+  </div>
+</section>
+
+<!-- 7. INTERACTIVE 2: dissolve-to-react -->
+<section class="slide" data-title="Dissolve-to-react" id="slide-dissolve">
+  <div class="s-head"><p class="kicker">Lecture 5-1 · Interactive — drag the sliders</p><h2>Why it must “dissolve first” to react</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Solubility / partition $S$ <span class="val" id="d_Sval"></span></label>
+        <input type="range" id="d_S" min="0.1" max="2" step="0.05" value="1"></div>
+      <div class="sl"><label>Stirring $k_m a$ <span class="val" id="d_kmval"></span></label>
+        <input type="range" id="d_km" min="0.5" max="20" step="0.5" value="6"></div>
+      <div class="sl"><label>Reaction $k_r$ <span class="val" id="d_krval"></span></label>
+        <input type="range" id="d_kr" min="0.5" max="20" step="0.5" value="6"></div>
+      <div class="callout note" style="font-size:17px">$C_{Al}=\dfrac{k_m a\,S\,C_{Ag}}{k_m a + k_r},\quad r=k_r C_{Al}$</div>
+    </div>
+    <div class="sim-out">
+      <svg id="d_svg" viewBox="0 0 480 250" style="width:100%">
+        <text x="10" y="40" font-size="15" fill="var(--muted)">Gas bulk (C_Ag)</text>
+        <rect x="150" y="24" height="26" rx="4" fill="var(--blue)" id="d_bg"></rect>
+        <text x="10" y="115" font-size="15" fill="var(--muted)">Interface  S x C_Ag</text>
+        <rect x="150" y="99" height="26" rx="4" fill="var(--orange)" id="d_bi"></rect>
+        <text x="10" y="190" font-size="15" fill="var(--muted)">Liquid (reacting)</text>
+        <rect x="150" y="174" height="26" rx="4" fill="var(--green)" id="d_bl"></rect>
+      </svg>
+      <div class="bignum" id="d_rate" style="font-size:40px"></div>
+      <div id="d_reg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Section 5-2 -->
+<section class="slide section-slide" data-title="Lecture 5-2" data-sec="Lecture 5-2">
+  <div class="big">5-2</div>
+  <p class="lbl">Lecture 5-2</p>
+  <p class="q">What is the rate expression for a 2-phase L–L or G–L reaction? (non-elementary)</p>
+</section>
+
+<!-- 9. Diagram: 2-phase setup -->
+<section class="slide" data-title="2-phase system">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Setup</p><h2>$A(\text{dispersed}) + B(\text{continuous}) \rightarrow$ Product</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="callout">A is in the <b>dispersed phase</b> (droplets), B is in the <b>continuous phase</b></div>
+      <div class="callout note">Here the reaction occurs in the <b>continuous phase</b> — A must first cross the interface</div>
+      <div class="eq-box" style="font-size:21px">$$C_{Aci}=K_{cd}\,C_{Adi},\qquad K_{cd}<1$$</div>
+    </div>
+    <svg viewBox="0 0 380 320">
+      <rect x="20" y="20" width="230" height="280" rx="10" fill="#EAF0F8" stroke="var(--navy)" stroke-width="2"/>
+      <line x1="135" y1="8" x2="135" y2="70" stroke="var(--navy)" stroke-width="3"/>
+      <rect x="105" y="66" width="60" height="10" rx="3" fill="var(--navy)"/>
+      <circle cx="70" cy="130" r="15" fill="var(--orange)" opacity=".8"/><circle cx="150" cy="180" r="18" fill="var(--orange)" opacity=".8"/>
+      <circle cx="95" cy="235" r="13" fill="var(--orange)" opacity=".8"/><circle cx="185" cy="120" r="12" fill="var(--orange)" opacity=".8"/>
+      <text x="135" y="290" font-size="15" fill="var(--navy)" text-anchor="middle">continuous phase (B)</text>
+      <text x="150" y="184" font-size="12" fill="#fff" text-anchor="middle">A</text>
+      <line x1="280" y1="40" x2="280" y2="300" stroke="var(--muted)" stroke-width="2"/>
+      <text x="300" y="60" font-size="13" fill="var(--red)">C_Adb</text>
+      <path d="M285,70 L305,74 L335,150" fill="none" stroke="var(--red)" stroke-width="2.5"/>
+      <text x="308" y="170" font-size="13" fill="var(--red)">C_Aci</text>
+      <path d="M305,180 L360,250" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+      <text x="330" y="270" font-size="13" fill="var(--green)">C_Acb</text>
+      <line x1="305" y1="40" x2="305" y2="300" stroke="var(--line)" stroke-dasharray="4 4"/>
+      <text x="305" y="315" font-size="12" fill="var(--muted)" text-anchor="middle">interface</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 10. Eq walk: 3 steps -->
+<section class="slide" data-title="Three rate steps">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Mechanism</p><h2>The rate arises from 3 steps in series</h2></div>
+  <div class="grow">
+    <div class="eq-step"><div>1. Transport (dispersed → interface): $\;r_{md}=k_{md}\,a\,(C_{Adb}-C_{Adi})$</div><div class="why">dispersed-side film</div></div>
+    <div class="eq-step"><div>2. Transport (interface → continuous): $\;r_{mc}=k_{mc}\,a\,(C_{Aci}-C_{Acb})$</div><div class="why">continuous-side film</div></div>
+    <div class="eq-step"><div>3. Reaction in continuous phase: $\;r_1=k_r\,C_{Bcb}\,C_{Acb}$</div><div class="why">chemical reaction</div></div>
+    <div class="callout aside" style="margin-top:14px;font-size:19px">$a=\dfrac{\text{mass transfer area}}{\text{reaction volume}}=\dfrac{\text{surface of dispersed particle}}{\text{reaction volume}}$</div>
+  </div>
+</section>
+
+<!-- 11. Eq walk: combine -> overall -->
+<section class="slide" data-title="Overall 2-phase rate">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Combine (steady state)</p><h2>Overall rate = driving force ÷ sum of resistances</h2></div>
+  <div class="grow stack">
+    <div class="callout note" style="font-size:20px">At steady state: $\;r_1=r_{md}=r_{mc}=r$</div>
+    <div class="eq-box">$$r=\cfrac{C_{Adb}}{\dfrac{1}{k_r K_{cd} C_{Bcb}}+\dfrac{1}{k_{md}a}+\dfrac{1}{K_{cd}k_{mc}a}}$$</div>
+    <p class="eq-note orange">Three terms in the denominator = resistances of <span style="color:var(--red)">reaction</span> · dispersed film · continuous film</p>
+  </div>
+</section>
+
+<!-- 12. INTERACTIVE 3: concentration profile -->
+<section class="slide" data-title="Concentration profile" id="slide-c3">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Interactive — concentration profile</p><h2>Which step is the “bottleneck” that controls the rate?</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Dispersed film $k_{md}a$ <span class="val" id="c3_kmdv"></span></label>
+        <input type="range" id="c3_kmd" min="0.5" max="20" step="0.5" value="10"></div>
+      <div class="sl"><label>Continuous film $k_{mc}a$ <span class="val" id="c3_kmcv"></span></label>
+        <input type="range" id="c3_kmc" min="0.5" max="20" step="0.5" value="10"></div>
+      <div class="sl"><label>Reaction $k_r C_{Bcb}$ <span class="val" id="c3_krv"></span></label>
+        <input type="range" id="c3_kr" min="0.5" max="20" step="0.5" value="6"></div>
+      <div class="sl"><label>Partition $K_{cd}$ <span class="val" id="c3_Kv"></span></label>
+        <input type="range" id="c3_K" min="0.1" max="1" step="0.05" value="0.6"></div>
+    </div>
+    <div class="sim-out">
+      <svg id="c3svg" viewBox="0 0 500 300" style="width:100%">
+        <line x1="40" y1="270" x2="480" y2="270" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="40" y1="270" x2="40" y2="20" stroke="var(--muted)" stroke-width="2"/>
+        <text x="18" y="150" font-size="14" fill="var(--muted)" transform="rotate(-90 18 150)" text-anchor="middle">C_A</text>
+        <line x1="180" y1="24" x2="180" y2="270" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <line x1="320" y1="24" x2="320" y2="270" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="110" y="288" font-size="12" fill="var(--muted)" text-anchor="middle">dispersed film</text>
+        <text x="250" y="288" font-size="12" fill="var(--muted)" text-anchor="middle">continuous film</text>
+        <text x="405" y="288" font-size="12" fill="var(--muted)" text-anchor="middle">continuous bulk</text>
+        <polyline id="c3line" fill="none" stroke="var(--blue)" stroke-width="3"/>
+        <circle id="c3p1" r="5" fill="var(--red)"></circle><circle id="c3p2" r="5" fill="var(--navy)"></circle>
+        <circle id="c3p3" r="5" fill="var(--navy)"></circle><circle id="c3p4" r="5" fill="var(--green)"></circle>
+        <text id="c3ctrl" x="255" y="16" font-size="15" font-weight="700" fill="var(--navy)" text-anchor="middle"></text>
+      </svg>
+      <div class="simnote">Red dot = $C_{Adb}$ · green dot = $C_{Acb}$ · the steepest drop is the bottleneck</div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. INTERACTIVE 4: rate vs interfacial area -->
+<section class="slide" data-title="Rate vs stirring" id="slide-c4">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Interactive — Chart</p><h2>Raise stirring / interfacial area $a$ and the rate saturates</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Interfacial area $a$ (relative) <span class="val" id="c4_av"></span></label>
+        <input type="range" id="c4_a" min="0.1" max="10" step="0.1" value="2"></div>
+      <div class="sl"><label>Reaction $k_r C_{Bcb}$ <span class="val" id="c4_krv"></span></label>
+        <input type="range" id="c4_kr" min="0.5" max="20" step="0.5" value="8"></div>
+      <div class="sl"><label>Partition $K_{cd}$ <span class="val" id="c4_Kv"></span></label>
+        <input type="range" id="c4_K" min="0.1" max="1" step="0.05" value="0.6"></div>
+      <div class="bignum" id="c4_rate" style="font-size:34px"></div>
+      <div id="c4_reg"></div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="c4canvas"></canvas></div>
+      <div class="simnote">Dashed line = ceiling when reaction-controlled: $r_{max}=k_r K_{cd} C_{Bcb}C_{Adb}$</div>
+    </div>
+  </div>
+</section>
+
+<!-- 14. INTERACTIVE 5: temperature sensitivity -->
+<section class="slide" data-title="Temperature sensitivity" id="slide-c5">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Interactive — Arrhenius</p><h2>Why mass-transfer control is less sensitive to temperature</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reaction $E_a$ (kJ/mol) <span class="val" id="c5_eav"></span></label>
+        <input type="range" id="c5_ea" min="20" max="120" step="5" value="70"></div>
+      <div class="sl"><label>Mass-transfer level $k_m a$ <span class="val" id="c5_kmv"></span></label>
+        <input type="range" id="c5_km" min="0.2" max="8" step="0.2" value="2"></div>
+      <div class="callout note" style="font-size:17px">$\dfrac{1}{k_{app}}=\dfrac{1}{k_{rxn}(T)}+\dfrac{1}{k_{m}a}$</div>
+      <div id="c5_reg"></div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="c5canvas"></canvas></div>
+      <div class="simnote">Axes: $\ln k_{app}$ vs $1000/T$ — steep = reaction control (T-sensitive), flat = mass-transfer control</div>
+    </div>
+  </div>
+</section>
+
+<!-- 15. Comparison: MT vs reaction controlled -->
+<section class="slide" data-title="MT vs reaction controlled">
+  <div class="s-head"><p class="kicker">Lecture 5-2 · Apparent kinetics</p><h2>Mass-transfer controlled vs Reaction controlled</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th></th><th>Mass-transfer controlled</th><th>Reaction controlled</th></tr>
+      <tr><td>Apparent rate</td><td>$r=k_{mc}\,a\,K_{cd}\,C_{Adb}$</td><td>$r=k_r K_{cd} C_{Bcb} C_{Adb}$</td></tr>
+      <tr><td>Depends on $C_{Bcb}$?</td><td style="color:var(--red)">No</td><td style="color:var(--green)">Yes</td></tr>
+      <tr><td>Impeller power / size $a$</td><td style="color:var(--green)">Yes</td><td style="color:var(--red)">No</td></tr>
+      <tr><td>Temperature sensitivity</td><td>Low (low $E_a$)</td><td>High (high $E_a$)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 16. Section 5-3 -->
+<section class="slide section-slide" data-title="Lecture 5-3" data-sec="Lecture 5-3">
+  <div class="big">5-3</div>
+  <p class="lbl">Lecture 5-3</p>
+  <p class="q">What is the rate expression for a 3-phase G–L–S or L–L–S reaction? (non-elementary)</p>
+</section>
+
+<!-- 17. Diagram G-L-S -->
+<section class="slide" data-title="G-L-S system">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Setup</p><h2>$A(g) + B(l) \xrightarrow{\text{solid catalyst}}$ Product</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="callout">A diffuses from the gas → through the G/L interface → into the liquid → to the catalyst surface → active site</div>
+      <div class="callout aside" style="font-size:18px">$C_{Agi}=K_{gi}\,C_{Ali}$ — Henry's constant at the gas–liquid surface</div>
+      <div class="callout note" style="font-size:18px">Five steps in series: gas film · G–L · liquid film · L–S film · reaction</div>
+    </div>
+    <svg viewBox="0 0 380 300">
+      <rect x="20" y="20" width="120" height="260" rx="8" fill="#F3F7FC" stroke="var(--blue)" stroke-width="2"/>
+      <text x="80" y="40" font-size="14" fill="var(--blue)" text-anchor="middle">Gas (A)</text>
+      <rect x="140" y="20" width="150" height="260" fill="#EAF0F8" stroke="var(--navy)" stroke-width="0"/>
+      <text x="215" y="40" font-size="14" fill="var(--navy)" text-anchor="middle">Liquid (B)</text>
+      <line x1="140" y1="20" x2="140" y2="280" stroke="var(--navy)" stroke-dasharray="5 4"/>
+      <text x="140" y="296" font-size="11" fill="var(--muted)" text-anchor="middle">G/L</text>
+      <circle cx="320" cy="150" r="52" fill="#FCEBD8" stroke="var(--orange)" stroke-width="2"/>
+      <text x="320" y="150" font-size="13" fill="var(--orange)" text-anchor="middle">catalyst</text>
+      <text x="320" y="168" font-size="11" fill="var(--orange)" text-anchor="middle">(solid)</text>
+      <path d="M40,150 L135,150" stroke="var(--red)" stroke-width="2" marker-end="url(#ar)"/>
+      <path d="M150,150 L262,150" stroke="var(--navy)" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="88" y="142" font-size="12" fill="var(--red)" text-anchor="middle">k_g</text>
+      <text x="200" y="142" font-size="12" fill="var(--navy)" text-anchor="middle">k_l</text>
+      <text x="270" y="142" font-size="12" fill="var(--orange)" text-anchor="middle">k_c</text>
+      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--navy)"/></marker></defs>
+    </svg>
+  </div>
+</section>
+
+<!-- 18. Concept: definitions -->
+<section class="slide" data-title="Definitions a, f">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Notation</p><h2>Interfacial areas and phase fractions</h2></div>
+  <div class="grow">
+    <div class="eq-step"><div>$a_i=\dfrac{\text{gas–liquid interfacial area}}{\text{volume of reactor}}$</div><div class="why">G–L area per reactor volume</div></div>
+    <div class="eq-step"><div>$a_c=\dfrac{\text{external surface of particle}}{\text{volume of particle}}$</div><div class="why">particle surface area</div></div>
+    <div class="eq-step"><div>$f_s=\dfrac{\text{volume of particles}}{\text{volume of reactor}}$</div><div class="why">solid loading</div></div>
+    <div class="eq-step"><div>$f_l=\dfrac{\text{volume of liquid}}{\text{volume of reactor}}$</div><div class="why">liquid loading</div></div>
+  </div>
+</section>
+
+<!-- 19. Eq walk: 5 steps -->
+<section class="slide" data-title="Five resistances">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Mechanism</p><h2>Five steps in series (A limiting)</h2></div>
+  <div class="grow">
+    <div class="eq-step"><div>1. Gas film:&nbsp; $r_1'=\dfrac{k_g a_i}{(1-\varepsilon)\rho_p}(C_{Agb}-C_{Agi})$</div><div class="why">bulk gas → interface</div></div>
+    <div class="eq-step"><div>2. Liquid film:&nbsp; $r_2'=\dfrac{k_l a_i}{(1-\varepsilon)\rho_p}(C_{Ali}-C_{Alb})$</div><div class="why">interface → bulk liquid</div></div>
+    <div class="eq-step"><div>3. Liquid–solid:&nbsp; $r_3'=k_c a_c(C_{Alb}-C_{As})$</div><div class="why">bulk liquid → surface</div></div>
+    <div class="eq-step"><div>4–5. Reaction:&nbsp; $r_{45}'=\dfrac{\eta\,k_r' C_{As} C_{Bs}}{1+K_A C_{As}+K_B C_{Bs}}$</div><div class="why">ads + rxn + desorption ($\eta$ = effectiveness)</div></div>
+  </div>
+</section>
+
+<!-- 20. INTERACTIVE 6: 5-step cascade -->
+<section class="slide" data-title="Concentration cascade" id="slide-c6">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Interactive — Concentration cascade</p><h2>Track A from the gas to the active site</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Gas film $k_g a_i$ <span class="val" id="c6_kgv"></span></label>
+        <input type="range" id="c6_kg" min="0.5" max="20" step="0.5" value="12"></div>
+      <div class="sl"><label>Liquid film $k_l a_i$ <span class="val" id="c6_klv"></span></label>
+        <input type="range" id="c6_kl" min="0.5" max="20" step="0.5" value="6"></div>
+      <div class="sl"><label>Liquid–solid $k_c a_c$ <span class="val" id="c6_kcv"></span></label>
+        <input type="range" id="c6_kc" min="0.5" max="20" step="0.5" value="10"></div>
+      <div class="sl"><label>Reaction $\eta k_r'$ <span class="val" id="c6_krv"></span></label>
+        <input type="range" id="c6_kr" min="0.5" max="20" step="0.5" value="8"></div>
+    </div>
+    <div class="sim-out">
+      <svg id="c6svg" viewBox="0 0 500 300" style="width:100%">
+        <line x1="40" y1="270" x2="480" y2="270" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="40" y1="270" x2="40" y2="20" stroke="var(--muted)" stroke-width="2"/>
+        <text x="18" y="150" font-size="14" fill="var(--muted)" transform="rotate(-90 18 150)" text-anchor="middle">C_A</text>
+        <line x1="150" y1="24" x2="150" y2="270" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <line x1="260" y1="24" x2="260" y2="270" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <line x1="370" y1="24" x2="370" y2="270" stroke="var(--line)" stroke-dasharray="4 4"/>
+        <text x="95" y="288" font-size="11.5" fill="var(--muted)" text-anchor="middle">gas film</text>
+        <text x="205" y="288" font-size="11.5" fill="var(--muted)" text-anchor="middle">liquid film</text>
+        <text x="315" y="288" font-size="11.5" fill="var(--muted)" text-anchor="middle">L–S film</text>
+        <text x="425" y="288" font-size="11.5" fill="var(--muted)" text-anchor="middle">reaction</text>
+        <polyline id="c6line" fill="none" stroke="var(--blue)" stroke-width="3"/>
+        <circle id="c6p1" r="5" fill="var(--red)"></circle><circle id="c6p2" r="5" fill="var(--navy)"></circle>
+        <circle id="c6p3" r="5" fill="var(--navy)"></circle><circle id="c6p4" r="5" fill="var(--green)"></circle>
+        <text id="c6ctrl" x="255" y="16" font-size="15" font-weight="700" fill="var(--navy)" text-anchor="middle"></text>
+      </svg>
+      <div class="simnote">The steepest concentration drop is the rate-limiting step</div>
+    </div>
+  </div>
+</section>
+
+<!-- 21. Eq walk: overall rate A limiting -->
+<section class="slide" data-title="Overall G-L-S rate">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Combine</p><h2>Overall rate when A is the limiting reactant</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:20px">$$r'=\cfrac{C_{Agb}}{\dfrac{K_{gL}}{\eta k_r' C_{Bs}}+\dfrac{(1-\varepsilon)\rho_p}{k_g a_i}+\dfrac{K_{gL}(1-\varepsilon)\rho_p}{k_l a_i}+\dfrac{K_{gL}}{k_c a_c}}$$</div>
+    <p class="eq-note orange">Four terms = resistances of reaction · gas film · liquid film · liquid–solid film</p>
+    <div class="callout note" style="font-size:19px">If $C_B\gg C_A$ ($C_{Bs}=C_{Bb}$): $\;r'=k_{app}'\,C_{Agb}$ (pseudo-first order)</div>
+  </div>
+</section>
+
+<!-- 22. INTERACTIVE 7: resistance decomposition -->
+<section class="slide" data-title="Resistance decomposition" id="slide-c7">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Interactive — find the controlling step</p><h2>Resistance of each step</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Gas film $k_g a_i$ <span class="val" id="c7_kgv"></span></label>
+        <input type="range" id="c7_kg" min="0.5" max="20" step="0.5" value="14"></div>
+      <div class="sl"><label>Liquid film $k_l a_i$ <span class="val" id="c7_klv"></span></label>
+        <input type="range" id="c7_kl" min="0.5" max="20" step="0.5" value="4"></div>
+      <div class="sl"><label>Liquid–solid $k_c a_c$ <span class="val" id="c7_kcv"></span></label>
+        <input type="range" id="c7_kc" min="0.5" max="20" step="0.5" value="10"></div>
+      <div class="sl"><label>Reaction $\eta k_r'$ <span class="val" id="c7_krv"></span></label>
+        <input type="range" id="c7_kr" min="0.5" max="20" step="0.5" value="12"></div>
+      <div id="c7_reg"></div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="c7canvas"></canvas></div>
+      <div class="simnote">The tallest bar = largest resistance = the rate-limiting step</div>
+    </div>
+  </div>
+</section>
+
+<!-- 23. INTERACTIVE 8: virtual lab -->
+<section class="slide" data-title="Virtual lab: slurry reactor" id="slide-c8">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Virtual lab — run a batch slurry reactor</p><h2>Reach 90% conversion as fast as you can</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Pressure $P$ → $C_A^{*}$ <span class="val" id="l_pv"></span></label>
+        <input type="range" id="l_p" min="1" max="10" step="0.5" value="4"></div>
+      <div class="sl"><label>Stirring $k_l a_i$ <span class="val" id="l_stv"></span></label>
+        <input type="range" id="l_st" min="0.5" max="20" step="0.5" value="6"></div>
+      <div class="sl"><label>Temperature $T$ → $k_r'$ <span class="val" id="l_tv"></span></label>
+        <input type="range" id="l_t" min="300" max="450" step="5" value="360"></div>
+      <div class="sl"><label>Catalyst loading <span class="val" id="l_cav"></span></label>
+        <input type="range" id="l_ca" min="0.5" max="10" step="0.5" value="4"></div>
+      <div style="margin-top:6px"><button class="lab-btn" id="l_run">▶ Start</button><button class="lab-btn" id="l_reset">↺ Reset</button></div>
+    </div>
+    <div class="sim-out">
+      <svg id="l_svg" viewBox="0 0 220 200" style="width:100%;max-height:150px">
+        <rect x="40" y="20" width="140" height="160" rx="12" fill="#DBEAFE" stroke="var(--navy)" stroke-width="2" id="l_liq"/>
+        <line x1="110" y1="6" x2="110" y2="60" stroke="var(--navy)" stroke-width="3"/>
+        <rect x="80" y="56" width="60" height="9" rx="3" fill="var(--navy)"/>
+      </svg>
+      <div class="bignum" id="l_conv" style="font-size:34px">0%</div>
+      <div id="l_stat" class="simnote">Press Start to begin · $t=0$</div>
+      <div id="l_reg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 24. Comparison A vs B limiting -->
+<section class="slide" data-title="A vs B limiting">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Apparent rate</p><h2>Different limiting reactant → different apparent rate</h2></div>
+  <div class="grow">
+    <table class="compare">
+      <tr><th>Case</th><th>A limiting ($C_B\gg C_A$)</th><th>B limiting ($C_A\gg C_B$)</th></tr>
+      <tr><td>Assumption</td><td>$C_{Bs}=C_{Bb}$</td><td>$C_{As}=C_{Ab}$</td></tr>
+      <tr><td>Apparent rate</td><td>$r'=k_{app}'\,C_{Agb}$</td><td>$r'=k_{app}'\,C_{Blb}$</td></tr>
+      <tr><td>Order</td><td>1st order in $C_{Agb}$</td><td>1st order in $C_{Blb}$</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 25. Remark scale -->
+<section class="slide" data-title="Remark: scale">
+  <div class="s-head"><p class="kicker">Lecture 5-3 · Remark</p><h2>The physical rate changes with scale</h2></div>
+  <div class="grow stack">
+    <div class="callout q">Unlike the chemical steps (adsorption, surface reaction, desorption), the <b>physical (mass-transfer) rate changes with scale</b> and operating parameters</div>
+    <div class="callout note">Result: the <b>apparent rate can differ at each scale</b> — the controlling step may change</div>
+  </div>
+</section>
+
+<!-- 26. Section 5-4 -->
+<section class="slide section-slide" data-title="Lecture 5-4" data-sec="Lecture 5-4">
+  <div class="big">5-4</div>
+  <p class="lbl">Lecture 5-4</p>
+  <p class="q">Which rate expression do we use to design an industrial reactor?</p>
+</section>
+
+<!-- 27. Concept: from experiment -->
+<section class="slide" data-title="From experiment to design">
+  <div class="s-head"><p class="kicker">Lecture 5-4 · Practice</p><h2>The rate expression comes from experimental data</h2></div>
+  <div class="grow stack">
+    <ul class="clean">
+      <li>The rate expression is obtained from <b>experimental data</b></li>
+      <li>To design a commercial-scale reactor, <b>validate</b> it against results from several sizes: lab → pilot 1 → pilot 2</li>
+    </ul>
+    <div class="callout aside" style="font-size:18px">The closer to full scale, the more confident the rate expression truly holds</div>
+  </div>
+</section>
+
+<!-- 28. Concept: scale change -->
+<section class="slide" data-title="Rate changes with scale">
+  <div class="s-head"><p class="kicker">Lecture 5-4 · Key insight</p><h2>Chemical rate is constant, but the physical rate changes</h2></div>
+  <div class="grow">
+    <ul class="clean">
+      <li>The rate expression <b>may change with scale</b></li>
+      <li><span style="color:var(--green)">Chemical rate does not change</span> but the <span style="color:var(--red)">physical rate changes with scale</span> → a different limiting step at each scale</li>
+      <li>So the <b>exact rate expression is not used</b> for design, even for a heterogeneous phase</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 29. INTERACTIVE 9: scale-up simulator -->
+<section class="slide" data-title="Scale-up simulator" id="slide-c9">
+  <div class="s-head"><p class="kicker">Lecture 5-4 · Interactive — Scale-up</p><h2>Scale the reactor up and the controlling step shifts</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reactor scale (L) <span class="val" id="c9_sv"></span></label>
+        <input type="range" id="c9_s" min="0" max="4.7" step="0.05" value="0.3"></div>
+      <div class="sl"><label>Intrinsic reaction $k_r'$ <span class="val" id="c9_krv"></span></label>
+        <input type="range" id="c9_kr" min="1" max="30" step="1" value="16"></div>
+      <div class="bignum" id="c9_rate" style="font-size:30px"></div>
+      <div id="c9_reg"></div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="c9canvas"></canvas></div>
+      <div class="simnote">As scale increases: $k_l a_i,\,k_g a_i$ fall (harder to mix) → apparent rate drops and shifts to mass-transfer control</div>
+    </div>
+  </div>
+</section>
+
+<!-- 30. Concept: design stage -->
+<section class="slide" data-title="Design stage">
+  <div class="s-head"><p class="kicker">Lecture 5-4 · During design</p><h2>Use the apparent rate + power law</h2></div>
+  <div class="grow stack">
+    <ul class="clean">
+      <li>Use the <b>apparent rate expression</b> to design reactors of various sizes</li>
+      <li>The rate is a function of the <b>limiting-reactant concentration</b></li>
+      <li>Usually a <b>simple power law</b> — first-order reaction</li>
+    </ul>
+    <div class="eq-box">$$r=k_{app}\,C_{Ab}$$</div>
+  </div>
+</section>
+
+<!-- 31. Quiz Q1 -->
+<section class="slide" data-title="Quiz 1" data-sec="Check yourself">
+  <div class="s-head"><p class="kicker">Check your understanding · 5-1</p><h2>Quiz 1 — Heterogeneous reaction</h2></div>
+  <div class="quiz-q">
+    <p class="q-text">In a two-phase system where the reactants sit in different phases, why can the reaction still occur?</p>
+    <button class="q-opt" data-explain="Not quite — the reaction generally proceeds mainly within one phase, not solely at the interface.">The reaction occurs only at the interface, with no dissolution needed</button>
+    <button class="q-opt" data-correct data-explain="Correct — one reactant must dissolve across into the other phase first, then the reaction proceeds in that phase.">One reactant must first dissolve into the other phase, then the reaction occurs there</button>
+    <button class="q-opt" data-explain="Not quite — heating may help somewhat, but the key point is that the reactants must first come together in the same phase.">You must raise the temperature so both phases merge into one</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 32. Quiz Q2 -->
+<section class="slide" data-title="Quiz 2" data-sec="Check yourself">
+  <div class="s-head"><p class="kicker">Check your understanding · 5-2</p><h2>Quiz 2 — 2-phase rate</h2></div>
+  <div class="quiz-q">
+    <p class="q-text">If a two-phase system is mass-transfer controlled ($k_{mc}a \ll k_r$), how does the apparent rate behave?</p>
+    <button class="q-opt" data-explain="Not quite — under mass-transfer control the rate is only weakly temperature-sensitive (low activation energy), not strongly.">Very temperature-sensitive, because the activation energy is high</button>
+    <button class="q-opt" data-correct data-explain="Correct — $r=k_{mc}aK_{cd}C_{Adb}$ depends on interfacial area/stirring ($a$) and is weakly temperature-sensitive (low $E_a$).">Depends on impeller power / interfacial area $a$ and is weakly temperature-sensitive</button>
+    <button class="q-opt" data-explain="Not quite — in this case the rate does not depend on $C_{Bcb}$ of the other phase (that is reaction-controlled behavior).">Depends mainly on the concentration $C_{Bcb}$ of the other phase</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 33. Quiz Q3 -->
+<section class="slide" data-title="Quiz 3" data-sec="Check yourself">
+  <div class="s-head"><p class="kicker">Check your understanding · 5-3</p><h2>Quiz 3 — G–L–S resistances</h2></div>
+  <div class="quiz-q">
+    <p class="q-text">In a G–L–S reaction, which is <b>NOT</b> one of the series resistances for transporting A to the active site?</p>
+    <button class="q-opt" data-explain="This is a real resistance — the gas film (bulk gas → G–L interface) has the term $(1-\varepsilon)\rho_p/(k_g a_i)$.">The gas film at the gas–liquid surface</button>
+    <button class="q-opt" data-explain="This is a real resistance — the liquid film around the particle (bulk liquid → catalyst surface), term $K_{gL}/(k_c a_c)$.">The liquid–solid film</button>
+    <button class="q-opt" data-correct data-explain="Correct — gas viscosity is not one of this model's series resistances; the terms are gas film, liquid film, L–S film, and reaction.">The viscosity of the gas phase</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 34. Quiz Q4 -->
+<section class="slide" data-title="Quiz 4" data-sec="Check yourself">
+  <div class="s-head"><p class="kicker">Check your understanding · 5-4</p><h2>Quiz 4 — Design stage</h2></div>
+  <div class="quiz-q">
+    <p class="q-text">Why is the exact rate expression usually not used to design a full-scale reactor?</p>
+    <button class="q-opt" data-explain="Not quite — the chemical rate (adsorption/surface reaction) does not change with scale; what changes is the physical (mass-transfer) rate.">Because the chemical rate changes with reactor size</button>
+    <button class="q-opt" data-correct data-explain="Correct — the physical (mass-transfer) rate changes with scale, making the limiting step differ, so an apparent rate (power law) validated across sizes is used instead.">Because the physical rate changes with scale → the limiting step differs, so the apparent rate is used instead</button>
+    <button class="q-opt" data-explain="Not quite — the exact expression is indeed complex, but the main reason is the scale-dependent physical rate, not just mathematical difficulty.">Only because the exact equation is mathematically hard to solve</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- 35. Key takeaways -->
+<section class="slide" data-title="Key takeaways" data-sec="Check yourself">
+  <div class="s-head"><p class="kicker">Exit ticket</p><h2>Key Takeaways</h2></div>
+  <div class="grow">
+    <div class="tk"><div class="n">1</div><p>A heterogeneous reaction occurs in one phase — reactants must <b>dissolve across phases</b> first</p></div>
+    <div class="tk"><div class="n">2</div><p>Overall rate = driving force ÷ <b>sum of series resistances</b> (mass transfer + reaction)</p></div>
+    <div class="tk"><div class="n">3</div><p>Mass-transfer control → sensitive to $a$/stirring, low $E_a$ · Reaction control → depends on $C_B$, high $E_a$</p></div>
+    <div class="tk"><div class="n">4</div><p>Design with an <b>apparent rate (power law)</b> validated across scales</p></div>
+    <p class="quiz-score"></p>
+    <p style="color:var(--muted); font-size:18px; margin-top:16px">Write down one remaining question — bring it to next class</p>
+  </div>
+</section>
+
+<!-- ============ /SLIDES ============ -->
+
+</div>
+
+<div id="progress"></div>
+<div id="hud">
+  <button id="btnToc" title="Contents (T)">☰</button>
+  <button id="btnPrev" title="Previous (←)">‹</button>
+  <button id="btnNext" title="Next (→)">›</button>
+</div>
+<div id="toc"><div class="panel"><h3>CONTENTS</h3><div id="tocList"></div></div></div>
+
+<script>
+/* ================= Deck engine ================= */
+const DECK_META = { course: '2105604 ADV CHE KINETICS' };  // footer text — set per deck
+
+const el = id => document.getElementById(id);
+const cs = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function fmt(x, d = 3){
+  if (!isFinite(x)) return '–';
+  if (x !== 0 && (Math.abs(x) < 1e-3 || Math.abs(x) >= 1e5)) return x.toExponential(d - 1);
+  return parseFloat(x.toPrecision(d)).toString();
+}
+function mix(c1, c2, t){
+  const p = c => [1,3,5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const a = p(c1), b = p(c2);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+const Deck = (() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = -1;
+  const enterCbs = [];   // {key, fn, once, fired}
+
+  // footer stamping
+  let _sec = '';
+  slides.forEach((s, i) => {
+    if (s.dataset.sec) _sec = s.dataset.sec;
+    if (s.classList.contains('title-slide') || s.classList.contains('section-slide') || s.dataset.nofooter !== undefined) return;
+    const f = document.createElement('div');
+    f.className = 's-foot';
+    f.innerHTML = `<span>${DECK_META.course}</span><span class="s-sec">${_sec}</span><span>${i + 1} / ${slides.length}</span>`;
+    s.appendChild(f);
+  });
+
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    location.hash = '#/' + (cur + 1);
+    el('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+    [...document.querySelectorAll('#tocList a')].forEach((a, j) => a.classList.toggle('cur', j === cur));
+    fireEnter(false);
+  }
+  function fireEnter(onlyUnfired){
+    enterCbs.forEach(c => {
+      const hit = (typeof c.key === 'number') ? c.key === cur : slides[cur].id === c.key;
+      if (!hit) return;
+      if (onlyUnfired && c.fired) return;
+      if (c.once && c.fired) return;
+      try{ c.fn(); c.fired = true; }catch(e){ console.error(e); }
+    });
+  }
+  // Deep-link safety: if the first slide shown needs a CDN lib (e.g. Chart.js) that
+  // hasn't loaded yet, its enter callback throws; retry once everything has loaded.
+  addEventListener('load', () => fireEnter(true));
+  function onEnter(key, fn, opts = {}){ enterCbs.push({ key, fn, once: !!opts.once, fired: false }); }
+
+  // TOC
+  const list = el('tocList');
+  slides.forEach((s, i) => {
+    if (s.dataset.sec){ const h = document.createElement('div'); h.className = 'sec'; h.textContent = s.dataset.sec; list.appendChild(h); }
+    const a = document.createElement('a');
+    a.href = '#/' + (i + 1);
+    a.textContent = (i + 1) + '. ' + (s.dataset.title || s.querySelector('h1,h2,.q')?.textContent.slice(0, 60) || 'Slide');
+    a.onclick = e => { e.preventDefault(); goTo(i); toc(false); };
+    list.appendChild(a);
+  });
+  function toc(open){ el('toc').classList.toggle('open', open ?? !el('toc').classList.contains('open')); }
+  el('toc').addEventListener('click', e => { if (e.target === el('toc')) toc(false); });
+  el('btnToc').onclick = () => toc();
+  el('btnPrev').onclick = () => goTo(cur - 1);
+  el('btnNext').onclick = () => goTo(cur + 1);
+
+  // keyboard
+  addEventListener('keydown', e => {
+    if (['ArrowRight',' ','PageDown'].includes(e.key)){ e.preventDefault(); goTo(cur + 1); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); goTo(cur - 1); }
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End') goTo(slides.length - 1);
+    else if (e.key.toLowerCase() === 't') toc();
+    else if (e.key === 'Escape') toc(false);
+    else if (e.key.toLowerCase() === 'f'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+    else if (e.key.toLowerCase() === 'o') debugOverflow();
+  });
+
+  // Overflow debugger (press O): measures every slide against the 1280x720 stage,
+  // outlines offenders in red and lists them in the console. Use before class.
+  function debugOverflow(){
+    const st = el('stage').getBoundingClientRect();
+    const sc = st.width / 1280;
+    const report = [];
+    slides.forEach((s, i) => {
+      const wasActive = s.classList.contains('active');
+      if (!wasActive) s.classList.add('active');
+      s.querySelectorAll('*').forEach(n => {
+        const r = n.getBoundingClientRect();
+        if ((!r.width && !r.height) || n.closest('.q-explain')) return;
+        const past = Math.max(r.bottom - st.bottom, r.right - st.right) / sc;
+        if (past > 2){
+          n.style.outline = '3px solid red';
+          report.push(`slide ${i + 1}: <${n.tagName.toLowerCase()} class="${n.className}"> ${Math.round(past)}px past edge`);
+        }
+      });
+      if (!wasActive) s.classList.remove('active');
+    });
+    if (report.length){ console.warn('OVERFLOW REPORT\n' + report.join('\n')); }
+    window.__overflowReport = report;
+    alert(report.length ? report.length + ' overflowing element(s) outlined red - see console' : 'No overflow - all slides fit 1280x720');
+    return report;
+  }
+
+  // swipe
+  let x0 = null;
+  addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 60) goTo(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
+
+  // scale stage to window
+  function fit(){
+    const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.98;
+    el('stage').style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  // hash routing (agenda links, deep links, back/forward)
+  function hashIndex(){ const m = location.hash.match(/#\/(\d+)/); return m ? +m[1] - 1 : NaN; }
+  addEventListener('hashchange', () => { const i = hashIndex(); if (!isNaN(i) && i !== cur) goTo(i); });
+  const h0 = hashIndex();
+  goTo(isNaN(h0) ? 0 : h0);
+
+  return { goTo, onEnter, get current(){ return cur; }, get count(){ return slides.length; } };
+})();
+
+/* ================= KaTeX ================= */
+const KATEX_OPTS = { delimiters: [
+  { left: '$$', right: '$$', display: true },
+  { left: '$', right: '$', display: false },
+  { left: '\\(', right: '\\)', display: false },
+  { left: '\\[', right: '\\]', display: true }
+], throwOnError: false };
+document.addEventListener('DOMContentLoaded', () => {
+  const tryRender = () => window.renderMathInElement
+    ? renderMathInElement(document.body, KATEX_OPTS)
+    : setTimeout(tryRender, 120);
+  tryRender();
+});
+
+/* ================= Quiz engine ================= */
+const Quiz = { score: 0, answered: 0, total: document.querySelectorAll('.quiz-q').length };
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const exp = q.querySelector('.q-explain');
+  q.querySelectorAll('.q-opt').forEach(opt => opt.addEventListener('click', () => {
+    if (q.dataset.done) return;
+    q.dataset.done = '1';
+    const ok = opt.hasAttribute('data-correct');
+    opt.classList.add(ok ? 'right' : 'wrong');
+    q.querySelectorAll('.q-opt[data-correct]').forEach(c => c.classList.add('right'));
+    q.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+    if (exp){
+      exp.innerHTML = opt.getAttribute('data-explain') || '';
+      exp.classList.add('show');
+      if (window.renderMathInElement) renderMathInElement(exp, KATEX_OPTS);
+    }
+    Quiz.answered++; if (ok) Quiz.score++;
+    document.querySelectorAll('.quiz-score').forEach(s =>
+      s.textContent = `Quiz score: ${Quiz.score} / ${Quiz.total}` + (Quiz.answered < Quiz.total ? ` (${Quiz.total - Quiz.answered} unanswered)` : ''));
+  }));
+});
+
+/* ================= Reveal blocks (Socratic click-to-show) ================= */
+document.querySelectorAll('.reveal-btn').forEach(b =>
+  b.addEventListener('click', () => b.closest('.reveal').classList.add('open')));
+
+/* ================= Helpers for simulations ================= */
+function bindSlider(id, fn){
+  const s = el(id);
+  const h = () => fn(+s.value);
+  s.addEventListener('input', h); h();
+  return s;
+}
+
+/* ================= Lecture 5 simulations ================= */
+/* ================= Lecture 5 interactive logic ================= */
+if (window.Chart){
+  Chart.defaults.font.family = "'Montserrat','Prompt',sans-serif";
+  Chart.defaults.font.size = 14;
+  Chart.defaults.color = cs('--muted');
+}
+const R_GAS = 8.314;
+
+/* ---- INT1: Phase-type explorer ---- */
+const phaseData = {
+  LS:{t:'Liquid–Solid reaction', ph:'Liquid + solid', wh:'In the fluid phase, or at active sites in the catalyst pores', tr:'Solid dissolves/sublimes into the fluid; or reactant diffuses to active sites in the pores', ex:'Solid catalytic reaction; dissolution of a solid'},
+  GS:{t:'Gas–Solid reaction', ph:'Gas + solid', wh:'At active sites in the catalyst pores', tr:'Gas diffuses to the catalyst surface and pores', ex:'Solid catalytic reaction, e.g. ammonia synthesis'},
+  LL:{t:'Liquid–Liquid reaction', ph:'Two immiscible liquid phases', wh:'In one of the phases (e.g. the methanol phase)', tr:'Triglyceride must dissolve into the methanol first', ex:'Transesterification (homogeneous catalyst, NaOH)'},
+  GL:{t:'Gas–Liquid reaction', ph:'Gas + liquid', wh:'Mainly in the liquid phase', tr:'Gas must dissolve into the liquid phase first', ex:'Hydrogenation, oxidation, chlorination, alkoxylation'},
+  LLS:{t:'Solid + Liquid–Liquid reaction', ph:'Two liquid phases + solid catalyst', wh:'At the active sites of the solid catalyst', tr:'Triglyceride dissolves into methanol, then diffuses to the active site', ex:'Transesterification (heterogeneous catalyst)'},
+  GLS:{t:'Gas–Liquid–Solid reaction', ph:'Gas + liquid + solid catalyst', wh:'In the liquid film covering the catalyst active sites', tr:'Gas dissolves into the liquid, then diffuses to the active site', ex:'Hydrodeoxygenation, hydrotreating, fermentation'}
+};
+function setPhase(k){
+  const d = phaseData[k]; if(!d) return;
+  el('phTitle').textContent=d.t; el('phPhases').textContent=d.ph;
+  el('phWhere').textContent=d.wh; el('phTrans').textContent=d.tr; el('phEx').textContent=d.ex;
+  document.querySelectorAll('#phaseBtns .phb').forEach(b=>b.classList.toggle('on', b.dataset.k===k));
+}
+document.querySelectorAll('#phaseBtns .phb').forEach(b=>b.addEventListener('click',()=>setPhase(b.dataset.k)));
+setPhase('LS');
+
+/* ---- INT2: Dissolve-to-react ---- */
+function updDissolve(){
+  const S=+el('d_S').value, km=+el('d_km').value, kr=+el('d_kr').value, Cag=1;
+  el('d_Sval').textContent=fmt(S,2); el('d_kmval').textContent=fmt(km,2); el('d_krval').textContent=fmt(kr,2);
+  const Cint=S*Cag, Cl=km*S*Cag/(km+kr), r=kr*Cl, sc=140;
+  el('d_bg').setAttribute('width', Math.max(2, Cag*sc));
+  el('d_bi').setAttribute('width', Math.max(2, Cint*sc));
+  el('d_bl').setAttribute('width', Math.max(2, Cl*sc));
+  el('d_rate').textContent='r = '+fmt(r,3);
+  let reg;
+  if(km < 0.6*kr) reg='<span class="reg-badge reg-mt">Dissolution / mass-transfer limited</span>';
+  else if(kr < 0.6*km) reg='<span class="reg-badge reg-rx">Reaction limited</span>';
+  else reg='<span class="reg-badge reg-bal">Balanced</span>';
+  el('d_reg').innerHTML=reg;
+}
+['d_S','d_km','d_kr'].forEach(id=>el(id).addEventListener('input',updDissolve));
+updDissolve();
+
+/* ---- INT3: 2-phase concentration profile ---- */
+const y3=c=>270-Math.max(0,Math.min(1,c))*240;
+function updC3(){
+  const kmd=+el('c3_kmd').value, kmc=+el('c3_kmc').value, kr=+el('c3_kr').value, K=+el('c3_K').value;
+  el('c3_kmdv').textContent=fmt(kmd,2); el('c3_kmcv').textContent=fmt(kmc,2);
+  el('c3_krv').textContent=fmt(kr,2); el('c3_Kv').textContent=fmt(K,2);
+  const Rrxn=1/(kr*K), Rmd=1/kmd, Rmc=1/(K*kmc), r=1/(Rrxn+Rmd+Rmc);
+  const Cadb=1, Cadi=Cadb-r/kmd, Caci=K*Cadi, Cacb=Caci-r/kmc;
+  const pts=[[60,y3(Cadb)],[180,y3(Cadi)],[180,y3(Caci)],[320,y3(Cacb)],[460,y3(Cacb)]];
+  el('c3line').setAttribute('points', pts.map(p=>p.join(',')).join(' '));
+  el('c3p1').setAttribute('cx',60); el('c3p1').setAttribute('cy',y3(Cadb));
+  el('c3p2').setAttribute('cx',180); el('c3p2').setAttribute('cy',y3(Cadi));
+  el('c3p3').setAttribute('cx',180); el('c3p3').setAttribute('cy',y3(Caci));
+  el('c3p4').setAttribute('cx',320); el('c3p4').setAttribute('cy',y3(Cacb));
+  const res=[['reaction',Rrxn],['dispersed film',Rmd],['continuous film',Rmc]].sort((a,b)=>b[1]-a[1]);
+  el('c3ctrl').textContent='Bottleneck: '+res[0][0];
+}
+['c3_kmd','c3_kmc','c3_kr','c3_K'].forEach(id=>el(id).addEventListener('input',updC3));
+updC3();
+
+/* ---- INT4: rate vs interfacial area (Chart.js) ---- */
+let c4chart; const c4xs=[]; for(let x=0.1;x<=10.01;x+=0.1) c4xs.push(+x.toFixed(2));
+const rC4=(a,kr,K)=>1/(1/(kr*K)+(1+1/K)/a);
+function updC4(){
+  const a=+el('c4_a').value, kr=+el('c4_kr').value, K=+el('c4_K').value;
+  el('c4_av').textContent=fmt(a,2); el('c4_krv').textContent=fmt(kr,2); el('c4_Kv').textContent=fmt(K,2);
+  const r=rC4(a,kr,K), plateau=kr*K, frac=r/plateau;
+  el('c4_rate').textContent='r = '+fmt(r,3);
+  el('c4_reg').innerHTML = frac>0.8 ? '<span class="reg-badge reg-rx">Reaction controlled (saturated)</span>'
+    : frac<0.4 ? '<span class="reg-badge reg-mt">Mass-transfer controlled</span>'
+    : '<span class="reg-badge reg-bal">Transition</span>';
+  if(c4chart){
+    c4chart.data.datasets[0].data=c4xs.map(x=>({x,y:rC4(x,kr,K)}));
+    c4chart.data.datasets[1].data=[{x:0.1,y:plateau},{x:10,y:plateau}];
+    c4chart.data.datasets[2].data=[{x:a,y:r}];
+    c4chart.update('none');
+  }
+}
+Deck.onEnter('slide-c4',()=>{
+  c4chart=new Chart(el('c4canvas'),{type:'line',data:{datasets:[
+    {data:[],borderColor:cs('--blue'),backgroundColor:'transparent',pointRadius:0,borderWidth:3,tension:.25,parsing:false},
+    {data:[],borderColor:cs('--red'),borderDash:[6,6],pointRadius:0,borderWidth:2,parsing:false},
+    {data:[],borderColor:cs('--navy'),backgroundColor:cs('--navy'),pointRadius:6,parsing:false,showLine:false}
+  ]},options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{type:'linear',min:0,max:10,title:{display:true,text:'interfacial area a (relative)'},grid:{display:false}},
+            y:{min:0,title:{display:true,text:'rate r'},grid:{color:cs('--line')}}}}});
+  updC4();
+},{once:true});
+['c4_a','c4_kr','c4_K'].forEach(id=>el(id).addEventListener('input',updC4));
+
+/* ---- INT5: temperature sensitivity (Chart.js) ---- */
+let c5chart; const c5T=[]; for(let T=300;T<=500;T+=5) c5T.push(T);
+const kapp5=(T,Ea,km)=>{const kr=1e6*Math.exp(-Ea*1000/(R_GAS*T)); return 1/(1/kr+1/km);};
+function updC5(){
+  const Ea=+el('c5_ea').value, km=+el('c5_km').value;
+  el('c5_eav').textContent=Ea; el('c5_kmv').textContent=fmt(km,2);
+  if(c5chart){ c5chart.data.datasets[0].data=c5T.map(T=>({x:1000/T,y:Math.log(kapp5(T,Ea,km))})); c5chart.update('none'); }
+  const kr400=1e6*Math.exp(-Ea*1000/(R_GAS*400));
+  el('c5_reg').innerHTML = kr400>3*km ? '<span class="reg-badge reg-mt">At high T → mass-transfer control (flat)</span>'
+    : '<span class="reg-badge reg-rx">Reaction control dominates (steep)</span>';
+}
+Deck.onEnter('slide-c5',()=>{
+  c5chart=new Chart(el('c5canvas'),{type:'line',data:{datasets:[
+    {data:[],borderColor:cs('--blue'),backgroundColor:'transparent',pointRadius:0,borderWidth:3,tension:.2,parsing:false}]},
+    options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{type:'linear',title:{display:true,text:'1000 / T  (1/K)'},grid:{display:false}},
+            y:{title:{display:true,text:'ln k_app'},grid:{color:cs('--line')}}}}});
+  updC5();
+},{once:true});
+['c5_ea','c5_km'].forEach(id=>el(id).addEventListener('input',updC5));
+
+/* ---- INT6: G-L-S concentration cascade ---- */
+const y6=c=>270-Math.max(0,Math.min(1,c))*240;
+function updC6(){
+  const kg=+el('c6_kg').value, kl=+el('c6_kl').value, kc=+el('c6_kc').value, kr=+el('c6_kr').value;
+  el('c6_kgv').textContent=fmt(kg,2); el('c6_klv').textContent=fmt(kl,2); el('c6_kcv').textContent=fmt(kc,2); el('c6_krv').textContent=fmt(kr,2);
+  const R1=1/kg,R2=1/kl,R3=1/kc,R4=1/kr, r=1/(R1+R2+R3+R4);
+  const Cagb=1, Cagi=Cagb-r*R1, Calb=Cagi-r*R2, Cas=Calb-r*R3;
+  const pts=[[60,y6(Cagb)],[150,y6(Cagi)],[260,y6(Calb)],[370,y6(Cas)],[460,y6(Cas)]];
+  el('c6line').setAttribute('points', pts.map(p=>p.join(',')).join(' '));
+  el('c6p1').setAttribute('cx',60); el('c6p1').setAttribute('cy',y6(Cagb));
+  el('c6p2').setAttribute('cx',150); el('c6p2').setAttribute('cy',y6(Cagi));
+  el('c6p3').setAttribute('cx',260); el('c6p3').setAttribute('cy',y6(Calb));
+  el('c6p4').setAttribute('cx',370); el('c6p4').setAttribute('cy',y6(Cas));
+  const res=[['gas film',R1],['liquid film',R2],['L–S film',R3],['reaction',R4]].sort((a,b)=>b[1]-a[1]);
+  el('c6ctrl').textContent='Rate-limiting: '+res[0][0];
+}
+['c6_kg','c6_kl','c6_kc','c6_kr'].forEach(id=>el(id).addEventListener('input',updC6));
+updC6();
+
+/* ---- INT7: resistance decomposition (Chart.js bar) ---- */
+let c7chart; const c7names=['Gas film','Liquid film','L–S film','Reaction'];
+function updC7(){
+  const kg=+el('c7_kg').value, kl=+el('c7_kl').value, kc=+el('c7_kc').value, kr=+el('c7_kr').value;
+  el('c7_kgv').textContent=fmt(kg,2); el('c7_klv').textContent=fmt(kl,2); el('c7_kcv').textContent=fmt(kc,2); el('c7_krv').textContent=fmt(kr,2);
+  const R=[1/kg,1/kl,1/kc,1/kr], tot=R.reduce((a,b)=>a+b,0), maxi=R.indexOf(Math.max(...R));
+  if(c7chart){
+    c7chart.data.datasets[0].data=R;
+    c7chart.data.datasets[0].backgroundColor=R.map((_,i)=>i===maxi?cs('--red'):cs('--blue'));
+    c7chart.update('none');
+  }
+  el('c7_reg').innerHTML='<span class="reg-badge reg-rx">Controlled by: '+c7names[maxi]+' ('+fmt(100*R[maxi]/tot,3)+'%)</span>';
+}
+Deck.onEnter('slide-c7',()=>{
+  c7chart=new Chart(el('c7canvas'),{type:'bar',data:{labels:c7names,datasets:[{data:[],backgroundColor:cs('--blue')}]},
+    options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false}},y:{title:{display:true,text:'resistance  1/k'},grid:{color:cs('--line')},beginAtZero:true}}}});
+  updC7();
+},{once:true});
+['c7_kg','c7_kl','c7_kc','c7_kr'].forEach(id=>el(id).addEventListener('input',updC7));
+
+/* ---- INT8: virtual lab slurry reactor ---- */
+const labIdx=[...document.querySelectorAll('.slide')].findIndex(s=>s.id==='slide-c8');
+const lab={raf:null,t:0,CB:1};
+function labModel(){
+  const P=+el('l_p').value, st=+el('l_st').value, T=+el('l_t').value, ca=+el('l_ca').value;
+  const Cstar=0.1*P, kr=1e6*Math.exp(-35000/(R_GAS*T));
+  const R=[1/8, 1/st, 1/(ca*1.5), 1/(kr*ca)];
+  const kobs=Cstar/R.reduce((a,b)=>a+b,0);
+  return {kobs,R};
+}
+function labReadouts(){
+  const P=+el('l_p').value, st=+el('l_st').value, T=+el('l_t').value, ca=+el('l_ca').value;
+  el('l_pv').textContent=fmt(P,2); el('l_stv').textContent=fmt(st,2); el('l_tv').textContent=T+' K'; el('l_cav').textContent=fmt(ca,2);
+  const {R}=labModel(), names=['gas film','liquid film','L–S film','reaction'], maxi=R.indexOf(Math.max(...R));
+  el('l_reg').innerHTML='<span class="reg-badge reg-mt">limiting: '+names[maxi]+'</span>';
+}
+function labFrame(){
+  if(Deck.current!==labIdx){ lab.raf=null; return; }
+  const {kobs}=labModel(), dt=0.05;
+  lab.CB=lab.CB*Math.exp(-kobs*dt); lab.t+=dt;
+  const conv=1-lab.CB;
+  el('l_conv').textContent=Math.round(conv*100)+'%';
+  el('l_liq').setAttribute('fill', mix('#DBEAFE','#1A8038',conv));
+  el('l_stat').innerHTML='t = '+fmt(lab.t,3)+'  ·  C_B = '+fmt(lab.CB,3);
+  if(conv>=0.9){ el('l_stat').innerHTML='&#10004; reached 90% at t = '+fmt(lab.t,3); lab.raf=null; return; }
+  if(lab.t>80){ el('l_stat').innerHTML='Too slow (t &gt; 80) — try more stirring / higher temperature'; lab.raf=null; return; }
+  lab.raf=requestAnimationFrame(labFrame);
+}
+if(el('l_run')){
+  el('l_run').addEventListener('click',()=>{ if(lab.raf) return; if(lab.CB<=0.001){lab.CB=1;lab.t=0;} labFrame(); });
+  el('l_reset').addEventListener('click',()=>{ if(lab.raf){cancelAnimationFrame(lab.raf);lab.raf=null;} lab.CB=1;lab.t=0; el('l_conv').textContent='0%'; el('l_liq').setAttribute('fill','#DBEAFE'); el('l_stat').textContent='Press Start to begin · t=0'; });
+  ['l_p','l_st','l_t','l_ca'].forEach(id=>el(id).addEventListener('input',labReadouts));
+  labReadouts();
+}
+
+/* ---- INT9: scale-up simulator (Chart.js) ---- */
+let c9chart; const c9scales=[]; for(let e=0;e<=4.7;e+=0.1) c9scales.push(+e.toFixed(2));
+function c9res(logV,kr){ const V=Math.pow(10,logV); return [1/(12*Math.pow(V,-0.15)), 1/(8*Math.pow(V,-0.18)), 1/10, 1/kr]; }
+const c9rate=(logV,kr)=>1/c9res(logV,kr).reduce((a,b)=>a+b,0);
+function updC9(){
+  const logV=+el('c9_s').value, kr=+el('c9_kr').value, V=Math.pow(10,logV);
+  el('c9_sv').textContent = V>=1000 ? fmt(V/1000,2)+' m³' : Math.round(V)+' L';
+  el('c9_krv').textContent=fmt(kr,2);
+  const r=c9rate(logV,kr), R=c9res(logV,kr), names=['gas film','liquid film','L–S film','reaction'], maxi=R.indexOf(Math.max(...R));
+  el('c9_rate').textContent='r_app = '+fmt(r,3);
+  el('c9_reg').innerHTML='<span class="reg-badge '+(maxi===3?'reg-rx':'reg-mt')+'">Controlled by: '+names[maxi]+'</span>';
+  if(c9chart){ c9chart.data.datasets[1].data=[{x:logV,y:r}]; c9chart.update('none'); }
+}
+Deck.onEnter('slide-c9',()=>{
+  c9chart=new Chart(el('c9canvas'),{type:'line',data:{datasets:[
+    {data:c9scales.map(x=>({x,y:c9rate(x,+el('c9_kr').value)})),borderColor:cs('--blue'),backgroundColor:'transparent',pointRadius:0,borderWidth:3,tension:.2,parsing:false},
+    {data:[],borderColor:cs('--red'),backgroundColor:cs('--red'),pointRadius:6,parsing:false,showLine:false}
+  ]},options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{type:'linear',min:0,max:4.7,title:{display:true,text:'log₁₀ reactor volume (L)'},grid:{display:false}},
+            y:{min:0,title:{display:true,text:'apparent rate'},grid:{color:cs('--line')}}}}});
+  updC9();
+},{once:true});
+['c9_s','c9_kr'].forEach(id=>el(id).addEventListener('input',()=>{
+  if(c9chart) c9chart.data.datasets[0].data=c9scales.map(x=>({x,y:c9rate(x,+el('c9_kr').value)}));
+  updC9();
+}));
+
+</script>
+</body>
+</html>
