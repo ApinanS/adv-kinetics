@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 6 — Isothermal Reactor Design · Interactive</title>
+
+<!-- Fonts: Montserrat (Latin) + Prompt (Thai) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --navy:#1F497D; --blue:#4F81BD; --red:#C00000; --green:#1A8038; --orange:#D97706;
+  --ink:#1F2937; --muted:#6B7280; --line:#E5E7EB; --card:#F7F9FC; --bg:#FFFFFF;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; background:#ECEFF3; overflow:hidden;
+  font-family:'Montserrat','Prompt',system-ui,sans-serif; color:var(--ink)}
+
+/* ---------- Stage: fixed 1280x720, scaled to fit ---------- */
+#stage{width:1280px; height:720px; position:absolute; top:50%; left:50%;
+  transform-origin:center; background:var(--bg); box-shadow:0 10px 40px rgba(31,73,125,.18); overflow:hidden}
+
+/* ---------- Slides ---------- */
+.slide{position:absolute; inset:0; display:none; flex-direction:column;
+  padding:56px 72px 64px; background:var(--bg); overflow:hidden}
+.slide svg{max-width:100%; max-height:440px}
+.slide.active{display:flex}
+.s-head{margin-bottom:22px}
+.kicker{font-size:15px; font-weight:600; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin-bottom:8px}
+.s-head h2{font-size:34px; font-weight:700; color:var(--navy); line-height:1.18}
+.s-foot{position:absolute; left:72px; right:72px; bottom:26px; display:flex; justify-content:space-between; gap:20px;
+  font-size:15px; font-weight:500; color:var(--muted)}
+.grow{flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0}
+.s-foot .s-sec{color:var(--blue)}
+
+/* Title slide */
+.title-slide{justify-content:center; align-items:flex-start; border-top:6px solid var(--navy)}
+.title-slide .pill{display:inline-block; font-size:15px; font-weight:600; letter-spacing:.12em;
+  color:var(--navy); border:1.5px solid var(--navy); border-radius:999px; padding:6px 18px; margin-bottom:34px}
+.title-slide .lecno{font-size:22px; font-weight:600; color:var(--blue); margin-bottom:10px}
+.title-slide h1{font-size:58px; font-weight:800; color:var(--navy); line-height:1.12; margin-bottom:26px; max-width:1000px}
+.title-slide .rule{width:88px; height:4px; background:var(--blue); margin-bottom:26px}
+.title-slide .who{font-size:17px; color:var(--muted); line-height:1.7}
+.title-slide .who b{color:var(--ink); font-weight:600}
+
+/* Section divider */
+.section-slide{justify-content:center; background:var(--bg)}
+.section-slide .big{position:absolute; top:26px; right:56px; font-size:150px; font-weight:800;
+  color:var(--navy); opacity:.08; line-height:1}
+.section-slide .lbl{font-size:19px; font-weight:700; letter-spacing:.14em; color:var(--blue);
+  text-transform:uppercase; margin-bottom:18px}
+.section-slide .q{font-size:42px; font-weight:700; color:var(--red); line-height:1.25; max-width:980px}
+.section-slide .sub{font-size:20px; color:var(--muted); margin-top:20px; max-width:900px; line-height:1.5}
+
+/* Agenda / chapter hub */
+.agenda{display:flex; flex-direction:column; gap:18px; max-width:1020px}
+a.agenda-item{display:flex; align-items:center; gap:26px; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 28px}
+a.agenda-item:hover{border-color:var(--navy); box-shadow:0 4px 14px rgba(31,73,125,.12)}
+.agenda-item .no{flex:0 0 70px; font-size:26px; font-weight:800; color:var(--navy)}
+.agenda-item .qq{font-size:22px; font-weight:500; line-height:1.4}
+.agenda-item .go{margin-left:auto; color:var(--blue); font-size:26px}
+/* compact 2-col agenda for many sub-lectures */
+.agenda.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px 22px; max-width:1140px}
+.agenda.grid2 a.agenda-item{gap:16px; padding:12px 18px; border-radius:11px}
+.agenda.grid2 .no{flex:0 0 44px; font-size:20px}
+.agenda.grid2 .qq{font-size:16.5px; line-height:1.3}
+.agenda.grid2 .go{font-size:20px}
+
+/* Cards */
+.cards{display:grid; gap:22px; grid-auto-columns:1fr; grid-auto-flow:column}
+.cards.wrap{grid-auto-flow:row; grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px 24px}
+.card h3{font-size:21px; font-weight:600; color:var(--navy); margin-bottom:10px}
+.card p{font-size:19px; line-height:1.45}
+.card .ic{width:34px; height:34px; margin-bottom:12px}
+.card-red{border-top:4px solid var(--red)} .card-green{border-top:4px solid var(--green)}
+.card-blue{border-top:4px solid var(--blue)} .card-orange{border-top:4px solid var(--orange)}
+
+/* Equations */
+.eq-box{background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:24px 32px; text-align:center; font-size:28px; margin:8px 0}
+.eq-box.sm{font-size:22px; padding:18px 24px}
+.eq-note{font-size:18px; margin-top:12px; text-align:center}
+.eq-note.green{color:var(--green)} .eq-note.orange{color:var(--orange)} .eq-note.red{color:var(--red)}
+.eq-step{display:flex; align-items:center; gap:34px; padding:12px 6px; border-bottom:1px solid var(--line); font-size:22px}
+.eq-step:last-child{border-bottom:none}
+.eq-step .why{font-size:17px; color:var(--muted); flex:1; text-align:right}
+
+/* Comparison table */
+table.compare{width:100%; border-collapse:collapse; font-size:20px}
+.compare th{background:var(--card); color:var(--navy); font-weight:700; padding:12px 16px;
+  border:1px solid var(--line); text-align:center}
+.compare td{padding:13px 16px; border:1px solid var(--line); text-align:center}
+.compare td:first-child{font-weight:600; text-align:left}
+.compare.sm{font-size:16.5px}
+.compare.sm th, .compare.sm td{padding:8px 10px}
+
+/* Callouts */
+.callout{border-left:5px solid var(--navy); background:var(--card); border-radius:0 12px 12px 0;
+  padding:14px 20px; font-size:20px; margin:12px 0; line-height:1.45}
+.callout.q{border-color:var(--red)} .callout.note{border-color:var(--green)} .callout.aside{border-color:var(--orange)}
+
+/* Layout helpers */
+.two-col{display:grid; grid-template-columns:11fr 9fr; gap:40px; align-items:center; flex:1}
+.two-col.even{grid-template-columns:1fr 1fr}
+.stack>*+*{margin-top:16px}
+ul.clean{list-style:none} ul.clean li{font-size:21px; line-height:1.45; padding-left:30px; position:relative; margin-bottom:12px}
+ul.clean li::before{content:''; position:absolute; left:0; top:.55em; width:10px; height:10px; border-radius:3px; background:var(--blue)}
+
+/* Simulation */
+.sim{display:grid; grid-template-columns:2fr 3fr; grid-template-rows:minmax(0,1fr); gap:36px; align-items:center; flex:1; min-height:0}
+.sim.wide{grid-template-columns:5fr 7fr}
+.sim-controls .sl{margin-bottom:20px}
+.sim-controls label{display:flex; justify-content:space-between; font-size:19px; font-weight:500; margin-bottom:6px}
+.val{font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--navy); height:30px; cursor:pointer}
+.sim-controls{align-self:center; min-width:0}
+.sim-out{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; text-align:center;
+  display:flex; flex-direction:column; justify-content:center; align-self:stretch; min-height:0; overflow:hidden}
+.sim-out svg{max-height:100%; min-height:0}
+.bignum{font-size:46px; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums}
+.chart-box{position:relative; flex:1 1 auto; min-height:180px; max-height:430px; min-width:0}
+.chart-box>canvas{position:absolute; inset:0; width:100% !important; height:100% !important}
+.readout-row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:8px}
+.readout{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:6px 14px; font-size:17px}
+.readout b{color:var(--navy); font-variant-numeric:tabular-nums}
+
+/* Reveal */
+.reveal-btn{font:inherit; font-size:18px; font-weight:600; color:var(--navy); background:var(--bg);
+  border:2px solid var(--navy); border-radius:10px; padding:9px 24px; cursor:pointer}
+.reveal-btn:hover{background:var(--navy); color:#fff}
+.reveal-body{display:none; margin-top:16px}
+.reveal.open .reveal-body{display:block} .reveal.open .reveal-btn{display:none}
+
+/* Quiz */
+.quiz-q{max-width:1040px}
+.q-text{font-size:23px; font-weight:600; margin-bottom:18px; line-height:1.4}
+.q-opt{display:block; width:100%; text-align:left; font:inherit; font-size:20px; padding:12px 20px;
+  margin-bottom:10px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; cursor:pointer}
+.q-opt:hover{border-color:var(--navy)}
+.q-opt.right{border-color:var(--green); background:#EDF7F0; color:var(--green); font-weight:600}
+.q-opt.wrong{border-color:var(--red); background:#FBEDED; color:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-explain{display:none; border-left:5px solid var(--blue); background:var(--card);
+  padding:14px 20px; border-radius:0 12px 12px 0; font-size:18px; line-height:1.5; margin-top:12px}
+.q-explain.show{display:block}
+.quiz-score{font-size:21px; font-weight:700; color:var(--navy)}
+
+/* Takeaways */
+.tk{display:flex; gap:22px; align-items:flex-start; margin-bottom:18px}
+.tk .n{flex:0 0 40px; height:40px; border-radius:50%; background:var(--navy); color:#fff;
+  font-weight:700; font-size:19px; display:flex; align-items:center; justify-content:center}
+.tk p{font-size:22px; line-height:1.4; padding-top:5px}
+
+/* ---------- Code + code<->equation mapping (EQUATRAN / Python) ---------- */
+.codewrap{display:grid; grid-template-columns:1fr 1fr; gap:22px; flex:1; min-height:0}
+.codewrap.single{grid-template-columns:1fr}
+.codecol{display:flex; flex-direction:column; min-height:0}
+.codecap{font-size:15px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:8px}
+.codecap .lang{color:var(--navy)}
+.code{background:#0F2233; color:#E6EEF5; border-radius:12px; padding:16px 18px; font-family:'JetBrains Mono',Consolas,monospace;
+  font-size:14px; line-height:1.55; overflow:auto; min-height:0; flex:1; white-space:pre}
+.code.py{background:#10261c}
+.code .c{color:#6C8AA0}          /* comment */
+.code .k{color:#7FD1FF}          /* keyword / balance var */
+.code .n{color:#FFC96B}          /* number */
+.code .s{color:#9EE493}          /* string / label */
+.code .op{color:#FF9E9E}         /* operator emphasis */
+.code.py .c{color:#5f8f74}
+
+/* code<->equation map table */
+table.codemap{width:100%; border-collapse:collapse; font-size:16px; table-layout:fixed}
+.codemap th{background:var(--card); color:var(--navy); font-weight:700; padding:9px 12px; border:1px solid var(--line); text-align:left}
+.codemap td{padding:9px 12px; border:1px solid var(--line); vertical-align:middle}
+.codemap td.cd{font-family:'JetBrains Mono',Consolas,monospace; font-size:14px; color:var(--navy); background:#F4F7FB; width:40%}
+.codemap td.eqn{width:38%}
+.codemap td.mn{font-size:15px; color:var(--muted)}
+.tag{display:inline-block; font-size:12px; font-weight:700; letter-spacing:.05em; padding:2px 9px; border-radius:999px; vertical-align:middle}
+.tag.equatran{background:#E7EEF7; color:var(--navy)} .tag.python{background:#E7F3EB; color:var(--green)} .tag.js{background:#FDF0E3; color:var(--orange)}
+
+/* HUD (not scaled) */
+#hud{position:fixed; right:18px; bottom:14px; display:flex; gap:8px; z-index:50}
+#hud button{width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff;
+  font-size:18px; color:var(--navy); cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#hud button:hover{background:var(--card)}
+#progress{position:fixed; left:0; bottom:0; height:4px; background:var(--blue); width:0; z-index:60; transition:width .2s}
+#toc{position:fixed; inset:0; background:rgba(15,25,40,.55); display:none; z-index:100; align-items:center; justify-content:center}
+#toc.open{display:flex}
+#toc .panel{background:#fff; border-radius:16px; padding:34px 40px; max-height:80vh; overflow:auto; min-width:420px}
+#toc h3{color:var(--navy); font-size:20px; margin-bottom:18px; letter-spacing:.08em}
+#toc a{display:block; padding:9px 6px; font-size:16.5px; color:var(--ink); text-decoration:none; border-radius:8px}
+#toc a:hover{background:var(--card)} #toc a.cur{color:var(--navy); font-weight:700}
+#toc .sec{margin-top:10px; font-weight:700; color:var(--blue); font-size:14px; letter-spacing:.1em; text-transform:uppercase}
+
+.katex{font-size:1.03em}
+svg text{font-family:'Montserrat','Prompt',sans-serif}
+
+/* Print: one slide per landscape page */
+@media print{
+  html,body{overflow:visible; background:#fff}
+  #stage{position:static; transform:none !important; width:1280px; height:auto; box-shadow:none}
+  .slide{display:flex !important; position:relative; width:1280px; height:720px; page-break-after:always; border-bottom:1px solid var(--line)}
+  #hud,#progress,#toc{display:none !important}
+}
+@page{size:landscape}
+</style>
+</head>
+<body>
+
+<div id="stage">
+<!-- ==================== FRONT MATTER ==================== -->
+<section class="slide title-slide" data-title="Title">
+  <span class="pill">2105604 ADV CHE KINETICS</span>
+  <p class="lecno">Lecture 6</p>
+  <h1>Isothermal Reactor Design</h1>
+  <div class="rule"></div>
+  <p class="who"><b>Assoc. Prof. Dr. Apinan Soottitantawat</b><br>
+    Department of Chemical Engineering, Faculty of Engineering<br>
+    Chulalongkorn University · apinan.s@chula.ac.th</p>
+</section>
+
+<section class="slide" data-title="Roadmap">
+  <div class="s-head"><p class="kicker">Roadmap — 10 guiding questions</p><h2>What we will answer in Lecture 6</h2></div>
+  <div class="grow agenda grid2">
+    <a class="agenda-item" href="#/4"><span class="no">6-1</span><span class="qq">How to do a reactor materials / mole balance?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/12"><span class="no">6-2</span><span class="qq">Time in an isothermal batch reactor for a target conversion?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/20"><span class="no">6-3</span><span class="qq">Time in an isothermal semi-batch reactor?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/26"><span class="no">6-4</span><span class="qq">Volume of an isothermal CSTR?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/32"><span class="no">6-5</span><span class="qq">Concentration profile in a mixed-flow bioreactor?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/37"><span class="no">6-6</span><span class="qq">Volume of an isothermal tubular (PFR) reactor?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/44"><span class="no">6-7</span><span class="qq">Weight of catalyst in an isothermal fixed-bed reactor?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/53"><span class="no">6-8</span><span class="qq">Analytical solutions for single-reaction apparent rate?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/58"><span class="no">6-9</span><span class="qq">External mass-transfer-limited design?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/64"><span class="no">6-10</span><span class="qq">Internal mass-transfer-limited design?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/71"><span class="no">&#9873;</span><span class="qq">Class Activity — Week 5 problem set</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/76"><span class="no">&#10003;</span><span class="qq">Quiz &amp; Key Takeaways</span><span class="go">&#8594;</span></a>
+  </div>
+</section>
+
+<section class="slide" data-title="How to use">
+  <div class="s-head"><p class="kicker">How to use this deck</p><h2>Every solved example is shown four ways</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-red"><h3>1 · The equations</h3><p>The mole balance, rate law and stoichiometry — the physics you must set up first.</p></div>
+      <div class="card card-blue"><h3>2 · EQUATRAN code</h3><p>The professor's solver script, mapped line-by-line back to each equation.</p></div>
+      <div class="card card-green"><h3>3 · Python</h3><p>The same system in <code>scipy.solve_ivp</code>/<code>fsolve</code> so the method is tool-independent.</p></div>
+      <div class="card card-orange"><h3>4 · Live sim</h3><p>The equations solved in your browser — drag a slider, watch the profile move.</p></div>
+    </div>
+    <div class="callout aside" style="margin-top:22px">Navigate: <b>&larr; &rarr;</b> arrows · <b>T</b> = contents · <b>F</b> = fullscreen · <b>O</b> = overflow check. Each section divider is a question — try to answer it before advancing.</div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-1 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-1" data-sec="Lecture 6-1">
+  <div class="big">6-1</div>
+  <p class="lbl">Lecture 6-1</p>
+  <p class="q">How do we do a reactor material / mole balance?</p>
+  <p class="sub">Every reactor design equation is one general mole balance, simplified by the assumptions of an ideal reactor.</p>
+</section>
+
+<section class="slide" data-title="Four ideal reactors">
+  <div class="s-head"><p class="kicker">Classification</p><h2>Four ideal reactors, four sets of assumptions</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-blue"><h3>Batch</h3><p>No in/out flow · well mixed · constant $V$ (liquid) · <b>unsteady</b>.</p></div>
+      <div class="card card-blue"><h3>Semi-batch</h3><p>Only inlet <i>or</i> outlet · well mixed · $V$ changes · <b>unsteady</b>.</p></div>
+      <div class="card card-green"><h3>CSTR (mixed flow)</h3><p>In &amp; out flow · perfectly mixed · <b>steady state</b>, constant $V$.</p></div>
+      <div class="card card-green"><h3>PFR / Fixed bed</h3><p>In &amp; out flow · no radial gradient · <b>steady state</b>, plug flow.</p></div>
+    </div>
+    <div class="callout note" style="margin-top:20px">Homogeneous or solid-catalytic versions exist for each: normalize the rate per volume ($-r_A$) or per catalyst mass ($-r'_A$).</div>
+  </div>
+</section>
+
+<section class="slide" data-title="Ideal reactor assumptions">
+  <div class="s-head"><p class="kicker">Compare the assumptions</p><h2>Steady state, flow, and reaction volume</h2></div>
+  <div class="grow">
+    <table class="compare sm">
+      <tr><th></th><th>Batch</th><th>Semi-batch</th><th>CSTR</th><th>PFR / FBR</th></tr>
+      <tr><td>Inlet / outlet flow</td><td style="color:var(--red)">none</td><td>one only</td><td>both</td><td>both</td></tr>
+      <tr><td>Steady state</td><td style="color:var(--red)">no</td><td style="color:var(--red)">no</td><td style="color:var(--green)">yes</td><td style="color:var(--green)">yes</td></tr>
+      <tr><td>Reaction volume</td><td>constant</td><td>changes</td><td>constant</td><td>constant</td></tr>
+      <tr><td>Spatial gradient</td><td>none (mixed)</td><td>none (mixed)</td><td>none (mixed)</td><td>along length</td></tr>
+      <tr><td>Balance reduces to</td><td>ODE in $t$</td><td>ODE in $t$</td><td>algebraic</td><td>ODE in $V$ or $W$</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-title="General mole balance">
+  <div class="s-head"><p class="kicker">The master equation</p><h2>General mole balance on species $j$</h2></div>
+  <div class="grow">
+    <div class="eq-box">$$F_{j0}-F_j+\int_V \sum_{i=1}^{R}\nu_{ij}\,r_i\,dV=\frac{dN_j}{dt}$$</div>
+    <div class="eq-step"><span>$\underbrace{F_{j0}-F_j}_{\text{in} - \text{out}}$</span><span class="why">convective terms — zero for a batch reactor</span></div>
+    <div class="eq-step"><span>$\int_V \sum_i \nu_{ij} r_i\,dV$</span><span class="why">generation by all $R$ reactions (sign from $\nu_{ij}$)</span></div>
+    <div class="eq-step"><span>$\dfrac{dN_j}{dt}$</span><span class="why">accumulation — zero at steady state (CSTR, PFR)</span></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Multiple reactions">
+  <div class="s-head"><p class="kicker">Rate &amp; stoichiometry</p><h2>Net rate of a species in multiple reactions</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{A}+2\text{B}\to 4\text{C}+\text{D}\quad r_1=k_1 C_A C_B^2$$ $$2\text{A}+\text{B}\to \text{U}+3\text{G}\quad r_2=k_2 C_A^2 C_B$$</div>
+      <div class="callout">Net rate = sum over reactions weighted by $\nu_{ij}$:</div>
+      <div class="eq-box sm">$$r_A=\nu_{1A}r_1+\nu_{2A}r_2=-r_1-2r_2=\sum_i \nu_{ij}r_i$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout q">Sign convention</div>
+      <ul class="clean">
+        <li>$\nu_{ij}<0$ &rarr; species is a <b style="color:var(--red)">reactant</b> (consumed)</li>
+        <li>$\nu_{ij}>0$ &rarr; species is a <b style="color:var(--green)">product</b> (generated)</li>
+        <li>Subscript $1$ in $r_1$ means <b>reaction no. 1</b> — keep source notation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Rate constant">
+  <div class="s-head"><p class="kicker">Temperature dependence</p><h2>Arrhenius law and the equilibrium constant</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card"><h3>Rate constant</h3><p>$$k(T)=Ae^{-E/RT}=k(T_0)\,e^{\frac{E}{R}\left(\frac{1}{T_0}-\frac1T\right)}$$</p></div>
+      <div class="card"><h3>Equilibrium constant</h3><p>$$K_e(T)=K_e(T_1)\,e^{\frac{\Delta H_{rxn}^0}{R}\left(\frac{1}{T_1}-\frac1T\right)}$$</p></div>
+    </div>
+    <p class="eq-note orange" style="margin-top:18px">The reference form (with $T_0$) is exactly how the EQUATRAN scripts encode <code>k = k10*exp((E1/R)*((1/(T0+273))-(1/(T+273))))</code>.</p>
+  </div>
+</section>
+
+<section class="slide" data-title="Arrhenius simulator" id="slide-arr">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>How $T$ and $E$ set the rate constant $k=Ae^{-E/RT}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Temperature $T$ <span class="val" id="arrTval"></span></label>
+        <input type="range" id="arrT" min="300" max="900" step="5" value="500"></div>
+      <div class="sl"><label>Activation energy $E$ <span class="val" id="arrEval"></span></label>
+        <input type="range" id="arrE" min="20" max="200" step="5" value="80"></div>
+      <div class="callout note">Higher $E$ &rarr; steeper sensitivity of $k$ to $T$. The red dot is $k$ at your chosen $T$.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="arrCanvas"></canvas></div>
+      <div class="bignum" id="arrKout"></div>
+      <div style="font-size:16px;color:var(--muted)">rate constant $k$ (s⁻¹, log scale)</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Balance explorer" id="slide-balexp">
+  <div class="s-head"><p class="kicker">Interactive — pick a reactor</p><h2>Which terms of the general balance survive?</h2></div>
+  <div class="sim wide">
+    <div class="sim-controls">
+      <div class="sl"><label>Reactor type</label>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px">
+          <button class="reveal-btn balbtn" data-r="batch" style="font-size:16px; padding:8px 14px">Batch</button>
+          <button class="reveal-btn balbtn" data-r="semi" style="font-size:16px; padding:8px 14px">Semi-batch</button>
+          <button class="reveal-btn balbtn" data-r="cstr" style="font-size:16px; padding:8px 14px">CSTR</button>
+          <button class="reveal-btn balbtn" data-r="pfr" style="font-size:16px; padding:8px 14px">PFR</button>
+        </div>
+      </div>
+      <div class="callout aside" id="balDesc" style="margin-top:8px">Tap a reactor to grey-out the terms that vanish and reveal its design equation.</div>
+    </div>
+    <div class="sim-out" style="justify-content:center">
+      <div id="balEq" style="font-size:24px; margin-bottom:16px">$$\color{gray}{F_{j0}-F_j}+\int_V\sum_i\nu_{ij}r_i\,dV=\color{gray}{\frac{dN_j}{dt}}$$</div>
+      <div style="font-size:15px; color:var(--muted); margin-bottom:6px">Reduces to</div>
+      <div id="balResult" class="bignum" style="font-size:30px">—</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-2 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-2" data-sec="Lecture 6-2">
+  <div class="big">6-2</div>
+  <p class="lbl">Lecture 6-2</p>
+  <p class="q">How do we find the time in an isothermal batch reactor to reach a desired conversion?</p>
+  <p class="sub">Constant volume &rarr; the mole balance is a set of ODEs in time. Integrate them (EQUATRAN <code>rkv</code>) to get every concentration profile.</p>
+</section>
+
+<section class="slide" data-title="Batch mole balance">
+  <div class="s-head"><p class="kicker">Design equation</p><h2>Batch reactor: homogeneous and solid-catalytic</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <div class="callout note">Homogeneous, constant $V$</div>
+      <div class="eq-box sm">$$\frac{1}{V}\frac{dN_j}{dt}=\sum_i \nu_{ij}r_i\;\Rightarrow\;\frac{dC_j}{dt}=\sum_i \nu_{ij}r_i$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout aside">Solid-catalytic (per catalyst mass $W$)</div>
+      <div class="eq-box sm">$$\frac{dN_j}{dt}=\sum_i \nu_{ij}r'_i\,W_{cat},\quad C_j=\frac{N_j}{V}$$</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:6px">Both are initial-value problems: give $N_{j0}$, integrate in $t$. EQUATRAN writes the initial value with <code>#</code> — e.g. <code>NA#NA0</code>.</div>
+</section>
+
+<section class="slide" data-title="Batch example — givens">
+  <div class="s-head"><p class="kicker">Worked example · liquid-phase multiple reaction</p><h2>Two reactions in a batch reactor</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{A}+2\text{B}\underset{k_2}{\overset{k_1}{\rightleftharpoons}}\text{C}+3\text{D}\qquad 2\text{A}+\text{C}\xrightarrow{k_3}\text{E}+\text{F}$$</div>
+      <div class="eq-box sm">$$r_1=k_1C_AC_B^2-k_2C_CC_D^3,\quad r_2=k_3C_A^2C_C$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout q">Determine the concentration profile of every component.</div>
+      <ul class="clean">
+        <li>$V=5\ \text{m}^3$ (constant)</li>
+        <li>$C_{A0}=0.3,\ C_{B0}=1\ \text{mol/m}^3$</li>
+        <li>$T=60^\circ\text{C}$, $T_0=40^\circ\text{C}$ (Arrhenius reference)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN — the model">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> the code that solves it</p><h2>Balance, concentration &amp; rate law — exactly as typed</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">Mole balance &amp; concentration</span></div>
+<pre class="code"><span class="c">//A+2B&lt;--&gt;C+3D   //2A+C--&gt;E+F</span>
+<span class="c">//Design Equation Mass Balance</span>
+1/V*NA'= -r1-2*r2;  NA#NA0
+1/V*NB'= -2*r1;     NB#NB0
+1/V*NC'=  r1-r2;    NC#NC0
+1/V*ND'=  3*r1;     ND#ND0
+1/V*NE'=  r2;       NE#NE0
+1/V*NF'=  r2;       NF#NF0
+V= 5 <span class="c">//m3</span>
+<span class="c">//Concentration</span>
+CA=NA/V ; CB=NB/V ; CC=NC/V
+CD=ND/V ; CE=NE/V ; CF=NF/V</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Rate law</span></div>
+<pre class="code"><span class="c">//Rate Law</span>
+r1=k1*CA*CB^2 - k2*CC*CD^3
+r2=k3*CA^2*CC
+
+<span class="c">// EQUATRAN reads these as a coupled</span>
+<span class="c">// system: it does NOT need them in</span>
+<span class="c">// order. You state each relation;</span>
+<span class="c">// the solver orders and integrates.</span>
+
+<span class="c">// '  = derivative w.r.t. the</span>
+<span class="c">//      integration variable (t)</span>
+<span class="c">// #  = initial condition</span>
+<span class="c">// ^  = power</span></pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN ↔ equations">
+  <div class="s-head"><p class="kicker">Line-by-line mapping</p><h2>Each code line is one physical relation</h2></div>
+  <div class="grow">
+    <table class="codemap">
+      <tr><th>EQUATRAN line</th><th>Equation</th><th>What it says</th></tr>
+      <tr><td class="cd">1/V*NA'= -r1-2*r2</td><td class="eqn">$\frac{1}{V}\frac{dN_A}{dt}=-r_1-2r_2$</td><td class="mn">A consumed by rxn 1 ($\nu{=}{-}1$) and rxn 2 ($\nu{=}{-}2$)</td></tr>
+      <tr><td class="cd">NA#NA0</td><td class="eqn">$N_A(0)=N_{A0}$</td><td class="mn">Initial condition for the ODE</td></tr>
+      <tr><td class="cd">r1=k1*CA*CB^2-k2*CC*CD^3</td><td class="eqn">$r_1=k_1C_AC_B^2-k_2C_CC_D^3$</td><td class="mn">Reversible rate: forward minus backward</td></tr>
+      <tr><td class="cd">CA=NA/V</td><td class="eqn">$C_A=N_A/V$</td><td class="mn">Convert moles to concentration each step</td></tr>
+      <tr><td class="cd">integral t[0,10] step 0.1 by rkv</td><td class="eqn">$\int_{0}^{10}\!dt$, Runge–Kutta</td><td class="mn"><code>rkv</code> = variable-step RK integrator</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN ↔ Python">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> vs <span class="tag python">Python</span> — same system</p><h2>Kinetics, conversion &amp; the solve step in both tools</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">EQUATRAN — Arrhenius, conversion, solve</span></div>
+<pre class="code"><span class="c">//Arrhenius (reference-T form)</span>
+k1=k10*exp((E1/R)*((1/(T0+273))
+        -(1/(T+273))))
+k10=10; E1=20000; T0=40; T=60
+R=8.314
+<span class="c">//Conversion / selectivity / yield</span>
+XA1=(1/2)*(NB0-NB)/NA0
+XA2=2*(NE-NE0)/NA0
+SC=(NC-NC0)/(NA0-NA)
+YC=(NC-NC0)/NA0
+<span class="c">//Solve</span>
+integral t[0,10] step 0.1 by rkv
+trend CA,CB,CC,CD,XA,SC,YC</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Python — scipy.integrate.solve_ivp</span></div>
+<pre class="code py"><span class="c">import numpy as np</span>
+<span class="c">from scipy.integrate import solve_ivp</span>
+R=8.314; T0,T=40,60
+arr=lambda k0,E: k0*np.exp((E/R)*
+      (1/(T0+273)-1/(T+273)))
+k1,k2,k3=arr(10,2e4),arr(10,3e4),arr(5,3e4)
+def rhs(t,C):
+    CA,CB,CC,CD,CE,CF=C
+    r1=k1*CA*CB**2-k2*CC*CD**3
+    r2=k3*CA**2*CC
+    return [-r1-2*r2,-2*r1,r1-r2,
+             3*r1,r2,r2]
+sol=solve_ivp(rhs,[0,10],
+     [.3,1,0,0,0,0],dense_output=True)</pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Batch — live concentrations" id="slide-batch1">
+  <div class="s-head"><p class="kicker">Interactive — the ODE system solved in your browser (RK4)</p><h2>Batch concentration profiles $C_j(t)$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Temperature $T$ <span class="val" id="b1Tval"></span></label>
+        <input type="range" id="b1T" min="40" max="90" step="1" value="60"></div>
+      <div class="sl"><label>Initial $C_{A0}$ <span class="val" id="b1Aval"></span></label>
+        <input type="range" id="b1A" min="0.1" max="0.5" step="0.05" value="0.3"></div>
+      <div class="callout note">Raising $T$ speeds every $k_i$ (Arrhenius) — the profiles reach equilibrium sooner. This is the exact system in the code on the previous slides.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="b1Canvas"></canvas></div>
+      <div class="readout-row"><span class="readout">final $X_A$ = <b id="b1XA">–</b></span><span class="readout">final $C_A$ = <b id="b1CA">–</b> mol/m³</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Batch — conversion & selectivity" id="slide-batch2">
+  <div class="s-head"><p class="kicker">Interactive — same solver, different readout</p><h2>Conversion, selectivity &amp; yield vs time</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Temperature $T$ <span class="val" id="b2Tval"></span></label>
+        <input type="range" id="b2T" min="40" max="90" step="1" value="60"></div>
+      <div class="callout aside">$X_{A1}=\tfrac12\dfrac{N_{B0}-N_B}{N_{A0}}$, &nbsp; $S_C=\dfrac{N_C-N_{C0}}{N_{A0}-N_A}$, &nbsp; $Y_C=\dfrac{N_C-N_{C0}}{N_{A0}}$</div>
+      <div class="callout note">Notice the trade-off: hotter runs raise conversion but the side reaction can lower the selectivity to C.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="b2Canvas"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-3 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-3" data-sec="Lecture 6-3">
+  <div class="big">6-3</div>
+  <p class="lbl">Lecture 6-3</p>
+  <p class="q">How do we find the time in an isothermal semi-batch reactor?</p>
+  <p class="sub">One stream is added (or removed) during operation, so the volume is no longer constant — we track moles and volume together.</p>
+</section>
+
+<section class="slide" data-title="Semi-batch mole balance">
+  <div class="s-head"><p class="kicker">Design equation · variable volume</p><h2>Add a feed term and a volume ODE</h2></div>
+  <div class="grow">
+    <div class="eq-box">$$\frac{dN_j}{dt}=F_{j0}+\Big(\textstyle\sum_i \nu_{ij}r_i\Big)V,\qquad \frac{dV}{dt}=v_0$$</div>
+    <div class="eq-step"><span>$F_{j0}$</span><span class="why">molar feed of species $j$ — zero for species not fed</span></div>
+    <div class="eq-step"><span>$\left(\sum_i\nu_{ij}r_i\right)V$</span><span class="why">generation uses the <b>current</b> volume $V(t)$, not $V_0$</span></div>
+    <div class="eq-step"><span>$C_j=N_j/V$</span><span class="why">concentration falls both by reaction <i>and</i> by dilution</span></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Semi-batch example — givens">
+  <div class="s-head"><p class="kicker">Worked example</p><h2>Feed A into a reactor charged with B</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{A}+2\text{B}\rightleftharpoons\text{C}+3\text{D}\qquad 2\text{A}+\text{C}\to\text{E}+\text{F}$$</div>
+      <div class="callout q">Determine the concentration profile of each component as A is fed.</div>
+    </div>
+    <div class="stack">
+      <ul class="clean">
+        <li>Initial charge $V_0=5\ \text{m}^3$, $C_{B0}=1\ \text{mol/m}^3$, $C_{A0}=0$</li>
+        <li>Feed of A: $F_{A0}=3$ or $0.3\ \text{mol/s}$</li>
+        <li>Volumetric feed $v_0=0.1\ \text{m}^3/\text{s}$</li>
+        <li>$T=60^\circ\text{C}$</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN — semi-batch">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> what changed from the batch code</p><h2>The feed term <code>+FA0</code> and the volume ODE <code>V'=v0</code></h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">Code</span></div>
+<pre class="code"><span class="c">//Design Equation Mass Balance</span>
+NA'=FA0+(-r1-2*r2)*V
+NB'=(-2*r1)*V
+NC'=(r1-r2)*V
+ND'=(3*r1)*V
+NE'=r2*V
+NF'=r2*V
+V'=v0
+v0=0.1 <span class="c">//m3/s</span>
+V#V0;  V0=5 <span class="c">//m3</span>
+FA0=0.3 <span class="c">//mol/s (or 3)</span>
+CA=NA/V; CB=NB/V; ...
+<span class="c">//initial</span>
+NA#NA0; NB#NB0 ...
+integral t[0,5] step 0.01 by rkv</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Read it against the batch model</span></div>
+      <table class="codemap" style="font-size:15px">
+        <tr><th>Line</th><th>Meaning</th></tr>
+        <tr><td class="cd">NA'=FA0+(...)*V</td><td class="mn">Same reaction terms as batch <b>plus</b> the feed $F_{A0}$</td></tr>
+        <tr><td class="cd">(...)*V</td><td class="mn">Rates multiplied by current $V$ (moles, not conc.)</td></tr>
+        <tr><td class="cd">V'=v0</td><td class="mn">$dV/dt=v_0$ — volume grows linearly</td></tr>
+        <tr><td class="cd">V#V0</td><td class="mn">Start from the initial charge $V_0$</td></tr>
+      </table>
+      <div class="callout note" style="font-size:16px; margin-top:10px">Python: identical <code>rhs</code> with a 7th state <code>V</code> and <code>dV=v0</code>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Semi-batch — live fill" id="slide-semi1">
+  <div class="s-head"><p class="kicker">Interactive — RK4 with a growing volume</p><h2>Concentration profiles as A is fed in</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Feed rate $F_{A0}$ <span class="val" id="s1Fval"></span></label>
+        <input type="range" id="s1F" min="0.3" max="3" step="0.3" value="3"></div>
+      <div class="sl"><label>Temperature $T$ <span class="val" id="s1Tval"></span></label>
+        <input type="range" id="s1T" min="40" max="90" step="1" value="60"></div>
+      <div class="callout note">A enters continuously and is consumed on arrival, so $C_A$ stays low while C, D build up. Volume rises from 5 to $5+v_0t$.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="s1Canvas"></canvas></div>
+      <div class="readout-row"><span class="readout">final $V$ = <b id="s1V">–</b> m³</span><span class="readout">final $C_C$ = <b id="s1CC">–</b> mol/m³</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Semi-batch — feed-rate effect" id="slide-semi2">
+  <div class="s-head"><p class="kicker">Interactive — compare the two feed rates from the source</p><h2>$F_{A0}=3$ (solid) vs $0.3$ mol/s (dashed)</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Temperature $T$ <span class="val" id="s2Tval"></span></label>
+        <input type="range" id="s2T" min="40" max="90" step="1" value="60"></div>
+      <div class="callout aside">A high feed rate floods the reactor with A — driving the second, undesired reaction ($2\text{A}+\text{C}\to\text{E}+\text{F}$) and consuming product C.</div>
+      <div class="callout note">Slow feeding keeps $C_A$ low: better selectivity to C, but slower throughput.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="s2Canvas"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-4 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-4" data-sec="Lecture 6-4">
+  <div class="big">6-4</div>
+  <p class="lbl">Lecture 6-4</p>
+  <p class="q">How do we find the volume of an isothermal CSTR for a target conversion?</p>
+  <p class="sub">Steady state + perfect mixing removes the time derivative — the balance becomes a set of <b>algebraic</b> equations.</p>
+</section>
+
+<section class="slide" data-title="CSTR design equation">
+  <div class="s-head"><p class="kicker">Design equation · steady state</p><h2>No accumulation &rarr; algebraic balance</h2></div>
+  <div class="grow">
+    <div class="eq-box">$$\frac{F_j-F_{j0}}{V}=\sum_i \nu_{ij}r_i\quad\Longleftrightarrow\quad V=\frac{F_{j0}-F_j}{-\sum_i \nu_{ij}r_i}$$</div>
+    <div class="eq-step"><span>rates $r_i$ evaluated at <b>exit</b> conditions</span><span class="why">the whole tank sits at the outlet composition</span></div>
+    <div class="eq-step"><span>$C_j=F_j/v$</span><span class="why">outlet concentration; $v=v_0$ for a liquid</span></div>
+    <div class="eq-step"><span>$\tau=V/v_0$</span><span class="why">space time — the design unknown we solve for</span></div>
+  </div>
+</section>
+
+<section class="slide" data-title="CSTR example — givens">
+  <div class="s-head"><p class="kicker">Worked example · gas/liquid multiple reaction</p><h2>Find $V$ so that $X_{A1}=0.40$</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{A}+2\text{B}\rightleftharpoons\text{C}+3\text{D}\qquad 2\text{A}+\text{C}\to\text{E}+\text{F}$$</div>
+      <div class="eq-box sm">$$k_1=10,\;k_2=5,\;k_3=2$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout q">Determine $V$ and every exit concentration when conversion of A in reaction 1 is 0.40.</div>
+      <ul class="clean">
+        <li>$F_{A0}=3\ \text{mol/s}$, $F_{B0}=10\ \text{mol/s}$</li>
+        <li>$v_0=10\ \text{m}^3/\text{s}$</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN ↔ Python (CSTR)">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> vs <span class="tag python">Python</span> — an algebraic root-find</h2><h2>Solve the coupled algebraic system, then back out $V$</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">EQUATRAN — FUNCTION returns V for a set XA1</span></div>
+<pre class="code"><span class="c">FUNCTION CSTR(VV;XA1,XA2,XA,SC,YC)</span>
+<span class="c">//Design Equation (algebraic)</span>
+(FA-FA0)/VV= -r1-2*r2
+(FB-FB0)/VV= -2*r1
+(FC-FC0)/VV=  r1-r2
+(FD-FD0)/VV=  3*r1
+(FE-FE0)/VV=  r2
+(FF-FF0)/VV=  r2
+r1=k1*CA*CB^2-k2*CC*CD^3
+r2=k3*CA^2*CC
+CA=FA/v0 ; ... ; v0=10
+XA1=(1/2)*(FB0-FB)/FA0
+END CSTR
+CSTR(VV, XA1=0.40)   <span class="c">// solve for VV</span></pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Python — scipy.optimize.fsolve</span></div>
+<pre class="code py"><span class="c">from scipy.optimize import fsolve</span>
+k1,k2,k3,v0=10,5,2,10
+FA0,FB0=3,10
+def eqs(F,V):
+    FA,FB,FC,FD,FE,FF=F
+    CA,CB,CC,CD=FA/v0,FB/v0,FC/v0,FD/v0
+    r1=k1*CA*CB**2-k2*CC*CD**3
+    r2=k3*CA**2*CC
+    return [FA-FA0-(-r1-2*r2)*V, FB-FB0-(-2*r1)*V,
+            FC-(r1-r2)*V, FD-3*r1*V, FE-r2*V, FF-r2*V]
+<span class="c"># outer loop: adjust V until XA1 = 0.40</span>
+solveV = lambda V: 0.5*(FB0-fsolve(eqs,[FA0,FB0,0,0,0,0],
+                 args=(V,))[1])/FA0 - 0.40</pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="CSTR design curve" id="slide-cstr1">
+  <div class="s-head"><p class="kicker">Interactive — steady state found by integrating the startup transient</p><h2>Conversion vs reactor volume</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reactor volume $V$ <span class="val" id="cs1Vval"></span></label>
+        <input type="range" id="cs1V" min="0.1" max="3" step="0.05" value="1.2"></div>
+      <div class="callout note">The red dot is your $V$. Reading off $X_{A1}=0.40$ gives $V\approx1.2\ \text{m}^3$ — the source answer $V=1.198\ \text{m}^3$.</div>
+      <div class="readout-row"><span class="readout">$X_{A1}$ = <b id="cs1XA1">–</b></span><span class="readout">$X_A$ = <b id="cs1XA">–</b></span><span class="readout">$S_C$ = <b id="cs1SC">–</b></span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="cs1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="CSTR startup" id="slide-cstr2">
+  <div class="s-head"><p class="kicker">Interactive — why the algebra works</p><h2>The startup transient settles to the algebraic solution</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reactor volume $V$ (sets $\tau=V/v_0$) <span class="val" id="cs2Vval"></span></label>
+        <input type="range" id="cs2V" min="0.2" max="3" step="0.1" value="1.2"></div>
+      <div class="callout aside">Model: $\dfrac{dC_j}{dt}=\dfrac{C_{j0}-C_j}{\tau}+\sum_i\nu_{ij}r_i$. At long time $dC_j/dt\to0$ — the CSTR algebraic balance.</div>
+      <div class="callout note">Larger $V$ &rarr; larger $\tau$ &rarr; more conversion, but a slower approach to steady state.</div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="cs2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-5 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-5" data-sec="Lecture 6-5">
+  <div class="big">6-5</div>
+  <p class="lbl">Lecture 6-5</p>
+  <p class="q">How do we find the concentration profile in a mixed-flow bioreactor?</p>
+  <p class="sub">A chemostat with a predator–prey culture — the same unsteady mixed-flow balance, but the rates are microbial growth kinetics.</p>
+</section>
+
+<section class="slide" data-title="Predator–prey model">
+  <div class="s-head"><p class="kicker">Worked example · <i>Alcaligenes</i> (prey) &amp; <i>Colpidium</i> (predator)</p><h2>Two cells competing on one substrate</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{X}_1+\text{S}\to\text{more X}_1\quad(r_1=\mu_1 C_{X1})$$ $$\text{X}_1+\text{X}_2\to\text{more X}_2\quad(r_2=\mu_2 C_{X2})$$</div>
+      <div class="callout aside">$\mu_1=\dfrac{\mu_{1m}C_S}{K_S+C_S}$ (prey on substrate), $\mu_2=\dfrac{\mu_{2m}C_{X1}}{K_P+C_{X1}}$ (predator on prey).</div>
+    </div>
+    <div class="stack">
+      <div class="callout q">Plot $C_{X1}, C_{X2}, C_S$ vs time for dilution $D=0.04\ \text{h}^{-1}$.</div>
+      <ul class="clean">
+        <li>$V=10\ \text{L}$, feed $C_{Sf}=250\ \text{mg/L}$</li>
+        <li>Initial: $C_{X1}=25,\ C_{X2}=7,\ C_S=10\ \text{mg/L}$</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN — bioreactor">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> the mixed-flow balance with growth kinetics</p><h2>Predation enters as a coupling term</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">Code</span></div>
+<pre class="code"><span class="c">//X1+S--&gt;moreX1+Product1</span>
+<span class="c">//X1+X2--&gt;moreX2+Product2</span>
+<span class="c">//Design Equation Mass Balance</span>
+NX1'=FX10-FX1+r1*V-(r2/2)*V; NX1#NX10
+NS' =FS0 -FS -r1*V;          NS#NS0
+NX2'=FX20-FX2+r2*V;          NX2#NX20
+<span class="c">//Rate law</span>
+r1=mu1*CX1
+r2=mu2*CX2
+<span class="c">//Concentration &amp; dilution</span>
+CX1=NX1/V; CS=NS/V; CX2=NX2/V
+v/V=0.04       <span class="c">// = D, 1/h</span>
+V=10; FX10=0; FX20=0
+integral t[0,600] step 1 by rkv</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Line-by-line</span></div>
+      <table class="codemap" style="font-size:15px">
+        <tr><th>Line</th><th>Meaning</th></tr>
+        <tr><td class="cd">+r1*V</td><td class="mn">Prey grows on substrate</td></tr>
+        <tr><td class="cd">-(r2/2)*V</td><td class="mn">Prey eaten by predator (coupling)</td></tr>
+        <tr><td class="cd">-FS -r1*V</td><td class="mn">Substrate washed out &amp; consumed</td></tr>
+        <tr><td class="cd">+r2*V</td><td class="mn">Predator grows on prey</td></tr>
+        <tr><td class="cd">v/V=0.04</td><td class="mn">Dilution rate $D$ = wash-out of all species</td></tr>
+      </table>
+      <div class="callout note" style="font-size:16px;margin-top:10px">The result is an oscillation — predator and prey chase each other in time.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Predator–prey dynamics" id="slide-bio1">
+  <div class="s-head"><p class="kicker">Interactive — RK4 chemostat, solved live</p><h2>Prey, predator &amp; substrate oscillate in time</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Dilution rate $D$ <span class="val" id="bio1Dval"></span></label>
+        <input type="range" id="bio1D" min="0.01" max="0.12" step="0.005" value="0.04"></div>
+      <div class="callout note">Predator ($C_{X2}$) peaks lag prey ($C_{X1}$) peaks — the classic quarter-cycle delay.</div>
+      <div class="callout aside">Push $D$ high enough and both cells wash out faster than they grow: the culture goes extinct.</div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="bio1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Phase portrait" id="slide-bio2">
+  <div class="s-head"><p class="kicker">Interactive — the same run in phase space</p><h2>Predator vs prey traces a limit cycle</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Dilution rate $D$ <span class="val" id="bio2Dval"></span></label>
+        <input type="range" id="bio2D" min="0.01" max="0.12" step="0.005" value="0.04"></div>
+      <div class="callout aside">Each loop is one oscillation. A closed loop = sustained oscillation; a spiral into a point = a stable steady state.</div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="bio2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-6 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-6" data-sec="Lecture 6-6">
+  <div class="big">6-6</div>
+  <p class="lbl">Lecture 6-6</p>
+  <p class="q">How do we find the volume of an isothermal tubular (PFR) reactor?</p>
+  <p class="sub">Steady state, plug flow: the balance is an ODE in volume. For gas phase, the volumetric flow itself changes as moles change.</p>
+</section>
+
+<section class="slide" data-title="PFR design equation">
+  <div class="s-head"><p class="kicker">Design equation · steady state</p><h2>A differential balance along the length</h2></div>
+  <div class="grow">
+    <div class="eq-box">$$\frac{dF_j}{dV}=\sum_i \nu_{ij}r_i,\qquad \tau=\frac{V}{v_0},\qquad C_j=\frac{F_j}{v}$$</div>
+    <div class="eq-step"><span>integrate from $V=0$ (inlet) to the exit</span><span class="why">an initial-value problem in $V$, solved with <code>rkv</code></span></div>
+    <div class="eq-step"><span>$F_j(0)=F_{j0}$</span><span class="why">feed molar flow rates set the initial condition</span></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Gas-phase volume change">
+  <div class="s-head"><p class="kicker">Why gas reactors are different</p><h2>Volumetric flow changes with moles, $P$ and $T$</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <div class="callout note">Liquid phase</div>
+      <div class="eq-box sm">$$v=v_0\;\;\Rightarrow\;\;C_j=\frac{F_j}{v_0}$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout aside">Gas phase (ideal)</div>
+      <div class="eq-box sm">$$v=v_0\left(\frac{P_0}{P}\right)\!\left(\frac{T}{T_0}\right)\!\left(\frac{F_T}{F_{T0}}\right)$$</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:6px">These two reactions produce more moles than they consume ($F_T\uparrow$), so a gas stream <b>expands</b> — diluting concentrations and needing a larger $V$ than the liquid case.</div>
+</section>
+
+<section class="slide" data-title="PFR example — givens">
+  <div class="s-head"><p class="kicker">Worked example</p><h2>Same reactions, now in a PFR</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{A}+2\text{B}\rightleftharpoons\text{C}+3\text{D}\quad 2\text{A}+\text{C}\to\text{E}+\text{F}$$</div>
+      <div class="eq-box sm">$$k_1=10,\;k_2=5,\;k_3=2$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout q">Find the PFR volume &amp; exit concentrations for $X_{A1}=0.40$.</div>
+      <ul class="clean">
+        <li>$F_{A0}=3$, $F_{B0}=10\ \text{mol/s}$, $v_0=10\ \text{m}^3/\text{s}$</li>
+        <li>Compare liquid vs gas phase</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN ↔ Python (PFR)">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> vs <span class="tag python">Python</span></p><h2>The design ODEs, with the gas volume-change line</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">EQUATRAN</span></div>
+<pre class="code"><span class="c">//Design Equation</span>
+FA'=-r1-2*r2; FA#FA0
+FB'=-2*r1;    FB#FB0
+FC'= r1-r2;   FC#FC0
+FD'= 3*r1;    FD#FD0
+FE'= r2; FF'= r2
+r1=k1*CA*CB^2-k2*CC*CD^3
+r2=k3*CA^2*CC
+<span class="c">//Volume change (gas)</span>
+FT0=FA0+FB0; FT=FA+FB+FC+FD+FE+FF
+v=v0*(P0/P)*(T/T0)*(FT/FT0)
+CA=FA/v; CB=FB/v; ...
+integral V[0,5] step 0.01 by rkv</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Python</span></div>
+<pre class="code py"><span class="c">from scipy.integrate import solve_ivp</span>
+k1,k2,k3,v0=10,5,2,10; FA0,FB0=3,10
+FT0=FA0+FB0
+def rhs(V,F,gas):
+    FT=sum(F)
+    v=v0*(FT/FT0) if gas else v0
+    CA,CB,CC,CD=[f/v for f in F[:4]]
+    r1=k1*CA*CB**2-k2*CC*CD**3
+    r2=k3*CA**2*CC
+    return [-r1-2*r2,-2*r1,r1-r2,3*r1,r2,r2]
+sol=solve_ivp(rhs,[0,2],[FA0,FB0,0,0,0,0],
+    args=(True,),dense_output=True,max_step=1e-3)</pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="PFR profile" id="slide-pfr1">
+  <div class="s-head"><p class="kicker">Interactive — dFj/dV integrated live</p><h2>Concentration profile along the PFR</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reactor volume $V$ <span class="val" id="pf1Vval"></span></label>
+        <input type="range" id="pf1V" min="0.1" max="2" step="0.05" value="0.69"></div>
+      <div class="sl"><label>Phase</label>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="reveal-btn pfphase" data-g="0" style="font-size:15px;padding:7px 16px">Liquid</button>
+          <button class="reveal-btn pfphase" data-g="1" style="font-size:15px;padding:7px 16px">Gas</button>
+        </div></div>
+      <div class="readout-row"><span class="readout">$X_{A1}$ at $V$ = <b id="pf1XA">–</b></span></div>
+      <div class="callout note" style="font-size:16px">Liquid reaches $X_{A1}=0.40$ at $V=0.69\ \text{m}^3$; the expanding gas needs $V=0.81\ \text{m}^3$.</div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="pf1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="PFR vs CSTR" id="slide-pfr2">
+  <div class="s-head"><p class="kicker">Interactive — the reactor-sizing punchline</p><h2>Volume needed: PFR vs CSTR for the same conversion</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Target $X_{A1}$ <span class="val" id="pf2Xval"></span></label>
+        <input type="range" id="pf2X" min="0.1" max="0.52" step="0.01" value="0.40"></div>
+      <div class="callout aside">For positive-order kinetics the PFR always needs less volume: it operates at high concentration all along its length, while the CSTR sits at the low exit concentration.</div>
+      <div class="readout-row"><span class="readout">PFR $V$ = <b id="pf2VP">–</b> m³</span><span class="readout">CSTR $V$ = <b id="pf2VC">–</b> m³</span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="pf2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-7 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-7" data-sec="Lecture 6-7">
+  <div class="big">6-7</div>
+  <p class="lbl">Lecture 6-7</p>
+  <p class="q">How do we find the weight of catalyst in an isothermal fixed-bed reactor?</p>
+  <p class="sub">A PFR packed with solid catalyst. Two new ingredients: rate per catalyst mass, and pressure drop through the bed (Ergun).</p>
+</section>
+
+<section class="slide" data-title="Packed-bed quantities">
+  <div class="s-head"><p class="kicker">Definitions</p><h2>Bed density, particle density &amp; void fraction</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-blue"><h3>Void fraction</h3><p>$$\Phi=\frac{\text{voids}}{\text{total bed}}\approx0.38\text{–}0.42$$</p></div>
+      <div class="card card-blue"><h3>Bed density</h3><p>$$\rho_b=(1-\Phi)\rho_c$$</p></div>
+      <div class="card card-blue"><h3>Design equation</h3><p>$$\frac{dF_j}{dW}=\sum_i \nu_{ij}r'_i$$</p></div>
+    </div>
+    <div class="callout note" style="margin-top:20px">$W=\rho_b V_{bed}$ ties catalyst weight to bed volume. Rates $r'_i$ are per kg of catalyst (mol · kg⁻¹ · s⁻¹).</div>
+  </div>
+</section>
+
+<section class="slide" data-title="Space velocity & Ergun">
+  <div class="s-head"><p class="kicker">Two more tools</p><h2>Space velocity and the pressure-drop equation</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <div class="callout aside">Space velocity (throughput per catalyst)</div>
+      <ul class="clean" style="font-size:19px">
+        <li>LHSV $=\dfrac{v_\text{liq}}{V_\text{bed}}$, GHSV $=\dfrac{v_\text{gas}}{V_\text{bed}}$</li>
+        <li>WHSV $=\dfrac{\dot m_\text{feed}}{W_\text{cat}}$</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="callout q">Ergun equation — pressure drop</div>
+      <div class="eq-box sm">$$\frac{dP}{dz}=-\frac{G}{\rho\,d_p}\frac{(1-\Phi)}{\Phi^3}\left[\frac{150(1-\Phi)\mu}{d_p}+1.75\,G\right]$$</div>
+      <p class="eq-note orange">$G=\dot m/A_c=\rho_0 u_0$ is the mass flux.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="FBR example — givens">
+  <div class="s-head"><p class="kicker">Worked example · gas-phase multiple reaction in an FBR</p><h2>Concentration &amp; pressure profile along the bed</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{A}+2\text{B}\rightleftharpoons\text{C}+3\text{D}\quad 2\text{A}+\text{C}\to\text{E}+\text{F}$$</div>
+      <ul class="clean" style="font-size:18px">
+        <li>$F_{A0}=3$, $F_{B0}=10\ \text{mol/s}$, $u_0=15\ \text{m/s}$</li>
+        <li>$d_p=5\ \text{mm}$, $\Phi=0.50$, $\rho_c=1200\ \text{kg/m}^3$</li>
+        <li>$P_F=20\ \text{bar}$, $\mu=0.03\ \text{cP}$; $M_{w}$: A 50, B 32, I 28</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="callout q">Determine the weight of catalyst needed to raise $X_{A1}$ from 0.20&rarr;0.25 and 0.65&rarr;0.70, and the pressure profile.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN ↔ Python (FBR)">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> vs <span class="tag python">Python</span> — balance + ideal gas + Ergun</p><h2>Integrate over catalyst weight $W$</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">EQUATRAN</span></div>
+<pre class="code"><span class="c">//Design (derivative w.r.t W)</span>
+FA'=-r1-2*r2; FA#FA0 ...
+<span class="c">//Catalyst &amp; Bed</span>
+dp=5e-3; void=0.50; CatDen=1200
+BedDen=(1-void)*CatDen
+u0=15; Ac=v0/u0; D=(4*Ac/3.14)^0.5
+<span class="c">//Ideal gas + volume change</span>
+PF*v0=FT0*R*(TF+273)
+v=v0*(P0/P)*(FT/FT0)
+<span class="c">//Ergun pressure drop</span>
+G=FeedDen0*u0
+P'=-(f*G^2/(FeedDen*dp))/((1-void)*Ac*CatDen)
+integral W[0.01,50] step 0.1 by rkv</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Python</span></div>
+<pre class="code py"><span class="c">from scipy.integrate import solve_ivp</span>
+def rhs(W,Y):
+    *F,P = Y
+    FT=sum(F); v=v0*(P0/P)*(FT/FT0)
+    CA,CB,CC,CD=[f/v for f in F[:4]]
+    r1=k1*CA*CB**2-k2*CC*CD**3
+    r2=k3*CA**2*CC
+    rho=FeedDen0*(P/P0)*(FT0/FT)
+    beta=G*(1-e)/(rho*dp*e**3)*(150*(1-e)*mu/dp
+          +1.75*G)          <span class="c"># Ergun</span>
+    dP=-beta/((1-e)*Ac*rho_c)
+    return [-r1-2*r2,-2*r1,r1-r2,3*r1,r2,r2,dP]
+sol=solve_ivp(rhs,[0.01,50],Y0,max_step=0.1)</pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Ergun line ↔ equation">
+  <div class="s-head"><p class="kicker">The pressure-drop line, decoded</p><h2>Mapping the Ergun code to the physics</h2></div>
+  <div class="grow">
+    <table class="codemap">
+      <tr><th>EQUATRAN</th><th>Equation</th><th>Meaning</th></tr>
+      <tr><td class="cd">BedDen=(1-void)*CatDen</td><td class="eqn">$\rho_b=(1-\Phi)\rho_c$</td><td class="mn">Convert particle density to bed density</td></tr>
+      <tr><td class="cd">G=FeedDen0*u0</td><td class="eqn">$G=\rho_0 u_0$</td><td class="mn">Superficial mass flux (kg·m⁻²·s⁻¹)</td></tr>
+      <tr><td class="cd">v=v0*(P0/P)*(FT/FT0)</td><td class="eqn">$v=v_0\frac{P_0}{P}\frac{F_T}{F_{T0}}$</td><td class="mn">Gas expands as $P\downarrow$ and moles $\uparrow$</td></tr>
+      <tr><td class="cd">P'=-(f*G^2/(...))</td><td class="eqn">$\dfrac{dP}{dW}=-\dfrac{\beta_0}{\rho_b A_c}$</td><td class="mn">Ergun drop per unit catalyst weight</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-title="FBR + pressure drop" id="slide-fbr1">
+  <div class="s-head"><p class="kicker">Interactive — Ergun coupled to conversion (RK4)</p><h2>Particle size sets the pressure drop &mdash; and the conversion</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Particle diameter $d_p$ <span class="val" id="fb1dval"></span></label>
+        <input type="range" id="fb1d" min="2" max="10" step="0.5" value="5"></div>
+      <div class="callout aside">Small particles = huge pressure drop ($\beta_0\propto 1/d_p^2$). $P$ falls, the gas expands, concentrations drop, and conversion stalls.</div>
+      <div class="readout-row"><span class="readout">exit $X$ = <b id="fb1X">–</b></span><span class="readout">exit $P/P_0$ = <b id="fb1P">–</b></span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="fb1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Ergun explorer" id="slide-fbr2">
+  <div class="s-head"><p class="kicker">Interactive — the Ergun equation itself</p><h2>What drives the pressure-drop gradient?</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Particle diameter $d_p$ <span class="val" id="fb2dval"></span></label>
+        <input type="range" id="fb2d" min="2" max="12" step="0.5" value="5"></div>
+      <div class="sl"><label>Void fraction $\Phi$ <span class="val" id="fb2vval"></span></label>
+        <input type="range" id="fb2v" min="0.35" max="0.6" step="0.01" value="0.5"></div>
+      <div class="sl"><label>Superficial velocity $u_0$ <span class="val" id="fb2uval"></span></label>
+        <input type="range" id="fb2u" min="2" max="20" step="1" value="15"></div>
+      <div class="readout-row"><span class="readout">$dP/dz$ = <b id="fb2beta">–</b> kPa/m</span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="fb2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Ethyl acetate FBR">
+  <div class="s-head"><p class="kicker">Worked example 2 · esterification</p><h2>Ethyl acetate: how much catalyst before $P$ drops too far?</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{C}_2\text{H}_5\text{OH}+\text{CH}_3\text{COOH}\to\text{EtOAc}+\text{H}_2\text{O}$$</div>
+<pre class="code" style="font-size:13px;max-height:210px"><span class="c">Function PBR(weight;X,P)</span>
+FE'=-r1; FA'=-r1; FEA'=r1; FW'=r1
+r1=k1*CE;  k1=1.2E-3
+PF=1.013E6; TF=118; u0=1; rho_c=2000
+<span class="c">// Ergun ... </span>
+X=(FE0-FE)/FE0
+integral W[0.01,weight] by rkv
+END;  PBR(weight,X,P); P=9*1.013E5</pre>
+    </div>
+    <div class="stack">
+      <div class="callout q">First-order in ethanol, pseudo-zero in acid. Keep exit $P>9$ atm.</div>
+      <div class="reveal"><button class="reveal-btn">Show results</button>
+        <div class="reveal-body">
+          <div class="callout note" style="font-size:18px">Max catalyst for $P>9$ atm: $W=63.4\ \text{kg}$ at $X=0.90$.<br>First 5% of conversion: $1.38\ \text{kg}$. &nbsp; Last 5% (0.85&rarr;0.90): $11.44\ \text{kg}$ — an 8&times; penalty as concentration &amp; pressure fall.</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-8 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-8" data-sec="Lecture 6-8">
+  <div class="big">6-8</div>
+  <p class="lbl">Lecture 6-8</p>
+  <p class="q">When can we skip the solver and use an analytical solution?</p>
+  <p class="sub">For a single reaction with an apparent rate law, each ideal reactor has a closed-form concentration–conversion relation.</p>
+</section>
+
+<section class="slide" data-title="Analytical solutions">
+  <div class="s-head"><p class="kicker">Single reaction · apparent rate $-r_A=kC_A^n$</p><h2>Closed-form $C_A/C_{A0}$ by reactor and order</h2></div>
+  <div class="grow">
+    <table class="compare sm">
+      <tr><th>Order</th><th>Batch / PFR (time or $\tau$)</th><th>CSTR (steady)</th></tr>
+      <tr><td>1st</td><td>$\dfrac{C_A}{C_{A0}}=e^{-k\tau}$</td><td>$\dfrac{C_A}{C_{A0}}=\dfrac{1}{1+k\tau}$</td></tr>
+      <tr><td>2nd</td><td>$\dfrac{C_A}{C_{A0}}=\dfrac{1}{1+k\tau C_{A0}}$</td><td>$C_A=\dfrac{-1+\sqrt{1+4k\tau C_{A0}}}{2k\tau}$</td></tr>
+      <tr><td>$n$th</td><td>$\dfrac{C_A}{C_{A0}}=\big[1+(n-1)C_{A0}^{\,n-1}k\tau\big]^{\frac{1}{1-n}}$</td><td>solve $\;x+\mathrm{Da}\,x^n=1$</td></tr>
+    </table>
+    <div class="callout note" style="margin-top:16px">$\tau=V/v_0$ (flow) or $t$ (batch). These are the exact solutions the numerical <code>rkv</code> run must reproduce — a great sanity check.</div>
+  </div>
+</section>
+
+<section class="slide" data-title="Expansion factor">
+  <div class="s-head"><p class="kicker">Gas phase only</p><h2>The expansion factor $\varepsilon$ handles volume change</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\varepsilon=\frac{\sum\nu_i/\nu_A\;F_{A0}}{F_{I0}+F_0}=y_{A0}\,\delta$$</div>
+      <div class="callout aside">For $\text{A}\to 4\text{R}$ with pure A feed: $\varepsilon=\dfrac{(4-1)}{-1}\times\dfrac{1}{1}\!=\!3$ &rarr; the gas quadruples in volume at full conversion.</div>
+    </div>
+    <div class="stack">
+      <div class="callout note">Add 50% inert ($F_{I0}=F_{A0}$): $\varepsilon=3\times\tfrac12=1.5$.</div>
+      <div class="eq-box sm">$$v=v_0(1+\varepsilon X)$$</div>
+      <p class="eq-note orange">Bigger $\varepsilon$ &rarr; more dilution &rarr; conversion is harder to reach.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Analytical: PFR vs CSTR" id="slide-an1">
+  <div class="s-head"><p class="kicker">Interactive — the closed-form solutions, live</p><h2>$C_A/C_{A0}$ vs Damköhler number for order $n$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Reaction order $n$ <span class="val" id="an1nval"></span></label>
+        <input type="range" id="an1n" min="0.5" max="3" step="0.1" value="2"></div>
+      <div class="callout aside">$\mathrm{Da}=k\,C_{A0}^{\,n-1}\tau$. Batch/PFR (solid) always leaves less A than a CSTR (dashed) of the same $\tau$ for $n>0$.</div>
+      <div class="callout note">That gap is exactly why the PFR needed less volume in 6-6.</div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="an1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Expansion effect" id="slide-an2">
+  <div class="s-head"><p class="kicker">Interactive — 1st-order gas PFR with volume change</p><h2>How $\varepsilon$ shifts the conversion curve</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Expansion factor $\varepsilon$ <span class="val" id="an2eval"></span></label>
+        <input type="range" id="an2e" min="-0.5" max="3" step="0.1" value="1"></div>
+      <div class="callout aside">$k\tau=(1+\varepsilon)\ln\dfrac{1}{1-X}-\varepsilon X$. The dashed line is the $\varepsilon=0$ (liquid) reference.</div>
+      <div class="callout note">$\varepsilon>0$: expanding gas dilutes A, so more $k\tau$ (more reactor) is needed for the same $X$.</div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="an2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-9 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-9" data-sec="Lecture 6-9">
+  <div class="big">6-9</div>
+  <p class="lbl">Lecture 6-9</p>
+  <p class="q">How do we design when external mass transfer limits the rate?</p>
+  <p class="sub">The reactant must first travel from the bulk gas to the catalyst surface. Two resistances in series — reaction and film diffusion.</p>
+</section>
+
+<section class="slide" data-title="Two resistances in series">
+  <div class="s-head"><p class="kicker">Apparent rate with a film</p><h2>Reaction and mass transfer in series</h2></div>
+  <div class="grow">
+    <div class="eq-box">$$r'=\frac{k'_r\,k_c a\,C_{Ab}}{k'_r+k_c a}\qquad\Longleftrightarrow\qquad \frac{1}{k_\text{eff}}=\frac{1}{k'_r}+\frac{1}{k_c a}$$</div>
+    <table class="compare sm" style="margin-top:8px">
+      <tr><th>Regime</th><th>Condition</th><th>Apparent rate</th><th>What controls</th></tr>
+      <tr><td>Reaction controlled</td><td>$k_c a\gg k'_r$</td><td>$r'=k'_r C_{Ab}$</td><td style="color:var(--green)">chemistry / temperature</td></tr>
+      <tr><td>MT controlled</td><td>$k_c a\ll k'_r$</td><td>$r'=k_c a\,C_{Ab}$</td><td style="color:var(--red)">flow, particle size</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-title="Fixed bed, MT-limited">
+  <div class="s-head"><p class="kicker">Derivation</p><h2>Conversion in a mass-transfer-limited bed</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\frac{dF_A}{dW}=-k_c a\,C_A,\quad \varepsilon_A=0\Rightarrow v=v_0$$</div>
+      <div class="eq-box sm">$$\ln\frac{1}{1-X}=\frac{k_c a\,\rho_b L}{u}$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout aside">From correlations $Sh=2+0.6\,Re^{1/2}Sc^{1/3}$:</div>
+      <div class="eq-box sm">$$k_c a\;\propto\;\frac{u^{1/2}}{d_p^{3/2}}$$</div>
+      <p class="eq-note orange">So $\ln\frac{1}{1-X}\propto \dfrac{L}{u^{1/2}d_p^{3/2}}$ — smaller particles help, faster flow hurts (per pass).</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Cl₂ removal example">
+  <div class="s-head"><p class="kicker">Worked example · trace Cl₂ scrubbing</p><h2>Can we push 63.2% removal higher?</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="callout q">Currently $X=0.632$ (so $k_c a\rho_b L/u=1$). Proposal: increase $u\times4$, decrease $d_p\times3$, increase $L\times1.5$. New removal?</div>
+      <div class="eq-box sm">$$\frac{E_\text{new}}{E_\text{old}}=f_L\,f_u^{-1/2}\,f_d^{-3/2}$$</div>
+    </div>
+    <div class="stack">
+      <div class="reveal"><button class="reveal-btn">Show answer</button>
+        <div class="reveal-body"><div class="callout note">$E_\text{new}=1\cdot(1.5)(4)^{-1/2}(1/3)^{-3/2}=3.90$<br>$X=1-e^{-3.90}=\mathbf{0.98}$ — removal rises from 63% to ~98%. Smaller particles dominate the gain.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Resistances explorer" id="slide-mt1">
+  <div class="s-head"><p class="kicker">Interactive — which resistance dominates?</p><h2>The series-resistance rate, live</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>$\log_{10}(k_c a\,/\,k'_r)$ <span class="val" id="mt1rval"></span></label>
+        <input type="range" id="mt1r" min="-2" max="2" step="0.1" value="0"></div>
+      <div class="callout aside">Left = mass-transfer controlled ($k_ca$ small); right = reaction controlled. The effective rate can never beat the slower step.</div>
+      <div class="readout-row"><span class="readout">$k_\text{eff}/k'_r$ = <b id="mt1keff">–</b></span><span class="readout">regime: <b id="mt1reg">–</b></span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="mt1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Cl₂ design explorer" id="slide-mt2">
+  <div class="s-head"><p class="kicker">Interactive — reproduce the Cl₂ result</p><h2>Effect of velocity, particle size &amp; bed length on removal</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>velocity factor $f_u$ <span class="val" id="mt2uval"></span></label>
+        <input type="range" id="mt2u" min="1" max="6" step="0.5" value="4"></div>
+      <div class="sl"><label>diameter factor $f_d$ <span class="val" id="mt2dval"></span></label>
+        <input type="range" id="mt2d" min="0.2" max="2" step="0.05" value="0.333"></div>
+      <div class="sl"><label>length factor $f_L$ <span class="val" id="mt2lval"></span></label>
+        <input type="range" id="mt2l" min="0.5" max="3" step="0.1" value="1.5"></div>
+      <div class="readout-row"><span class="readout">removal $X$ = <b id="mt2X">–</b></span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="mt2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== LECTURE 6-10 ==================== -->
+<section class="slide section-slide" data-title="Lecture 6-10" data-sec="Lecture 6-10">
+  <div class="big">6-10</div>
+  <p class="lbl">Lecture 6-10</p>
+  <p class="q">How do we design when internal (pore) diffusion limits the rate?</p>
+  <p class="sub">Reactant must diffuse into the porous pellet. The effectiveness factor $\eta$ discounts the intrinsic rate for the concentration gradient inside.</p>
+</section>
+
+<section class="slide" data-title="Effectiveness factor">
+  <div class="s-head"><p class="kicker">Thiele modulus &amp; effectiveness</p><h2>How much of the pellet actually works?</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\eta=\frac{3}{\phi^2}\big(\phi\coth\phi-1\big),\quad \phi=R\sqrt{\frac{k\rho_c}{D_e}}$$</div>
+      <div class="callout note">$\phi\ll1$: whole pellet reacts, $\eta\to1$.<br>$\phi\gg1$: only the outer shell reacts, $\eta\to 3/\phi$.</div>
+    </div>
+    <div class="stack">
+      <div class="callout aside">$\phi$ = (reaction rate) / (diffusion rate). Big pellets, fast reaction, or slow diffusion &rarr; big $\phi$ &rarr; small $\eta$.</div>
+      <div class="eq-box sm">$$r'_\text{obs}=\eta\,k\,C_{As}^n$$</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Strong pore diffusion">
+  <div class="s-head"><p class="kicker">$n$th-order, strong internal resistance</p><h2>The apparent order shifts to $(n+1)/2$</h2></div>
+  <div class="grow">
+    <div class="eq-box">$$r'_1=\left(\frac{2}{n+1}\right)^{1/2}\frac{3}{R}\sqrt{\frac{k'_n D_e}{\rho_c}}\;C_{Ab}^{\,(n+1)/2}$$</div>
+    <div class="eq-step"><span>$\eta=\left(\dfrac{2}{n+1}\right)^{1/2}\dfrac{3}{R}\sqrt{\dfrac{D_e}{k'_n\rho_c}}\;C_{Ab}^{\,(1-n)/2}$</span><span class="why">the effectiveness factor, concentration-dependent for $n\ne1$</span></div>
+    <div class="eq-step"><span>observed order $=\dfrac{n+1}{2}$</span><span class="why">a true 2nd-order reaction looks 1.5-order from outside</span></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Internal-MT FBR example">
+  <div class="s-head"><p class="kicker">Worked example · 2nd-order decomposition</p><h2>$\text{A}\to\text{B}+2\text{C}$ in a diffusion-limited bed</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="callout q">Internal-diffusion limited. Find the bed length for $X=0.80$.</div>
+      <ul class="clean" style="font-size:18px">
+        <li>$k=0.05\ \text{m}^6/(\text{mol·gcat·s})$, $n=2$</li>
+        <li>$u_0=3\ \text{m/s}$, $T=250^\circ\text{C}$, $P=500\ \text{kPa}$</li>
+        <li>$d_p=4\ \text{mm}$, $\Phi=0.40$, $\rho_c=2\times10^6\ \text{g/m}^3$</li>
+        <li>$D_e=2.66\times10^{-8}\ \text{m}^2/\text{s}$</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="reveal"><button class="reveal-btn">Show answer</button>
+        <div class="reveal-body"><div class="callout note">$C_{Ab0}=P/RT=115\ \text{mol/m}^3$; analytical &amp; numerical both give $L=0.0182\ \text{m}$ — the live sim reproduces this.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="EQUATRAN ↔ Python (internal MT)">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> vs <span class="tag python">Python</span> — the effectiveness-factor line</p><h2>One-D bed balance with $\eta(C_{Ab})$</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">EQUATRAN</span></div>
+<pre class="code"><span class="c">//A--&gt;B+2C, internal-diffusion limited</span>
+<span class="c">//Design Equation Mass Balance</span>
+-vsu*CAb'+rmass*BedDen=0
+rmass=-Eta*kmass*CAb^n
+CAb0=P/(R*(T+273.15))
+CAb#CAb0;  n=2
+<span class="c">//generalized effectiveness factor</span>
+Eta=((2/(n+1))^0.5)*3/Rp
+    *((De/(CatDen*kmass))^0.5)
+    *(CAb^((1-n)/2))
+X=(CAb0-CAb)/CAb0
+integral z[0,L] step 0.001 by rkv</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">Python</span></div>
+<pre class="code py">import numpy as np
+from scipy.integrate import solve_ivp
+k,n,De,rhoc,Rp=0.05,2,2.66e-8,2e6,2e-3
+vsu,BedDen=3,1.2e6
+CAb0=500000/(8.314*523.15)   <span class="c"># 115</span>
+def eta(C):
+    return (2/(n+1))**.5*3/Rp*(De/(rhoc*k))**.5\
+           *C**((1-n)/2)
+def rhs(z,C):
+    r=-eta(C[0])*k*C[0]**n
+    return [r*BedDen/vsu]
+sol=solve_ivp(rhs,[0,0.02],[CAb0],max_step=1e-4)</pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="η vs Thiele modulus" id="slide-im1">
+  <div class="s-head"><p class="kicker">Interactive — the classic effectiveness curve</p><h2>Effectiveness factor $\eta$ vs Thiele modulus $\phi$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Thiele modulus $\phi$ <span class="val" id="im1pval"></span></label>
+        <input type="range" id="im1p" min="0.1" max="10" step="0.1" value="2"></div>
+      <div class="callout aside">Dashed line = strong-diffusion asymptote $\eta=3/\phi$. Above $\phi\approx3$ the pellet is starved in its core.</div>
+      <div class="readout-row"><span class="readout">$\eta$ = <b id="im1eta">–</b></span><span class="readout">pellet used: <b id="im1pct">–</b></span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="im1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Bed length vs particle size" id="slide-im2">
+  <div class="s-head"><p class="kicker">Interactive — the A→B+2C bed, solved live (RK4)</p><h2>Conversion along the bed vs particle size</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Particle diameter $d_p$ <span class="val" id="im2dval"></span></label>
+        <input type="range" id="im2d" min="1" max="8" step="0.5" value="4"></div>
+      <div class="sl"><label>Effective diffusivity $D_e$ (×10⁻⁸) <span class="val" id="im2Dval"></span></label>
+        <input type="range" id="im2D" min="1" max="8" step="0.5" value="2.66"></div>
+      <div class="callout note">Smaller pellets raise $\eta$ (shorter diffusion path) &rarr; the bed reaches $X=0.80$ in a shorter length.</div>
+      <div class="readout-row"><span class="readout">$L$ for $X=0.80$ = <b id="im2L">–</b> mm</span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="im2Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== CLASS ACTIVITY ==================== -->
+<section class="slide section-slide" data-title="Class Activity" data-sec="Class Activity">
+  <div class="big">✎</div>
+  <p class="lbl">Week 5 · Class Activity</p>
+  <p class="q">Now you drive the solver — four reactor problems to set up and solve.</p>
+  <p class="sub">Each maps onto a lecture above: write the balance, the rate law, the property relations, then integrate with EQUATRAN (or Python).</p>
+</section>
+
+<section class="slide" data-title="Problem I — Methanol">
+  <div class="s-head"><p class="kicker">Problem I · gas-phase fixed-bed reactor</p><h2>Methanol from CO₂ hydrogenation</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\text{CO}_2+3\text{H}_2\to\text{CH}_3\text{OH}+\text{H}_2\text{O}$$ $$\text{CO}_2+\text{H}_2\to\text{CO}+\text{H}_2\text{O}\;\;(\text{RWGS})$$</div>
+      <ul class="clean" style="font-size:17px">
+        <li>Cu/ZnO, $\rho_c=1400\ \text{kg/m}^3$, $\Phi=0.42$, $d_p=2\ \text{mm}$, $W=20\ \text{g}$</li>
+        <li>Tube ID 1.20 cm, $T=230^\circ\text{C}$, 30 bar</li>
+        <li>$F_{CO_2}=7.04\times10^{-4}$, $F_{H_2}=3.44\times10^{-3}\ \text{mol/min}$</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="callout q">Determine: pressure drop · conversion, yield, selectivity · effluent flow of each species · whether external &amp; internal MT matter.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Problem I — EQUATRAN plan">
+  <div class="s-head"><p class="kicker"><span class="tag equatran">EQUATRAN</span> how to build it</p><h2>Two reactions, Ergun, and a Mears MT check</h2></div>
+  <div class="codewrap">
+    <div class="codecol"><div class="codecap"><span class="lang">Balance + rate + Ergun</span></div>
+<pre class="code"><span class="c">/* CO2+3H2--&gt;CH3OH+H2O (desired)
+   CO2+ H2--&gt;CO  +H2O (RWGS)  */</span>
+FCO2'=-r1-r2; FH2'=-3*r1-r2
+FME'=r1; FCO'=r2; FW'=r1+r2
+r1=k1*CCO2; r2=k2*CCO2    <span class="c">// mol/(s.kg)</span>
+CCO2=FCO2/v; v=v0*(P0/P)*(FT/FT0)
+<span class="c">//Ergun</span>
+G=gasden0*u0
+P'=-(f*G^2/(gasden*dp))/((1-void)*Ac*CatDen)
+integral W[0.01,Wcat] step 1E-5 by rkv</pre></div>
+    <div class="codecol"><div class="codecap"><span class="lang">External MT (Mears criterion)</span></div>
+<pre class="code"><span class="c">//Sherwood / mass-transfer coeff kg</span>
+Sh=2+0.60*Re^(1/2)*Sc^(1/3)
+Sh=kg*dp/De
+Sc=vis/(gasden*De)
+<span class="c">//Mears criterion (external)</span>
+Mear=r_obs*rho_b*(dp/2)/(kg*CCO2)
+<span class="c">// Mear &lt; 0.15  =&gt; no external MT limit</span>
+<span class="c">//Weisz-Prater (internal) similarly</span></pre></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Problems II–IV">
+  <div class="s-head"><p class="kicker">The rest of the set</p><h2>Three more to solve with the same toolkit</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-blue"><h3>II · Batch (isothermal)</h3><p>Liquid-phase multiple reaction — find every concentration profile. <span style="color:var(--muted)">→ use 6-2.</span></p></div>
+      <div class="card card-blue"><h3>III · Benzene pyrolysis</h3><p>$2\text{C}_6\text{H}_6\rightleftharpoons\text{C}_{12}\text{H}_{10}+\text{H}_2$ gas PFR. <span style="color:var(--muted)">→ use 6-6.</span></p></div>
+      <div class="card card-blue"><h3>IV · Isopropyl PBR</h3><p>$\eta=0.60$, find $D$, $W$ &amp; bed length for $X_P=0.90$. <span style="color:var(--muted)">→ use 6-7 &amp; 6-10.</span></p></div>
+    </div>
+    <div class="callout note" style="margin-top:20px">Problem IV answer (for reference): $W=10{,}000\ \text{g}$ gives $X_P=0.90$ at WHSV $=83.7\ \text{h}^{-1}$.</div>
+  </div>
+</section>
+
+<section class="slide" data-title="Methanol selectivity" id="slide-act1">
+  <div class="s-head"><p class="kicker">Interactive — Problem I, the selectivity question</p><h2>Temperature sets methanol vs RWGS (CO)</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Temperature $T$ <span class="val" id="ac1Tval"></span></label>
+        <input type="range" id="ac1T" min="200" max="270" step="2" value="230"></div>
+      <div class="callout aside">Rate data: $k_{1}$ (methanol) rises from $1.0\!\times\!10^{-9}$ to $3.5\!\times\!10^{-9}$ over 200→250°C; $k_2$ (RWGS) from $2.0\!\times\!10^{-10}$ to $3.2\!\times\!10^{-10}$.</div>
+      <div class="readout-row"><span class="readout">$S_{\text{CH}_3\text{OH}}$ = <b id="ac1S">–</b></span><span class="readout">$E_1$≈52, $E_2$≈19 kJ/mol</span></div>
+    </div>
+    <div class="sim-out"><div class="chart-box"><canvas id="ac1Canvas"></canvas></div></div>
+  </div>
+</section>
+
+<!-- ==================== QUIZ ==================== -->
+<section class="slide section-slide" data-title="Quiz" data-sec="Quiz">
+  <div class="big">?</div>
+  <p class="lbl">Check yourself</p>
+  <p class="q">Five questions — one per big idea from Lecture 6.</p>
+</section>
+
+<section class="slide" data-title="Quiz 1">
+  <div class="s-head"><p class="kicker">Check your understanding · 1 / 5</p><h2>Simplifying the general balance</h2></div>
+  <div class="grow"><div class="quiz-q">
+    <p class="q-text">Which term of $F_{j0}-F_j+\int_V\sum\nu_{ij}r_i\,dV=\dfrac{dN_j}{dt}$ vanishes for a steady-state CSTR?</p>
+    <button class="q-opt" data-explain="The flow terms stay — a CSTR has both inlet and outlet streams. It's the time derivative that is zero.">The flow terms $F_{j0}-F_j$</button>
+    <button class="q-opt" data-correct data-explain="Correct. Steady state means no accumulation, so $dN_j/dt=0$ and the balance becomes algebraic: $F_{j0}-F_j+\sum\nu_{ij}r_iV=0$.">The accumulation term $dN_j/dt$</button>
+    <button class="q-opt" data-explain="The generation term is the whole point of a reactor — it never vanishes while reaction occurs.">The generation term $\int_V\sum\nu_{ij}r_i\,dV$</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 2">
+  <div class="s-head"><p class="kicker">Check your understanding · 2 / 5</p><h2>Reading the semi-batch code</h2></div>
+  <div class="grow"><div class="quiz-q">
+    <p class="q-text">In the semi-batch script, why does <code>NA'=FA0+(-r1-2*r2)*V</code> carry <code>+FA0</code> but <code>NB'</code> does not?</p>
+    <button class="q-opt" data-correct data-explain="Correct. Only species A is fed during operation, so only A's balance gets the molar feed term $F_{A0}$. B was fully charged at the start.">Only A is fed into the reactor; B was charged initially</button>
+    <button class="q-opt" data-explain="A is not a catalyst here — it is a reactant being added. The feed term reflects the physical inlet stream, not stoichiometry.">Because A is the catalyst</button>
+    <button class="q-opt" data-explain="Stoichiometric coefficients appear in the reaction terms ($-r_1-2r_2$), not in the feed term. The $+F_{A0}$ is the external feed of A.">Because A has a stoichiometric coefficient of 1</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 3">
+  <div class="s-head"><p class="kicker">Check your understanding · 3 / 5</p><h2>PFR vs CSTR sizing</h2></div>
+  <div class="grow"><div class="quiz-q">
+    <p class="q-text">For a positive-order reaction at the same conversion, which reactor needs the smaller volume — and why did our example give 0.69 vs 1.19 m³?</p>
+    <button class="q-opt" data-correct data-explain="Correct. The PFR (0.69 m³) beats the CSTR (1.19 m³): it operates at high reactant concentration along its whole length, while the CSTR sits entirely at the low exit concentration where the rate is slowest.">PFR — it runs at high concentration all along its length</button>
+    <button class="q-opt" data-explain="The CSTR needed the larger volume (1.19 m³). A perfectly mixed tank operates at the low exit concentration, so its rate is slow everywhere.">CSTR — perfect mixing makes it more efficient</button>
+    <button class="q-opt" data-explain="They are only equal for a zero-order reaction, where rate is independent of concentration. For positive order the PFR always wins.">They are always equal</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 4">
+  <div class="s-head"><p class="kicker">Check your understanding · 4 / 5</p><h2>Pressure drop &amp; particle size</h2></div>
+  <div class="grow"><div class="quiz-q">
+    <p class="q-text">You halve the catalyst particle diameter $d_p$. What happens to the Ergun pressure drop through the bed?</p>
+    <button class="q-opt" data-explain="It rises sharply, not falls. Both Ergun terms scale inversely with $d_p$ (the viscous term as $1/d_p^2$), so smaller particles pack tighter and resist flow more.">It falls — smaller particles leave more room</button>
+    <button class="q-opt" data-correct data-explain="Correct. Pressure drop increases strongly: the viscous term $\propto 1/d_p^2$ and the inertial term $\propto 1/d_p$. This is the trade-off — small particles help internal diffusion but cost pressure.">It rises sharply — the bed resists flow more</button>
+    <button class="q-opt" data-explain="Ergun's equation depends explicitly on $d_p$, so pressure drop is far from unchanged.">It stays about the same</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 5">
+  <div class="s-head"><p class="kicker">Check your understanding · 5 / 5</p><h2>Apparent order under pore diffusion</h2></div>
+  <div class="grow"><div class="quiz-q">
+    <p class="q-text">A truly 2nd-order reaction is strongly limited by internal pore diffusion. What reaction order do you measure from outside the pellet?</p>
+    <button class="q-opt" data-explain="You would measure 2 only with no diffusion limit. Strong pore diffusion changes the apparent order.">2 — diffusion does not change the order</button>
+    <button class="q-opt" data-correct data-explain="Correct. The observed order becomes $(n+1)/2=(2+1)/2=1.5$, because the effectiveness factor carries a $C^{(1-n)/2}$ dependence.">1.5 — the apparent order is $(n+1)/2$</button>
+    <button class="q-opt" data-explain="First order corresponds to a true order of $n=1$ under strong diffusion, giving $(1+1)/2=1$. Here $n=2$.">1 — everything looks first order</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<!-- ==================== KEY TAKEAWAYS ==================== -->
+<section class="slide" data-title="Key takeaways">
+  <div class="s-head"><p class="kicker">Exit ticket</p><h2>Key Takeaways</h2></div>
+  <div class="grow">
+    <div class="tk"><div class="n">1</div><p>Every design equation is the one general mole balance — drop the terms your reactor's assumptions kill.</p></div>
+    <div class="tk"><div class="n">2</div><p>Batch, semi-batch &amp; PFR/FBR give ODEs; the CSTR gives algebra. Write balance → rate law → property relations, then integrate.</p></div>
+    <div class="tk"><div class="n">3</div><p>For gas beds, always carry volume change and Ergun pressure drop — they can dominate the design.</p></div>
+    <div class="tk"><div class="n">4</div><p>Mass transfer (external film or internal pores) can control the rate and shift the apparent order — check it.</p></div>
+    <p class="quiz-score" style="margin-top:20px"></p>
+    <p style="color:var(--muted); font-size:17px; margin-top:14px">Write down one question you still have — bring it to the next class.</p>
+  </div>
+</section>
+
+<!-- SLIDES_PLACEHOLDER -->
+</div>
+
+<div id="progress"></div>
+<div id="hud">
+  <button id="btnToc" title="Contents (T)">☰</button>
+  <button id="btnPrev" title="Previous (←)">‹</button>
+  <button id="btnNext" title="Next (→)">›</button>
+</div>
+<div id="toc"><div class="panel"><h3>CONTENTS</h3><div id="tocList"></div></div></div>
+
+<script>
+/* ================= Deck engine ================= */
+const DECK_META = { course: '2105604 ADV CHE KINETICS' };  // footer text
+
+const el = id => document.getElementById(id);
+const cs = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function fmt(x, d = 3){
+  if (!isFinite(x)) return '–';
+  if (x !== 0 && (Math.abs(x) < 1e-3 || Math.abs(x) >= 1e5)) return x.toExponential(d - 1);
+  return parseFloat(x.toPrecision(d)).toString();
+}
+function mix(c1, c2, t){
+  const p = c => [1,3,5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const a = p(c1), b = p(c2);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+const Deck = (() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = -1;
+  const enterCbs = [];
+
+  let _sec = '';
+  slides.forEach((s, i) => {
+    if (s.dataset.sec) _sec = s.dataset.sec;
+    if (s.classList.contains('title-slide') || s.classList.contains('section-slide') || s.dataset.nofooter !== undefined) return;
+    const f = document.createElement('div');
+    f.className = 's-foot';
+    f.innerHTML = `<span>${DECK_META.course}</span><span class="s-sec">${_sec}</span><span>${i + 1} / ${slides.length}</span>`;
+    s.appendChild(f);
+  });
+
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    location.hash = '#/' + (cur + 1);
+    el('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+    [...document.querySelectorAll('#tocList a')].forEach((a, j) => a.classList.toggle('cur', j === cur));
+    fireEnter(false);
+  }
+  function fireEnter(onlyUnfired){
+    enterCbs.forEach(c => {
+      const hit = (typeof c.key === 'number') ? c.key === cur : slides[cur].id === c.key;
+      if (!hit) return;
+      if (onlyUnfired && c.fired) return;
+      if (c.once && c.fired) return;
+      try{ c.fn(); c.fired = true; }catch(e){ console.error(e); }
+    });
+  }
+  addEventListener('load', () => fireEnter(true));
+  function onEnter(key, fn, opts = {}){ enterCbs.push({ key, fn, once: !!opts.once, fired: false }); }
+
+  const list = el('tocList');
+  slides.forEach((s, i) => {
+    if (s.dataset.sec){ const h = document.createElement('div'); h.className = 'sec'; h.textContent = s.dataset.sec; list.appendChild(h); }
+    const a = document.createElement('a');
+    a.href = '#/' + (i + 1);
+    a.textContent = (i + 1) + '. ' + (s.dataset.title || s.querySelector('h1,h2,.q')?.textContent.slice(0, 60) || 'Slide');
+    a.onclick = e => { e.preventDefault(); goTo(i); toc(false); };
+    list.appendChild(a);
+  });
+  function toc(open){ el('toc').classList.toggle('open', open ?? !el('toc').classList.contains('open')); }
+  el('toc').addEventListener('click', e => { if (e.target === el('toc')) toc(false); });
+  el('btnToc').onclick = () => toc();
+  el('btnPrev').onclick = () => goTo(cur - 1);
+  el('btnNext').onclick = () => goTo(cur + 1);
+
+  addEventListener('keydown', e => {
+    if (['ArrowRight',' ','PageDown'].includes(e.key)){ e.preventDefault(); goTo(cur + 1); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); goTo(cur - 1); }
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End') goTo(slides.length - 1);
+    else if (e.key.toLowerCase() === 't') toc();
+    else if (e.key === 'Escape') toc(false);
+    else if (e.key.toLowerCase() === 'f'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+    else if (e.key.toLowerCase() === 'o') debugOverflow();
+  });
+
+  function debugOverflow(){
+    const st = el('stage').getBoundingClientRect();
+    const sc = st.width / 1280;
+    const report = [];
+    slides.forEach((s, i) => {
+      const wasActive = s.classList.contains('active');
+      if (!wasActive) s.classList.add('active');
+      s.querySelectorAll('*').forEach(n => {
+        const r = n.getBoundingClientRect();
+        if ((!r.width && !r.height) || n.closest('.q-explain')) return;
+        const past = Math.max(r.bottom - st.bottom, r.right - st.right) / sc;
+        if (past > 2){
+          n.style.outline = '3px solid red';
+          report.push(`slide ${i + 1}: <${n.tagName.toLowerCase()} class="${n.className}"> ${Math.round(past)}px past edge`);
+        }
+      });
+      if (!wasActive) s.classList.remove('active');
+    });
+    if (report.length){ console.warn('OVERFLOW REPORT\n' + report.join('\n')); }
+    window.__overflowReport = report;
+    alert(report.length ? report.length + ' overflowing element(s) outlined red - see console' : 'No overflow - all slides fit 1280x720');
+    return report;
+  }
+
+  let x0 = null;
+  addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 60) goTo(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
+
+  function fit(){
+    const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.98;
+    el('stage').style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  function hashIndex(){ const m = location.hash.match(/#\/(\d+)/); return m ? +m[1] - 1 : NaN; }
+  addEventListener('hashchange', () => { const i = hashIndex(); if (!isNaN(i) && i !== cur) goTo(i); });
+  const h0 = hashIndex();
+  goTo(isNaN(h0) ? 0 : h0);
+
+  return { goTo, onEnter, get current(){ return cur; }, get count(){ return slides.length; } };
+})();
+
+/* ================= KaTeX ================= */
+const KATEX_OPTS = { delimiters: [
+  { left: '$$', right: '$$', display: true },
+  { left: '$', right: '$', display: false },
+  { left: '\\(', right: '\\)', display: false },
+  { left: '\\[', right: '\\]', display: true }
+], throwOnError: false };
+document.addEventListener('DOMContentLoaded', () => {
+  const tryRender = () => window.renderMathInElement
+    ? renderMathInElement(document.body, KATEX_OPTS)
+    : setTimeout(tryRender, 120);
+  tryRender();
+});
+
+/* ================= Quiz engine ================= */
+const Quiz = { score: 0, answered: 0, total: document.querySelectorAll('.quiz-q').length };
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const exp = q.querySelector('.q-explain');
+  q.querySelectorAll('.q-opt').forEach(opt => opt.addEventListener('click', () => {
+    if (q.dataset.done) return;
+    q.dataset.done = '1';
+    const ok = opt.hasAttribute('data-correct');
+    opt.classList.add(ok ? 'right' : 'wrong');
+    q.querySelectorAll('.q-opt[data-correct]').forEach(c => c.classList.add('right'));
+    q.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+    if (exp){
+      exp.innerHTML = opt.getAttribute('data-explain') || '';
+      exp.classList.add('show');
+      if (window.renderMathInElement) renderMathInElement(exp, KATEX_OPTS);
+    }
+    Quiz.answered++; if (ok) Quiz.score++;
+    document.querySelectorAll('.quiz-score').forEach(s =>
+      s.textContent = `Quiz score: ${Quiz.score} / ${Quiz.total}` + (Quiz.answered < Quiz.total ? ` (${Quiz.total - Quiz.answered} unanswered)` : ''));
+  }));
+});
+
+/* ================= Reveal blocks ================= */
+document.querySelectorAll('.reveal-btn').forEach(b =>
+  b.addEventListener('click', () => b.closest('.reveal').classList.add('open')));
+
+/* ================= Simulation helpers ================= */
+function bindSlider(id, fn){
+  const s = el(id);
+  if(!s) return null;
+  const h = () => fn(+s.value);
+  s.addEventListener('input', h); h();
+  return s;
+}
+// RK4 integrator for reactor ODE systems. deriv(x, y[]) -> dy[]
+function rk4(deriv, y0, x0, x1, n){
+  const h = (x1 - x0) / n;
+  const xs = [x0], ys = [y0.slice()];
+  let x = x0, y = y0.slice();
+  for (let i = 0; i < n; i++){
+    const k1 = deriv(x, y);
+    const k2 = deriv(x + h/2, y.map((v,j)=>v + h/2*k1[j]));
+    const k3 = deriv(x + h/2, y.map((v,j)=>v + h/2*k2[j]));
+    const k4 = deriv(x + h,   y.map((v,j)=>v + h*k3[j]));
+    y = y.map((v,j)=> v + h/6*(k1[j] + 2*k2[j] + 2*k3[j] + k4[j]));
+    x = x + h;
+    xs.push(x); ys.push(y.slice());
+  }
+  return { xs, ys };
+}
+// house Chart.js line factory
+function lineChart(canvasId, datasets, xTitle, yTitle, opts={}){
+  return new Chart(el(canvasId), {
+    type:'line',
+    data:{ datasets },
+    options:{ animation:false, responsive:true, maintainAspectRatio:false, parsing:false, normalized:true,
+      interaction:{mode:'nearest', intersect:false},
+      plugins:{ legend:{ display: datasets.length>1, labels:{boxWidth:14, font:{size:13}} }, tooltip:{enabled:true} },
+      scales:{
+        x:{ type:'linear', title:{display:true,text:xTitle}, grid:{display:false}, ...(opts.x||{}) },
+        y:{ title:{display:true,text:yTitle}, grid:{color:cs('--line')}, ...(opts.y||{}) } } }
+  });
+}
+if(window.Chart){ Chart.defaults.font.family="'Montserrat','Prompt',sans-serif"; Chart.defaults.font.size=13; Chart.defaults.color='#6B7280'; }
+const PAL = ['#1F497D','#C00000','#1A8038','#D97706','#4F81BD','#7B2D8E'];
+
+/* ================= Slide simulation logic ================= */
+/* ---- 6-1 Arrhenius simulator ---- */
+(() => {
+  const A = 1e7, R = 8.314;
+  const kf = (T, E) => A * Math.exp(-E * 1000 / (R * T));
+  let chart;
+  const Ts = []; for (let T = 300; T <= 900; T += 10) Ts.push(T);
+  function curve(E){ return Ts.map(T => ({ x: T, y: kf(T, E) })); }
+  Deck.onEnter('slide-arr', () => {
+    chart = lineChart('arrCanvas',
+      [{ label: 'k(T)', data: curve(80), borderColor: cs('--blue'), borderWidth: 3, pointRadius: 0, tension: .3 },
+       { label: 'operating point', data: [], borderColor: cs('--red'), backgroundColor: cs('--red'), pointRadius: 6, showLine: false }],
+      'T (K)', 'k (1/s)', { y: { type: 'logarithmic' } });
+    update();
+  }, { once: true });
+  function update(){
+    if (!el('arrT')) return;
+    const T = +el('arrT').value, E = +el('arrE').value;
+    el('arrTval').textContent = T + ' K';
+    el('arrEval').textContent = E + ' kJ/mol';
+    el('arrKout').textContent = 'k = ' + fmt(kf(T, E));
+    if (chart){ chart.data.datasets[0].data = curve(E); chart.data.datasets[1].data = [{ x: T, y: kf(T, E) }]; chart.update('none'); }
+  }
+  ['arrT', 'arrE'].forEach(id => el(id) && el(id).addEventListener('input', update));
+})();
+
+/* ---- 6-1 General-balance explorer ---- */
+(() => {
+  const eqs = {
+    batch: { eq: '\\color{lightgray}{F_{j0}-F_j}+\\int_V\\sum_i\\nu_{ij}r_i\\,dV=\\frac{dN_j}{dt}', res: '\\dfrac{dN_j}{dt}=\\displaystyle\\sum_i \\nu_{ij} r_i\\,V', d: 'No flow in or out; unsteady. Accumulation balances generation.' },
+    semi: { eq: 'F_{j0}\\color{lightgray}{-F_j}+\\int_V\\sum_i\\nu_{ij}r_i\\,dV=\\frac{dN_j}{dt}', res: '\\dfrac{dN_j}{dt}=F_{j0}+\\displaystyle\\sum_i \\nu_{ij} r_i\\,V', d: 'Feed in, no outflow; volume grows as dV/dt = v_0.' },
+    cstr: { eq: 'F_{j0}-F_j+\\sum_i\\nu_{ij}r_i\\,V=\\color{lightgray}{\\frac{dN_j}{dt}}', res: 'F_{j0}-F_j+\\displaystyle\\sum_i \\nu_{ij} r_i\\,V=0', d: 'Steady state, perfectly mixed: an algebraic equation, no derivative.' },
+    pfr: { eq: 'F_{j0}-F_j+\\int_V\\sum_i\\nu_{ij}r_i\\,dV=\\color{lightgray}{\\frac{dN_j}{dt}}', res: '\\dfrac{dF_j}{dV}=\\displaystyle\\sum_i \\nu_{ij} r_i', d: 'Steady state, differential slice along the length V.' }
+  };
+  document.querySelectorAll('.balbtn').forEach(b => b.addEventListener('click', () => {
+    const e = eqs[b.dataset.r];
+    el('balEq').innerHTML = '$$' + e.eq + '$$';
+    el('balResult').innerHTML = '$' + e.res + '$';
+    el('balDesc').textContent = e.d;
+    if (window.renderMathInElement){ renderMathInElement(el('balEq'), KATEX_OPTS); renderMathInElement(el('balResult'), KATEX_OPTS); }
+  }));
+})();
+/* ---- 6-2 Batch reactor solver (shared) ---- */
+function batchSolve(T, CA0, CB0, tmax, n){
+  const Tk = T + 273, T0k = 40 + 273, R = 8.314;
+  const ar = (k0, E) => k0 * Math.exp((E / R) * (1 / T0k - 1 / Tk));
+  const k1 = ar(10, 20000), k2 = ar(10, 30000), k3 = ar(5, 30000);
+  const deriv = (t, C) => {
+    const [CA, CB, CC, CD] = C;
+    const r1 = k1 * CA * CB * CB - k2 * CC * CD * CD * CD;
+    const r2 = k3 * CA * CA * CC;
+    return [-r1 - 2 * r2, -2 * r1, r1 - r2, 3 * r1, r2, r2];
+  };
+  const { xs, ys } = rk4(deriv, [CA0, CB0, 0, 0, 0, 0], 0, tmax, n);
+  return { xs, ys, CA0, CB0 };
+}
+function batchSample(sol, every){
+  const out = { t: [], CA: [], CB: [], CC: [], CD: [], CE: [], CF: [], XA1: [], XA2: [], XA: [], SC: [], YC: [] };
+  for (let i = 0; i < sol.xs.length; i += every){
+    const t = sol.xs[i], y = sol.ys[i];
+    out.t.push(t);
+    ['CA','CB','CC','CD','CE','CF'].forEach((k, j) => out[k].push({ x: t, y: Math.max(0, y[j]) }));
+    const XA1 = 0.5 * (sol.CB0 - y[1]) / sol.CA0, XA2 = 2 * y[4] / sol.CA0;
+    const denom = sol.CA0 - y[0];
+    out.XA1.push({ x: t, y: XA1 }); out.XA2.push({ x: t, y: XA2 }); out.XA.push({ x: t, y: XA1 + XA2 });
+    out.SC.push({ x: t, y: denom > 1e-6 ? y[2] / denom : 0 }); out.YC.push({ x: t, y: y[2] / sol.CA0 });
+  }
+  return out;
+}
+(() => {
+  let c1;
+  function run1(){
+    if (!el('b1T')) return;
+    const T = +el('b1T').value, CA0 = +el('b1A').value;
+    el('b1Tval').textContent = T + ' °C'; el('b1Aval').textContent = CA0 + ' mol/m³';
+    const s = batchSolve(T, CA0, 1, 10, 1200), d = batchSample(s, 12);
+    const last = s.ys[s.ys.length - 1];
+    el('b1XA').textContent = fmt(0.5 * (1 - last[1]) / CA0 + 2 * last[4] / CA0, 3);
+    el('b1CA').textContent = fmt(Math.max(0, last[0]), 3);
+    if (c1){ const names=['CA','CB','CC','CD','CE','CF']; names.forEach((n,i)=> c1.data.datasets[i].data = d[n]); c1.update('none'); }
+  }
+  Deck.onEnter('slide-batch1', () => {
+    const names=['CA','CB','CC','CD','CE','CF'];
+    c1 = lineChart('b1Canvas', names.map((n,i)=>({ label:n, data:[], borderColor:PAL[i], borderWidth:2.5, pointRadius:0, tension:.25 })),
+      't (s)', 'C (mol/m³)');
+    run1();
+  }, { once: true });
+  ['b1T','b1A'].forEach(id => el(id) && el(id).addEventListener('input', run1));
+
+  let c2;
+  function run2(){
+    if (!el('b2T')) return;
+    const T = +el('b2T').value; el('b2Tval').textContent = T + ' °C';
+    const s = batchSolve(T, 0.3, 1, 10, 1200), d = batchSample(s, 12);
+    if (c2){ ['XA1','XA2','XA','SC','YC'].forEach((n,i)=> c2.data.datasets[i].data = d[n]); c2.update('none'); }
+  }
+  Deck.onEnter('slide-batch2', () => {
+    const defs=[['XA1',PAL[0]],['XA2',PAL[1]],['XA total',PAL[4]],['SC',PAL[2]],['YC',PAL[3]]];
+    c2 = lineChart('b2Canvas', defs.map(([l,col])=>({ label:l, data:[], borderColor:col, borderWidth:2.5, pointRadius:0, tension:.25 })),
+      't (s)', 'fraction (–)', { y:{ min:0, max:1.05 } });
+    run2();
+  }, { once: true });
+  el('b2T') && el('b2T').addEventListener('input', run2);
+})();
+/* ---- 6-3 Semi-batch solver (shared) ---- */
+function semiSolve(T, FA0, tmax, n){
+  const Tk = T + 273, T0k = 40 + 273, R = 8.314;
+  const ar = (k0, E) => k0 * Math.exp((E / R) * (1 / T0k - 1 / Tk));
+  const k1 = ar(10, 20000), k2 = ar(10, 30000), k3 = ar(5, 30000);
+  const v0 = 0.1, V0 = 5, CB0 = 1;
+  const deriv = (t, y) => {
+    const V = y[6];
+    const CA = y[0]/V, CB = y[1]/V, CC = y[2]/V, CD = y[3]/V;
+    const r1 = k1*CA*CB*CB - k2*CC*CD*CD*CD;
+    const r2 = k3*CA*CA*CC;
+    return [FA0+(-r1-2*r2)*V, (-2*r1)*V, (r1-r2)*V, (3*r1)*V, r2*V, r2*V, v0];
+  };
+  // initial moles: NB0 = CB0*V0, rest 0
+  const { xs, ys } = rk4(deriv, [0, CB0*V0, 0, 0, 0, 0, V0], 0, tmax, n);
+  return { xs, ys };
+}
+function semiConc(sol, idx, every){ // returns [{x,y}] of concentration of species idx
+  const out = [];
+  for (let i = 0; i < sol.xs.length; i += every){ const V = sol.ys[i][6]; out.push({ x: sol.xs[i], y: Math.max(0, sol.ys[i][idx] / V) }); }
+  return out;
+}
+(() => {
+  let c1;
+  function run1(){
+    if (!el('s1F')) return;
+    const F = +el('s1F').value, T = +el('s1T').value;
+    el('s1Fval').textContent = F + ' mol/s'; el('s1Tval').textContent = T + ' °C';
+    const s = semiSolve(T, F, 5, 1000);
+    const lastV = s.ys[s.ys.length-1][6];
+    el('s1V').textContent = fmt(lastV, 3);
+    el('s1CC').textContent = fmt(s.ys[s.ys.length-1][2]/lastV, 3);
+    if (c1){ [0,1,2,3].forEach((idx,k)=> c1.data.datasets[k].data = semiConc(s, idx, 10)); c1.update('none'); }
+  }
+  Deck.onEnter('slide-semi1', () => {
+    const defs=[['CA',PAL[0]],['CB',PAL[1]],['CC',PAL[2]],['CD',PAL[3]]];
+    c1 = lineChart('s1Canvas', defs.map(([l,col])=>({label:l,data:[],borderColor:col,borderWidth:2.5,pointRadius:0,tension:.25})),
+      't (s)', 'C (mol/m³)');
+    run1();
+  }, { once: true });
+  ['s1F','s1T'].forEach(id => el(id) && el(id).addEventListener('input', run1));
+
+  let c2;
+  function run2(){
+    if (!el('s2T')) return;
+    const T = +el('s2T').value; el('s2Tval').textContent = T + ' °C';
+    const hi = semiSolve(T, 3, 5, 1000), lo = semiSolve(T, 0.3, 5, 1000);
+    if (c2){
+      c2.data.datasets[0].data = semiConc(hi, 0, 10); // CA hi
+      c2.data.datasets[1].data = semiConc(hi, 2, 10); // CC hi
+      c2.data.datasets[2].data = semiConc(lo, 0, 10); // CA lo
+      c2.data.datasets[3].data = semiConc(lo, 2, 10); // CC lo
+      c2.update('none');
+    }
+  }
+  Deck.onEnter('slide-semi2', () => {
+    c2 = lineChart('s2Canvas', [
+      { label:'CA (F=3)', data:[], borderColor:PAL[0], borderWidth:2.5, pointRadius:0 },
+      { label:'CC (F=3)', data:[], borderColor:PAL[2], borderWidth:2.5, pointRadius:0 },
+      { label:'CA (F=0.3)', data:[], borderColor:PAL[0], borderWidth:2, borderDash:[6,4], pointRadius:0 },
+      { label:'CC (F=0.3)', data:[], borderColor:PAL[2], borderWidth:2, borderDash:[6,4], pointRadius:0 }
+    ], 't (s)', 'C (mol/m³)');
+    run2();
+  }, { once: true });
+  el('s2T') && el('s2T').addEventListener('input', run2);
+})();
+/* ---- 6-4 CSTR: steady state via startup transient ---- */
+const CSTR = (() => {
+  const k1=10,k2=5,k3=2,v0=10, C0=[0.3,1,0,0,0,0];
+  function net(C){ const[CA,CB,CC,CD]=C; const r1=k1*CA*CB*CB-k2*CC*CD*CD*CD, r2=k3*CA*CA*CC;
+    return [-r1-2*r2,-2*r1,r1-r2,3*r1,r2,r2]; }
+  function transient(V){ // returns full trajectory {xs,ys}
+    const tau=V/v0, deriv=(t,C)=>{ const n=net(C); return C.map((c,j)=>(C0[j]-c)/tau + n[j]); };
+    const T=Math.max(4, 30*tau);
+    return rk4(deriv,[0.3,1,0,0,0,0],0,T,1500);
+  }
+  function steady(V){ const tr=transient(V); const C=tr.ys[tr.ys.length-1];
+    const XA1=0.5*(1-C[1])/0.3, XA2=2*C[4]/0.3, denom=0.3-C[0];
+    return { C, XA1, XA2, XA:XA1+XA2, SC: denom>1e-6?C[2]/denom:0, YC:C[2]/0.3 }; }
+  return { transient, steady, v0 };
+})();
+(() => {
+  let c1, sweep=null;
+  function buildSweep(){ sweep={V:[],XA1:[],XA2:[],XA:[]}; for(let V=0.1;V<=3.001;V+=0.1){ const s=CSTR.steady(V);
+    sweep.V.push(V); sweep.XA1.push({x:V,y:s.XA1}); sweep.XA2.push({x:V,y:s.XA2}); sweep.XA.push({x:V,y:s.XA}); } }
+  function run1(){
+    if(!el('cs1V')) return;
+    const V=+el('cs1V').value; el('cs1Vval').textContent=V+' m³';
+    const s=CSTR.steady(V);
+    el('cs1XA1').textContent=fmt(s.XA1,3); el('cs1XA').textContent=fmt(s.XA,3); el('cs1SC').textContent=fmt(s.SC,3);
+    if(c1){ c1.data.datasets[3].data=[{x:V,y:s.XA1}]; c1.update('none'); }
+  }
+  Deck.onEnter('slide-cstr1', () => {
+    if(!sweep) buildSweep();
+    c1=lineChart('cs1Canvas',[
+      {label:'XA1',data:sweep.XA1,borderColor:PAL[0],borderWidth:2.5,pointRadius:0},
+      {label:'XA2',data:sweep.XA2,borderColor:PAL[1],borderWidth:2.5,pointRadius:0},
+      {label:'XA total',data:sweep.XA,borderColor:PAL[2],borderWidth:2.5,pointRadius:0},
+      {label:'your V',data:[],borderColor:PAL[1],backgroundColor:PAL[1],pointRadius:6,showLine:false}
+    ],'V (m³)','conversion (–)',{y:{min:0,max:1}});
+    run1();
+  }, { once:true });
+  el('cs1V') && el('cs1V').addEventListener('input', run1);
+
+  let c2;
+  function run2(){
+    if(!el('cs2V')) return;
+    const V=+el('cs2V').value; el('cs2Vval').textContent=V+' m³ (τ='+fmt(V/CSTR.v0,2)+' s)';
+    const tr=CSTR.transient(V);
+    const every=Math.max(1,Math.floor(tr.xs.length/80));
+    const names=['CA','CB','CC','CD'];
+    if(c2){ [0,1,2,3].forEach((idx,k)=>{ const d=[]; for(let i=0;i<tr.xs.length;i+=every) d.push({x:tr.xs[i],y:Math.max(0,tr.ys[i][idx])}); c2.data.datasets[k].data=d; }); c2.update('none'); }
+  }
+  Deck.onEnter('slide-cstr2', () => {
+    c2=lineChart('cs2Canvas',[['CA',PAL[0]],['CB',PAL[1]],['CC',PAL[2]],['CD',PAL[3]]].map(([l,col])=>({label:l,data:[],borderColor:col,borderWidth:2.5,pointRadius:0,tension:.2})),
+      't (s)','C (mol/m³)');
+    run2();
+  }, { once:true });
+  el('cs2V') && el('cs2V').addEventListener('input', run2);
+})();
+/* ---- 6-5 Bioreactor predator-prey chemostat ---- */
+function bioSolve(D, tmax, n){
+  const Sf=250, mu1m=0.4, Ks=12, mu2m=0.18, Kp=30, Y1=0.4, Y2=0.5;
+  const deriv=(t,y)=>{ let[S,H,P]=y; S=Math.max(0,S);H=Math.max(0,H);P=Math.max(0,P);
+    const mu1=mu1m*S/(Ks+S), mu2=mu2m*H/(Kp+H);
+    return [ D*(Sf-S) - mu1*H/Y1, mu1*H - mu2*P/Y2 - D*H, mu2*P - D*P ]; };
+  return rk4(deriv,[10,25,7],0,tmax,n);
+}
+(() => {
+  let c1;
+  function run1(){ if(!el('bio1D'))return; const D=+el('bio1D').value; el('bio1Dval').textContent=D+' h⁻¹';
+    const s=bioSolve(D,600,3000), every=8;
+    const S=[],H=[],P=[]; for(let i=0;i<s.xs.length;i+=every){ S.push({x:s.xs[i],y:Math.max(0,s.ys[i][0])}); H.push({x:s.xs[i],y:Math.max(0,s.ys[i][1])}); P.push({x:s.xs[i],y:Math.max(0,s.ys[i][2])}); }
+    if(c1){ c1.data.datasets[0].data=H; c1.data.datasets[1].data=P; c1.data.datasets[2].data=S; c1.update('none'); } }
+  Deck.onEnter('slide-bio1', () => {
+    c1=lineChart('bio1Canvas',[
+      {label:'CX1 prey',data:[],borderColor:PAL[2],borderWidth:2.5,pointRadius:0},
+      {label:'CX2 predator',data:[],borderColor:PAL[1],borderWidth:2.5,pointRadius:0},
+      {label:'CS substrate',data:[],borderColor:PAL[3],borderWidth:2,pointRadius:0,borderDash:[5,4]}
+    ],'t (h)','concentration (mg/L)');
+    run1();
+  }, { once:true });
+  el('bio1D') && el('bio1D').addEventListener('input', run1);
+
+  let c2;
+  function run2(){ if(!el('bio2D'))return; const D=+el('bio2D').value; el('bio2Dval').textContent=D+' h⁻¹';
+    const s=bioSolve(D,900,4500), pts=[]; for(let i=Math.floor(s.xs.length*0.15);i<s.xs.length;i+=4){ pts.push({x:Math.max(0,s.ys[i][1]),y:Math.max(0,s.ys[i][2])}); }
+    if(c2){ c2.data.datasets[0].data=pts; c2.update('none'); } }
+  Deck.onEnter('slide-bio2', () => {
+    c2=lineChart('bio2Canvas',[{label:'trajectory',data:[],borderColor:PAL[5],borderWidth:1.8,pointRadius:0}],
+      'CX1 prey (mg/L)','CX2 predator (mg/L)');
+    run2();
+  }, { once:true });
+  el('bio2D') && el('bio2D').addEventListener('input', run2);
+})();
+/* ---- 6-6 PFR solver + PFR/CSTR comparison ---- */
+const PFR = (() => {
+  const k1=10,k2=5,k3=2,v0=10,FA0=3,FB0=10,FT0=13;
+  function deriv(gas){ return (V,F)=>{ const FT=F[0]+F[1]+F[2]+F[3]+F[4]+F[5];
+    const v = gas ? v0*(FT/FT0) : v0;
+    const CA=F[0]/v,CB=F[1]/v,CC=F[2]/v,CD=F[3]/v;
+    const r1=k1*CA*CB*CB-k2*CC*CD*CD*CD, r2=k3*CA*CA*CC;
+    return [-r1-2*r2,-2*r1,r1-r2,3*r1,r2,r2]; }; }
+  function solve(Vmax,gas,n){ return rk4(deriv(gas),[FA0,FB0,0,0,0,0],0,Vmax,n); }
+  function VforX(target,gas){ const s=solve(3,gas,3000); for(let i=1;i<s.xs.length;i++){
+    const XA=0.5*(FB0-s.ys[i][1])/FA0, XAp=0.5*(FB0-s.ys[i-1][1])/FA0;
+    if(XA>=target){ const f=(target-XAp)/(XA-XAp); return s.xs[i-1]+f*(s.xs[i]-s.xs[i-1]); } } return 3; }
+  return { solve, VforX, v0, FA0, FB0 };
+})();
+function cstrVforX(target){ let lo=0.05,hi=4; for(let it=0;it<40;it++){ const mid=(lo+hi)/2;
+  (CSTR.steady(mid).XA1<target)?(lo=mid):(hi=mid); } return (lo+hi)/2; }
+(() => {
+  let c1, phase=0;
+  function run1(){ if(!el('pf1V'))return; const V=+el('pf1V').value; el('pf1Vval').textContent=V+' m³';
+    const s=PFR.solve(V,phase,600);
+    const FB=s.ys[s.ys.length-1][1]; el('pf1XA').textContent=fmt(0.5*(PFR.FB0-FB)/PFR.FA0,3);
+    const every=Math.max(1,Math.floor(s.xs.length/70));
+    const FT0=13;
+    const names=[0,1,2,3];
+    if(c1){ names.forEach((idx,k)=>{ const d=[]; for(let i=0;i<s.xs.length;i+=every){ const F=s.ys[i]; const FT=F.reduce((a,b)=>a+b,0); const v=phase?PFR.v0*(FT/FT0):PFR.v0; d.push({x:s.xs[i],y:Math.max(0,F[idx]/v)});} c1.data.datasets[k].data=d; }); c1.update('none'); } }
+  Deck.onEnter('slide-pfr1', () => {
+    c1=lineChart('pf1Canvas',[['CA',PAL[0]],['CB',PAL[1]],['CC',PAL[2]],['CD',PAL[3]]].map(([l,col])=>({label:l,data:[],borderColor:col,borderWidth:2.5,pointRadius:0,tension:.2})),
+      'V (m³)','C (mol/m³)');
+    run1();
+  }, { once:true });
+  el('pf1V') && el('pf1V').addEventListener('input', run1);
+  document.querySelectorAll('.pfphase').forEach(b=>b.addEventListener('click',()=>{ phase=+b.dataset.g; document.querySelectorAll('.pfphase').forEach(x=>x.style.background=''); b.style.background=cs('--navy'); b.style.color='#fff'; run1(); }));
+
+  let c2;
+  function run2(){ if(!el('pf2X'))return; const X=+el('pf2X').value; el('pf2Xval').textContent=X;
+    const vp=PFR.VforX(X,0), vc=cstrVforX(X);
+    el('pf2VP').textContent=fmt(vp,3); el('pf2VC').textContent=fmt(vc,3);
+    if(c2){ c2.data.datasets[0].data=[vp,vc]; c2.update('none'); } }
+  Deck.onEnter('slide-pfr2', () => {
+    c2=new Chart(el('pf2Canvas'),{ type:'bar',
+      data:{ labels:['PFR','CSTR'], datasets:[{ label:'Volume (m³)', data:[0,0], backgroundColor:[cs('--navy'),cs('--red')], borderRadius:6 }] },
+      options:{ animation:false, responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{ y:{ title:{display:true,text:'Volume required (m³)'}, grid:{color:cs('--line')}, beginAtZero:true }, x:{ grid:{display:false} } } } });
+    run2();
+  }, { once:true });
+  el('pf2X') && el('pf2X').addEventListener('input', run2);
+})();
+/* ---- 6-7 FBR with Ergun pressure drop ---- */
+function ergunBeta(dp, phi, u0){ // dp in metres; returns Pa/m
+  const rho0=25, mu=3e-5, G=rho0*u0;
+  return G*(1-phi)/(rho0*dp*phi*phi*phi)*(150*(1-phi)*mu/dp + 1.75*G);
+}
+(() => {
+  const phi=0.5, rhoc=1200, P0=20e5, u0=13, Ac=10/13, kW=0.05, eps=0.5, Wmax=20;
+  let c1;
+  function run1(){ if(!el('fb1d'))return; const dp=+el('fb1d').value/1000; el('fb1dval').textContent=(dp*1000)+' mm';
+    const beta=ergunBeta(dp,phi,u0), alpha=2*beta/(Ac*rhoc*(1-phi)*P0);
+    const deriv=(W,Y)=>{ let[X,y]=Y; y=Math.max(0.02,y);
+      return [ kW*(1-X)/(1+eps*X)*y, -(alpha/2)*(1+eps*X)/y ]; };
+    const s=rk4(deriv,[0,1],0,Wmax,1000);
+    const last=s.ys[s.ys.length-1];
+    el('fb1X').textContent=fmt(last[0],3); el('fb1P').textContent=fmt(last[1],3);
+    const every=15, X=[],Y=[]; for(let i=0;i<s.xs.length;i+=every){ X.push({x:s.xs[i],y:s.ys[i][0]}); Y.push({x:s.xs[i],y:Math.max(0,s.ys[i][1])}); }
+    if(c1){ c1.data.datasets[0].data=X; c1.data.datasets[1].data=Y; c1.update('none'); } }
+  Deck.onEnter('slide-fbr1', () => {
+    c1=lineChart('fb1Canvas',[
+      {label:'conversion X',data:[],borderColor:PAL[0],borderWidth:2.8,pointRadius:0},
+      {label:'P/P₀',data:[],borderColor:PAL[1],borderWidth:2.8,pointRadius:0,borderDash:[6,4]}
+    ],'W  catalyst weight (kg)','fraction (–)',{y:{min:0,max:1.05}});
+    run1();
+  }, { once:true });
+  el('fb1d') && el('fb1d').addEventListener('input', run1);
+
+  let c2;
+  function run2(){ if(!el('fb2d'))return; const dp=+el('fb2d').value/1000, phiv=+el('fb2v').value, uv=+el('fb2u').value;
+    el('fb2dval').textContent=(dp*1000)+' mm'; el('fb2vval').textContent=phiv; el('fb2uval').textContent=uv+' m/s';
+    const beta=ergunBeta(dp,phiv,uv);
+    el('fb2beta').textContent=fmt(beta/1000,3);
+    const pts=[]; for(let z=0;z<=2.001;z+=0.1){ pts.push({x:z,y:Math.max(0,(P0-beta*z)/P0)}); }
+    if(c2){ c2.data.datasets[0].data=pts; c2.update('none'); } }
+  Deck.onEnter('slide-fbr2', () => {
+    c2=lineChart('fb2Canvas',[{label:'P/P₀ along bed',data:[],borderColor:PAL[3],borderWidth:2.8,pointRadius:0}],
+      'bed length z (m)','P / P₀ (–)',{y:{min:0,max:1.05}});
+    run2();
+  }, { once:true });
+  ['fb2d','fb2v','fb2u'].forEach(id=> el(id) && el(id).addEventListener('input', run2));
+})();
+/* ---- 6-8 Analytical solutions ---- */
+(() => {
+  let c1;
+  function pfr(x_Da_n){ } // placeholder
+  function cstrX(Da,n){ // solve x + Da x^n = 1 for x in (0,1]
+    let lo=0, hi=1; for(let i=0;i<60;i++){ const m=(lo+hi)/2; (m+Da*Math.pow(m,n)>1)?(hi=m):(lo=m);} return (lo+hi)/2; }
+  function run1(){ if(!el('an1n'))return; const n=+el('an1n').value; el('an1nval').textContent=n;
+    const P=[],C=[]; for(let Da=0;Da<=5.001;Da+=0.1){
+      let xp; if(Math.abs(n-1)<1e-6) xp=Math.exp(-Da); else xp=Math.pow(Math.max(1e-9,1+(n-1)*Da),1/(1-n));
+      P.push({x:Da,y:Math.min(1,Math.max(0,xp))}); C.push({x:Da,y:cstrX(Da,n)}); }
+    if(c1){ c1.data.datasets[0].data=P; c1.data.datasets[1].data=C; c1.update('none'); } }
+  Deck.onEnter('slide-an1', () => {
+    c1=lineChart('an1Canvas',[
+      {label:'Batch / PFR',data:[],borderColor:PAL[0],borderWidth:2.8,pointRadius:0},
+      {label:'CSTR',data:[],borderColor:PAL[1],borderWidth:2.8,pointRadius:0,borderDash:[6,4]}
+    ],'Damkohler number  Da','CA / CA0',{y:{min:0,max:1}});
+    run1();
+  }, { once:true });
+  el('an1n') && el('an1n').addEventListener('input', run1);
+
+  let c2;
+  function Xfromktau(ktau,eps){ // solve ktau=(1+eps)ln(1/(1-X))-eps X
+    let lo=0, hi=0.999; for(let i=0;i<60;i++){ const X=(lo+hi)/2; const f=(1+eps)*Math.log(1/(1-X))-eps*X; (f<ktau)?(lo=X):(hi=X);} return (lo+hi)/2; }
+  function run2(){ if(!el('an2e'))return; const eps=+el('an2e').value; el('an2eval').textContent=eps;
+    const cur=[],ref=[]; for(let kt=0;kt<=4.001;kt+=0.1){ cur.push({x:kt,y:Xfromktau(kt,eps)}); ref.push({x:kt,y:Xfromktau(kt,0)}); }
+    if(c2){ c2.data.datasets[0].data=cur; c2.data.datasets[1].data=ref; c2.update('none'); } }
+  Deck.onEnter('slide-an2', () => {
+    c2=lineChart('an2Canvas',[
+      {label:'X (chosen ε)',data:[],borderColor:PAL[2],borderWidth:2.8,pointRadius:0},
+      {label:'X (ε=0)',data:[],borderColor:PAL[4],borderWidth:2,pointRadius:0,borderDash:[6,4]}
+    ],'k τ','conversion X',{y:{min:0,max:1}});
+    run2();
+  }, { once:true });
+  el('an2e') && el('an2e').addEventListener('input', run2);
+})();
+/* ---- 6-9 External mass transfer ---- */
+(() => {
+  let c1;
+  function run1(){ if(!el('mt1r'))return; const lr=+el('mt1r').value; el('mt1rval').textContent=lr;
+    const ratio=Math.pow(10,lr); // kc a / kr
+    const keff=ratio/(1+ratio); // k_eff/kr = (kc a/kr)/(1+kc a/kr)
+    el('mt1keff').textContent=fmt(keff,3);
+    el('mt1reg').textContent = lr<-0.4?'MT controlled':(lr>0.4?'reaction controlled':'mixed');
+    if(c1){ c1.data.datasets[1].data=[{x:lr,y:keff}]; c1.update('none'); } }
+  Deck.onEnter('slide-mt1', () => {
+    const curve=[]; for(let lr=-2;lr<=2.001;lr+=0.1){ const r=Math.pow(10,lr); curve.push({x:lr,y:r/(1+r)}); }
+    c1=lineChart('mt1Canvas',[
+      {label:'keff / kr',data:curve,borderColor:PAL[0],borderWidth:2.8,pointRadius:0},
+      {label:'operating point',data:[],borderColor:PAL[1],backgroundColor:PAL[1],pointRadius:6,showLine:false}
+    ],'log₁₀(k_c a / k_r)','keff / kr',{y:{min:0,max:1.05}});
+    run1();
+  }, { once:true });
+  el('mt1r') && el('mt1r').addEventListener('input', run1);
+
+  let c2;
+  function run2(){ if(!el('mt2u'))return; const fu=+el('mt2u').value, fd=+el('mt2d').value, fL=+el('mt2l').value;
+    el('mt2uval').textContent='×'+fu; el('mt2dval').textContent='×'+fd; el('mt2lval').textContent='×'+fL;
+    const E=fL*Math.pow(fu,-0.5)*Math.pow(fd,-1.5); const X=1-Math.exp(-E);
+    el('mt2X').textContent=fmt(X,3);
+    const pts=[]; for(let l=0.5;l<=3.001;l+=0.1){ const Ei=l*Math.pow(fu,-0.5)*Math.pow(fd,-1.5); pts.push({x:l,y:1-Math.exp(-Ei)}); }
+    const dot=[{x:fL,y:X}];
+    if(c2){ c2.data.datasets[0].data=pts; c2.data.datasets[1].data=dot; c2.update('none'); } }
+  Deck.onEnter('slide-mt2', () => {
+    c2=lineChart('mt2Canvas',[
+      {label:'X vs bed length factor',data:[],borderColor:PAL[2],borderWidth:2.8,pointRadius:0},
+      {label:'your design',data:[],borderColor:PAL[1],backgroundColor:PAL[1],pointRadius:6,showLine:false}
+    ],'length factor f_L','removal X',{y:{min:0,max:1.05}});
+    run2();
+  }, { once:true });
+  ['mt2u','mt2d','mt2l'].forEach(id=> el(id) && el(id).addEventListener('input', run2));
+})();
+/* ---- 6-10 Internal mass transfer ---- */
+(() => {
+  const etaSphere = phi => phi<1e-3 ? 1 : (3/(phi*phi))*(phi/Math.tanh(phi)-1);
+  let c1;
+  function run1(){ if(!el('im1p'))return; const phi=+el('im1p').value; el('im1pval').textContent=phi;
+    const e=etaSphere(phi); el('im1eta').textContent=fmt(e,3); el('im1pct').textContent=Math.round(e*100)+'%';
+    if(c1){ c1.data.datasets[2].data=[{x:phi,y:e}]; c1.update('none'); } }
+  Deck.onEnter('slide-im1', () => {
+    const curve=[],asym=[]; for(let p=0.1;p<=10.001;p+=0.1){ curve.push({x:p,y:etaSphere(p)}); asym.push({x:p,y:Math.min(1,3/p)}); }
+    c1=lineChart('im1Canvas',[
+      {label:'η (sphere)',data:curve,borderColor:PAL[0],borderWidth:2.8,pointRadius:0},
+      {label:'η = 3/φ',data:asym,borderColor:PAL[3],borderWidth:2,pointRadius:0,borderDash:[6,4]},
+      {label:'operating point',data:[],borderColor:PAL[1],backgroundColor:PAL[1],pointRadius:6,showLine:false}
+    ],'Thiele modulus φ','effectiveness η',{y:{min:0,max:1.05}});
+    run1();
+  }, { once:true });
+  el('im1p') && el('im1p').addEventListener('input', run1);
+
+  // A->B+2C internal-diffusion bed
+  const k=0.05, n=2, rhoc=2e6, vsu=3, BedDen=1.2e6, CAb0=500000/(8.314*523.15);
+  function bedSolve(dp, De){
+    const Rp=dp/2;
+    const eta = C => Math.pow(2/(n+1),0.5)*(3/Rp)*Math.sqrt(De/(rhoc*k))*Math.pow(Math.max(1e-6,C),(1-n)/2);
+    const deriv=(z,Y)=>{ const C=Math.max(0,Y[0]); return [ -eta(C)*k*Math.pow(C,n)*BedDen/vsu ]; };
+    return rk4(deriv,[CAb0],0,0.05,2000);
+  }
+  let c2;
+  function run2(){ if(!el('im2d'))return; const dp=+el('im2d').value/1000, De=+el('im2D').value*1e-8;
+    el('im2dval').textContent=(dp*1000)+' mm'; el('im2Dval').textContent=(De*1e8).toFixed(2);
+    const s=bedSolve(dp,De);
+    const pts=[]; let Lx=null;
+    for(let i=0;i<s.xs.length;i+=20){ const X=(CAb0-s.ys[i][0])/CAb0; pts.push({x:s.xs[i]*1000,y:Math.min(1,Math.max(0,X))}); }
+    for(let i=1;i<s.xs.length;i++){ const X=(CAb0-s.ys[i][0])/CAb0, Xp=(CAb0-s.ys[i-1][0])/CAb0;
+      if(Lx===null && X>=0.8){ const f=(0.8-Xp)/(X-Xp); Lx=(s.xs[i-1]+f*(s.xs[i]-s.xs[i-1]))*1000; break; } }
+    el('im2L').textContent = Lx===null ? '>50' : fmt(Lx,3);
+    if(c2){ c2.data.datasets[0].data=pts; c2.update('none'); } }
+  Deck.onEnter('slide-im2', () => {
+    c2=lineChart('im2Canvas',[{label:'conversion X',data:[],borderColor:PAL[0],borderWidth:2.8,pointRadius:0}],
+      'bed length z (mm)','conversion X',{y:{min:0,max:1.05}});
+    run2();
+  }, { once:true });
+  ['im2d','im2D'].forEach(id=> el(id) && el(id).addEventListener('input', run2));
+})();
+/* ---- Class Activity: methanol vs RWGS selectivity ---- */
+(() => {
+  const R=8.314, T1=473.15, T2=523.15;
+  const Efit=(ka,kb)=> R*Math.log(kb/ka)/(1/T1-1/T2);
+  const E1=Efit(1.0e-9,3.5e-9), E2=Efit(2.0e-10,3.2e-10);
+  const k1=T=>1.0e-9*Math.exp((E1/R)*(1/T1-1/(T+273.15)));
+  const k2=T=>2.0e-10*Math.exp((E2/R)*(1/T1-1/(T+273.15)));
+  const S=T=>{ const a=k1(T), b=k2(T); return a/(a+b); };
+  let c1;
+  function run1(){ if(!el('ac1T'))return; const T=+el('ac1T').value; el('ac1Tval').textContent=T+' °C';
+    el('ac1S').textContent=fmt(S(T),3);
+    if(c1){ c1.data.datasets[1].data=[{x:T,y:S(T)}]; c1.update('none'); } }
+  Deck.onEnter('slide-act1', () => {
+    const curve=[]; for(let T=200;T<=270.001;T+=2) curve.push({x:T,y:S(T)});
+    c1=lineChart('ac1Canvas',[
+      {label:'methanol selectivity',data:curve,borderColor:PAL[0],borderWidth:2.8,pointRadius:0},
+      {label:'your T',data:[],borderColor:PAL[1],backgroundColor:PAL[1],pointRadius:6,showLine:false}
+    ],'T (°C)','S = r₁/(r₁+r₂)',{y:{min:0.7,max:0.95}});
+    run1();
+  }, { once:true });
+  el('ac1T') && el('ac1T').addEventListener('input', run1);
+})();
+</script>
+</body>
+</html>
