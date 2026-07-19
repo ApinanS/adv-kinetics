@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 9 · Unsteady-State Non-Isothermal Reactor · Interactive</title>
+
+<!-- Fonts: Montserrat (Latin) + Prompt (Thai) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --navy:#1F497D; --blue:#4F81BD; --red:#C00000; --green:#1A8038; --orange:#D97706;
+  --ink:#1F2937; --muted:#6B7280; --line:#E5E7EB; --card:#F7F9FC; --bg:#FFFFFF;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; background:#ECEFF3; overflow:hidden;
+  font-family:'Montserrat','Prompt',system-ui,sans-serif; color:var(--ink)}
+
+/* ---------- Stage: fixed 1280x720, scaled to fit ---------- */
+#stage{width:1280px; height:720px; position:absolute; top:50%; left:50%;
+  transform-origin:center; background:var(--bg); box-shadow:0 10px 40px rgba(31,73,125,.18); overflow:hidden}
+
+/* ---------- Slides ---------- */
+.slide{position:absolute; inset:0; display:none; flex-direction:column;
+  padding:56px 72px 64px; background:var(--bg); overflow:hidden}
+.slide svg{max-width:100%; max-height:440px}
+.slide.active{display:flex}
+.s-head{margin-bottom:28px}
+.kicker{font-size:15px; font-weight:600; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin-bottom:8px}
+.s-head h2{font-size:36px; font-weight:700; color:var(--navy); line-height:1.2}
+.s-foot{position:absolute; left:72px; right:72px; bottom:26px; display:flex; justify-content:space-between; gap:20px;
+  font-size:15px; font-weight:500; color:var(--muted)}
+.grow{flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0}
+.s-foot .s-sec{color:var(--blue)}
+
+/* Title slide */
+.title-slide{justify-content:center; align-items:flex-start; border-top:6px solid var(--navy)}
+.title-slide .pill{display:inline-block; font-size:15px; font-weight:600; letter-spacing:.12em;
+  color:var(--navy); border:1.5px solid var(--navy); border-radius:999px; padding:6px 18px; margin-bottom:34px}
+.title-slide .lecno{font-size:22px; font-weight:600; color:var(--blue); margin-bottom:10px}
+.title-slide h1{font-size:60px; font-weight:800; color:var(--navy); line-height:1.12; margin-bottom:30px; max-width:1000px}
+.title-slide .rule{width:88px; height:4px; background:var(--blue); margin-bottom:30px}
+.title-slide .who{font-size:17px; color:var(--muted); line-height:1.7}
+.title-slide .who b{color:var(--ink); font-weight:600}
+
+/* Section divider */
+.section-slide{justify-content:center; background:var(--bg)}
+.section-slide .big{position:absolute; top:26px; right:56px; font-size:150px; font-weight:800;
+  color:var(--navy); opacity:.08; line-height:1}
+.section-slide .lbl{font-size:19px; font-weight:700; letter-spacing:.14em; color:var(--blue);
+  text-transform:uppercase; margin-bottom:18px}
+.section-slide .q{font-size:44px; font-weight:700; color:var(--red); line-height:1.25; max-width:980px}
+
+/* Agenda / chapter hub */
+.agenda{display:flex; flex-direction:column; gap:18px; max-width:1020px}
+a.agenda-item{display:flex; align-items:center; gap:26px; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 28px}
+a.agenda-item:hover{border-color:var(--navy); box-shadow:0 4px 14px rgba(31,73,125,.12)}
+.agenda-item .no{flex:0 0 70px; font-size:26px; font-weight:800; color:var(--navy)}
+.agenda-item .qq{font-size:22px; font-weight:500; line-height:1.4}
+.agenda-item .go{margin-left:auto; color:var(--blue); font-size:26px}
+
+/* Cards */
+.cards{display:grid; gap:24px; grid-auto-columns:1fr; grid-auto-flow:column}
+.cards.wrap{grid-auto-flow:row; grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:26px 26px}
+.card h3{font-size:22px; font-weight:600; color:var(--navy); margin-bottom:10px}
+.card p{font-size:20px; line-height:1.5}
+.card .ic{width:34px; height:34px; margin-bottom:14px}
+.card-red{border-top:4px solid var(--red)} .card-green{border-top:4px solid var(--green)}
+.card-blue{border-top:4px solid var(--blue)} .card-orange{border-top:4px solid var(--orange)}
+
+/* Equations */
+.eq-box{background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:30px 36px; text-align:center; font-size:30px; margin:8px 0}
+.eq-note{font-size:18px; margin-top:14px; text-align:center}
+.eq-note.green{color:var(--green)} .eq-note.orange{color:var(--orange)} .eq-note.red{color:var(--red)}
+.eq-step{display:flex; align-items:center; gap:34px; padding:14px 6px; border-bottom:1px solid var(--line); font-size:23px}
+.eq-step:last-child{border-bottom:none}
+.eq-step .why{font-size:18px; color:var(--muted); flex:1; text-align:right}
+
+/* Comparison table */
+table.compare{width:100%; border-collapse:collapse; font-size:21px}
+.compare th{background:var(--card); color:var(--navy); font-weight:700; padding:14px 18px;
+  border:1px solid var(--line); text-align:center}
+.compare td{padding:16px 18px; border:1px solid var(--line); text-align:center}
+.compare td:first-child{font-weight:600; text-align:left}
+
+/* Callouts */
+.callout{border-left:5px solid var(--navy); background:var(--card); border-radius:0 12px 12px 0;
+  padding:16px 22px; font-size:21px; margin:14px 0}
+.callout.q{border-color:var(--red)} .callout.note{border-color:var(--green)} .callout.aside{border-color:var(--orange)}
+
+/* Layout helpers */
+.two-col{display:grid; grid-template-columns:11fr 9fr; gap:44px; align-items:center; flex:1}
+.stack>*+*{margin-top:20px}
+ul.clean{list-style:none} ul.clean li{font-size:22px; line-height:1.5; padding-left:30px; position:relative; margin-bottom:14px}
+ul.clean li::before{content:''; position:absolute; left:0; top:.55em; width:10px; height:10px; border-radius:3px; background:var(--blue)}
+
+/* Simulation */
+.sim{display:grid; grid-template-columns:2fr 3fr; grid-template-rows:minmax(0,1fr); gap:40px; align-items:center; flex:1; min-height:0}
+.sim-controls .sl{margin-bottom:26px}
+.sim-controls label{display:flex; justify-content:space-between; font-size:20px; font-weight:500; margin-bottom:8px}
+.val{font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--navy); height:34px; cursor:pointer}
+.sim-controls{align-self:center; min-width:0}
+.sim-out{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; text-align:center;
+  display:flex; flex-direction:column; justify-content:center; align-self:stretch; min-height:0; overflow:hidden}
+.sim-out svg{max-height:100%; min-height:0}
+.bignum{font-size:52px; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums}
+.chart-box{position:relative; flex:1 1 auto; min-height:180px; max-height:430px; min-width:0}
+.chart-box>canvas{position:absolute; inset:0; width:100% !important; height:100% !important}
+
+/* Reveal */
+.reveal-btn{font:inherit; font-size:19px; font-weight:600; color:var(--navy); background:var(--bg);
+  border:2px solid var(--navy); border-radius:10px; padding:10px 26px; cursor:pointer}
+.reveal-btn:hover{background:var(--navy); color:#fff}
+.reveal-body{display:none; margin-top:18px}
+.reveal.open .reveal-body{display:block} .reveal.open .reveal-btn{display:none}
+
+/* Quiz */
+.quiz-q{max-width:1000px}
+.q-text{font-size:24px; font-weight:600; margin-bottom:22px; line-height:1.45}
+.q-opt{display:block; width:100%; text-align:left; font:inherit; font-size:21px; padding:14px 22px;
+  margin-bottom:12px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; cursor:pointer}
+.q-opt:hover{border-color:var(--navy)}
+.q-opt.right{border-color:var(--green); background:#EDF7F0; color:var(--green); font-weight:600}
+.q-opt.wrong{border-color:var(--red); background:#FBEDED; color:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-explain{display:none; border-left:5px solid var(--blue); background:var(--card);
+  padding:16px 22px; border-radius:0 12px 12px 0; font-size:19px; line-height:1.5; margin-top:14px}
+.q-explain.show{display:block}
+.quiz-score{font-size:21px; font-weight:700; color:var(--navy)}
+
+/* Takeaways */
+.tk{display:flex; gap:22px; align-items:flex-start; margin-bottom:24px}
+.tk .n{flex:0 0 40px; height:40px; border-radius:50%; background:var(--navy); color:#fff;
+  font-weight:700; font-size:19px; display:flex; align-items:center; justify-content:center}
+.tk p{font-size:23px; line-height:1.45; padding-top:5px}
+
+/* HUD (not scaled) */
+#hud{position:fixed; right:18px; bottom:14px; display:flex; gap:8px; z-index:50}
+#hud button{width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff;
+  font-size:18px; color:var(--navy); cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#hud button:hover{background:var(--card)}
+#progress{position:fixed; left:0; bottom:0; height:4px; background:var(--blue); width:0; z-index:60; transition:width .2s}
+#toc{position:fixed; inset:0; background:rgba(15,25,40,.55); display:none; z-index:100; align-items:center; justify-content:center}
+#toc.open{display:flex}
+#toc .panel{background:#fff; border-radius:16px; padding:34px 40px; max-height:80vh; overflow:auto; min-width:420px}
+#toc h3{color:var(--navy); font-size:20px; margin-bottom:18px; letter-spacing:.08em}
+#toc a{display:block; padding:9px 6px; font-size:16.5px; color:var(--ink); text-decoration:none; border-radius:8px}
+#toc a:hover{background:var(--card)} #toc a.cur{color:var(--navy); font-weight:700}
+#toc .sec{margin-top:10px; font-weight:700; color:var(--blue); font-size:14px; letter-spacing:.1em; text-transform:uppercase}
+
+.katex{font-size:1.06em}
+svg text{font-family:'Montserrat','Prompt',sans-serif}
+
+/* Print: one slide per landscape page */
+@media print{
+  html,body{overflow:visible; background:#fff}
+  #stage{position:static; transform:none !important; width:1280px; height:auto; box-shadow:none}
+  .slide{display:flex !important; position:relative; width:1280px; height:720px; page-break-after:always; border-bottom:1px solid var(--line)}
+  #hud,#progress,#toc{display:none !important}
+}
+@page{size:landscape}
+
+/* ===== deck-specific ===== */
+/* ===== Non-Isothermal deck additions ===== */
+.eq-box.sm{font-size:22px; padding:16px 24px}
+.tag{display:inline-block; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); margin-bottom:2px}
+.two-col.even{grid-template-columns:1fr 1fr; gap:38px}
+/* EQUATRAN code window (matches series) */
+.codewin{background:#F4F6FA; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 3px 12px rgba(31,73,125,.08); width:100%}
+.cw-bar{background:var(--navy); color:#fff; font-size:13.5px; font-weight:600; padding:8px 14px; display:flex; align-items:center; gap:10px}
+.cw-dot{width:10px; height:10px; border-radius:50%; background:#8FB4E0; box-shadow:15px 0 0 #8FB4E0,30px 0 0 #8FB4E0; margin-right:24px}
+.cw-body{font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace; font-size:14px; line-height:1.5;
+  color:var(--ink); padding:14px 18px; white-space:pre; overflow:auto; max-height:410px}
+.cw-body .c{color:var(--green)} .cw-body .k{color:var(--red); font-weight:700} .cw-body .n{color:var(--orange)} .cw-body .b{color:var(--navy); font-weight:700}
+/* code <-> equation mapping */
+.codemap{display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:center; flex:1; min-height:0}
+.map-list{display:flex; flex-direction:column; gap:12px; justify-content:center; min-width:0}
+.map-row{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:0 10px 10px 0; padding:9px 16px}
+.map-row .mc{font-family:'SFMono-Regular',Consolas,monospace; font-size:14px; color:var(--navy); font-weight:600; word-break:break-word}
+.map-row .me{font-size:16px; margin-top:4px}
+.map-row .mn{font-size:13px; color:var(--muted); margin-top:3px; line-height:1.35}
+.map-row code{font-family:'SFMono-Regular',Consolas,monospace; font-size:12.5px; background:#EAF0F8; padding:1px 5px; border-radius:4px}
+/* data tables */
+table.data{width:100%; border-collapse:collapse; font-size:16px}
+table.data th{background:var(--card); color:var(--navy); font-weight:700; padding:8px 12px; border:1px solid var(--line)}
+table.data td{padding:7px 12px; border:1px solid var(--line); text-align:center}
+table.data td:first-child{text-align:left; font-weight:600}
+/* result chips */
+.chips{display:flex; flex-wrap:wrap; gap:10px}
+.chip{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:6px 16px; font-size:16px}
+.chip b{color:var(--navy)}
+.chip.hot{border-color:var(--red); color:var(--red)}
+.chip.ok{border-color:var(--green); color:var(--green)}
+.chip.cold{border-color:var(--blue); color:var(--blue)}
+/* legend row under equations */
+.legend{display:flex; gap:24px; flex-wrap:wrap; font-size:16px; color:var(--ink); margin-top:10px; justify-content:center}
+.legend span{display:inline-flex; align-items:center; gap:8px}
+.legend i{width:22px; height:4px; border-radius:2px; display:inline-block}
+/* simulation with chart on the right */
+.sim.chartsim{align-items:stretch; grid-template-columns:5fr 7fr}
+.sim.chartsim .chart-box{height:100%; max-height:100%}
+.sim-controls .hint{font-size:15px; color:var(--muted); margin-top:6px; line-height:1.4}
+.sim-out .bignum{font-size:46px}
+/* compact 8-row agenda so it fits 470px budget */
+.agenda-item{padding:10px 24px !important}
+.agenda-item .no{flex:0 0 56px; font-size:22px}
+.agenda-item .qq{font-size:18px; line-height:1.3}
+.agenda-item .go{font-size:22px}
+
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+<!-- ===== SLIDES ===== -->
+<!-- ===== Title ===== -->
+<section class="slide title-slide" data-title="Title" data-nofooter>
+  <span class="pill">2105604 · ADV CHE KINETICS</span>
+  <p class="lecno">Lecture 9</p>
+  <h1>Unsteady-State<br>Non-Isothermal Reactor</h1>
+  <div class="rule"></div>
+  <p class="who"><b>Assoc. Prof. Dr. Apinan Soottitantawat</b><br>Department of Chemical Engineering, Faculty of Engineering<br>Chulalongkorn University</p>
+</section>
+
+<!-- ===== Agenda hub ===== -->
+<section class="slide" data-title="Agenda">
+  <div class="s-head"><p class="kicker">Six guiding questions + a design activity</p><h2>What this lecture answers</h2></div>
+  <div class="agenda">
+    <a class="agenda-item" data-seclink="Lecture 9-1" href="#/3"><span class="no">9-1</span><span class="qq">How to design an unsteady-state non-isothermal <b>batch</b> reactor?</span><span class="go">→</span></a>
+    <a class="agenda-item" data-seclink="Lecture 9-2" href="#/16"><span class="no">9-2</span><span class="qq">How to design an unsteady-state non-isothermal <b>semi-batch</b> reactor?</span><span class="go">→</span></a>
+    <a class="agenda-item" data-seclink="Lecture 9-3" href="#/24"><span class="no">9-3</span><span class="qq">How to determine the <b>stability</b> of a CSTR at given operating conditions?</span><span class="go">→</span></a>
+    <a class="agenda-item" data-seclink="Lecture 9-4" href="#/34"><span class="no">9-4</span><span class="qq">How to find the <b>runaway</b> conditions for a CSTR?</span><span class="go">→</span></a>
+    <a class="agenda-item" data-seclink="Lecture 9-5" href="#/41"><span class="no">9-5</span><span class="qq">How to compute the unsteady non-isothermal <b>tubular PFR</b> (PDE)?</span><span class="go">→</span></a>
+    <a class="agenda-item" data-seclink="Lecture 9-6" href="#/51"><span class="no">9-6</span><span class="qq">How to compute the unsteady non-isothermal <b>fixed-bed</b> reactor (PDE)?</span><span class="go">→</span></a>
+    <a class="agenda-item" data-seclink="Activity" href="#/59"><span class="no">▶</span><span class="qq"><b>Activity — Problem I:</b> multi-reaction batch, lab data → plant scale-up</span><span class="go">→</span></a>
+  </div>
+</section>
+
+<!-- ============================ LECTURE 9-1 : BATCH ============================ -->
+<section class="slide section-slide" data-title="Lecture 9-1" data-sec="Lecture 9-1">
+  <div class="big">9-1</div>
+  <p class="lbl">Lecture 9-1</p>
+  <p class="q">How to design an unsteady-state, non-isothermal batch reactor?</p>
+</section>
+
+<!-- 9-1 master balances -->
+<section class="slide" data-title="The two coupled balances">
+  <div class="s-head"><p class="kicker">Every unsteady non-isothermal reactor = these two, coupled</p><h2>Mole balance + energy balance, solved together</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <p class="tag">Reactor mole balance</p>
+      <div class="eq-box sm">$$\frac{dN_i}{dt}=F_{i0}-F_i+\sum_j \nu_{ij}\,r_j\,V$$</div>
+      <p class="eq-note">accumulation = in − out + generation</p>
+    </div>
+    <div class="stack">
+      <p class="tag">Reactor energy balance</p>
+      <div class="eq-box sm">$$\Big(\textstyle\sum_i N_iC_{p,i}\Big)\frac{dT}{dt}=\dot Q+\dot W_s-\sum_j r_jV\Delta H_{Rxj}-\sum_i F_{i0}C_{p,i}(T-T_F)$$</div>
+    </div>
+  </div>
+  <div class="callout note">$T$ enters the mole balance through every rate constant $k_j(T)$ — that is why the two equations cannot be solved separately.</div>
+</section>
+
+<!-- 9-1 batch mole balance -->
+<section class="slide" data-title="Batch mole balance">
+  <div class="s-head"><p class="kicker">Batch: no inflow, no outflow &nbsp;($F_{i0}=F_i=0$)</p><h2>Batch reactor — mole balance</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <div class="eq-box sm">$$\frac{dN_i}{dt}=\sum_j \nu_{ij}\,r_j\,V$$</div>
+      <p class="tag">Constant volume → work in concentration</p>
+      <div class="eq-box sm">$$\frac{dC_i}{dt}=\frac{1}{V}\frac{dN_i}{dt}=\sum_j \nu_{ij}\,r_j$$</div>
+    </div>
+    <div class="stack">
+      <p class="tag">The example reaction network</p>
+      <div class="eq-box sm">$$\text{(1)}\;\; A+2B \rightleftharpoons C+3D$$<div style="height:8px"></div>$$\text{(2)}\;\; 2A+C \rightarrow E+F$$</div>
+      <p class="eq-note orange">$A$ is consumed by both — its net rate carries both stoichiometries.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9-1 batch energy balance -->
+<section class="slide" data-title="Batch energy balance">
+  <div class="s-head"><p class="kicker">Batch: no feed term either</p><h2>Batch reactor — energy balance</h2></div>
+  <div class="eq-box">$$\Big(\textstyle\sum_i N_iC_{p,i}\Big)\frac{dT}{dt}=\dot Q+\dot W_s-\sum_j r_jV\,\Delta H_{Rxj}(T)$$</div>
+  <div class="eq-step"><span>$\dot Q=UA\,\Delta T_{LM}$</span><span class="why">heat removed through the jacket</span></div>
+  <div class="eq-step"><span>$\dot W_s=N_p\rho N^3 D^5$</span><span class="why">stirrer (shaft) work added to the fluid</span></div>
+  <div class="eq-step"><span>$\Delta H_{Rxj}(T)=\Delta H^{\circ}_{Rxj}+\Delta C_{p,j}(T-T_R)$</span><span class="why">temperature-corrected heat of reaction</span></div>
+</section>
+
+<!-- 9-1 heat rate detail -->
+<section class="slide" data-title="Jacket heat rate">
+  <div class="s-head"><p class="kicker">Standard tank + conventional jacket, flat bottom</p><h2>How much heat leaves through the wall?</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\dot Q=UA\,\Delta T_{LM}=\dot m_{cw}C_{p,cw}(T_{cw,in}-T_{cw,out})$$</div>
+      <div class="eq-box sm">$$\Delta T_{LM}=\frac{(T_{cw,in}-T)-(T_{cw,out}-T)}{\ln[(T_{cw,in}-T)/(T_{cw,out}-T)]}$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout">$U$ = overall coefficient (wall + two films); for a jacketed tank $A=\pi T_k Z+\tfrac{\pi}{4}T_k^2$ (side wall + flat bottom).</div>
+      <div class="callout note">Writing $\dot Q$ two ways gives <b>both</b> the coolant flow $\dot m_{cw}$ and the area $A$ from one solve; the log-mean $\Delta T$ accounts for the coolant warming as it passes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-1 shaft work / power number -->
+<section class="slide" data-title="Shaft work &amp; power number">
+  <div class="s-head"><p class="kicker">The impeller does work on the fluid — a heat source</p><h2>Shaft work = power = $N_p\rho N^3D^5$</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\dot W_s=N_p\,\rho\,N^3 D^5$$</div>
+      <div class="eq-box sm">$$Re=\frac{\rho\,D^2 N}{\mu}\quad(\text{turbulent if } Re>10^4)$$</div>
+      <p class="eq-note">$N$ = rotational speed (rev/s), $D$ = impeller diameter, $N_p$ = power number (a geometry constant at high $Re$).</p>
+    </div>
+    <table class="data">
+      <tr><th>Impeller type</th><th>$N_p$ (turbulent)</th></tr>
+      <tr><td>Propeller (3-blade)</td><td>0.35</td></tr>
+      <tr><td>Pitched-blade turbine 4×45°</td><td>1.27</td></tr>
+      <tr><td>Flat-blade turbine</td><td>4.0</td></tr>
+      <tr><td>Rushton (6-blade disc)</td><td>5.0</td></tr>
+      <tr><td>Anchor</td><td>0.35</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 9-1 INTERACTIVE 1: batch virtual lab -->
+<section class="slide" data-title="Batch virtual lab" id="s-batch">
+  <div class="s-head"><p class="kicker">Interactive 1 — move the cooling, watch the batch</p><h2>Batch reactor: concentration &amp; temperature vs time</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Cooling capacity $UA$ (W/K) <span class="val" id="bUAval"></span></label>
+        <input type="range" id="bUA" min="0" max="6000" step="100" value="1500"></div>
+      <div class="sl"><label>Initial charge temp $T_0$ (°C) <span class="val" id="bT0val"></span></label>
+        <input type="range" id="bT0" min="30" max="80" step="1" value="50"></div>
+      <div class="sim-out" style="gap:4px;padding:14px">
+        <div class="bignum" id="bTmax">–</div>
+        <div style="font-size:15px;color:var(--muted)">peak temperature</div>
+        <div class="chips" style="justify-content:center;margin-top:6px"><span class="chip" id="bXA"></span></div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="bCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-1 worked example setup -->
+<section class="slide" data-title="Example: batch (unsteady)">
+  <div class="s-head"><p class="kicker">Worked example — multiple liquid-phase reaction</p><h2>Batch reactor, non-isothermal</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$A+2B \rightleftharpoons C+3D\qquad 2A+C\rightarrow E+F$$</div>
+      <ul class="clean">
+        <li>Reaction volume $V=5\ \text{m}^3$; $C_{A0}=0.3$, $C_{B0}=1\ \text{mol/m}^3$; charge at $T_0=50\,°\text{C}$.</li>
+        <li>Standard tank, pitched-blade turbine 4×45° ($N_p=1.27$), 100 rpm = 1.67 rps.</li>
+        <li>Liquid: $\rho=1000\ \text{kg/m}^3$, $\mu=1\ \text{cP}$.</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="callout q"><b>Find:</b> the concentration &amp; temperature profiles, and the cooling-water flow rate.</div>
+      <div class="callout note">Jacket cooling: CW in 35 °C, out 43 °C, $U=500\ \text{W/m}^2\text{K}$ (wall + flat bottom).</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-1 EQUATRAN code walk 1 -->
+<section class="slide" data-title="EQUATRAN: batch mole balance" id="s-code-b1">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (1 of 2)</p><h2>Mole balance &amp; rate law</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>batch_mole.eq</div>
+<div class="cw-body"><span class="c">//A+2B-->C+3D  ;  2A+C-->E+F</span>
+<span class="b">1/V*NA'</span>= -r1-2*r2; <span class="k">NA#NA0</span>
+1/V*NB'=-2*r1;     <span class="k">NB#NB0</span>
+1/V*NC'=r1-r2;     <span class="k">NC#NC0</span>
+1/V*ND'= 3*r1;     <span class="k">ND#ND0</span>
+1/V*NE'= r2;       <span class="k">NE#NE0</span>
+1/V*NF'=r2;        <span class="k">NF#NF0</span>
+<span class="c">//Rate Law</span>
+r1=k1*CA*CB^2-k2*CC*CD^3
+r2=k3*CA^2*CC
+k1=k10*exp((E1/R)*((1/(Tref+273))
+        -(1/(T+273))))
+<span class="c">//initial charge</span>
+CA0=0.3; CB0=1; NA0=CA0*V</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">1/V*NA' = -r1-2*r2</div><div class="me">$\dfrac{1}{V}\dfrac{dN_A}{dt}=-r_1-2r_2$</div><div class="mn"><code>'</code> = time derivative. $A$ is eaten by both reactions → $\nu_{1A}=-1,\ \nu_{2A}=-2$.</div></div>
+      <div class="map-row"><div class="mc">r1=k1*CA*CB^2-k2*CC*CD^3</div><div class="me">$r_1=k_1C_AC_B^2-k_2C_CC_D^3$</div><div class="mn">Reaction 1 is reversible: forward − reverse.</div></div>
+      <div class="map-row"><div class="mc">k1=k10*exp((E1/R)(1/Tref−1/T))</div><div class="me">$k_1=k_{10}\,e^{\frac{E_1}{R}\left(\frac1{T_{ref}}-\frac1{T}\right)}$</div><div class="mn">Arrhenius, reference-temperature form; $T$ in kelvin (<code>+273</code>).</div></div>
+      <div class="map-row"><div class="mc">NA#NA0</div><div class="me">$N_A(0)=N_{A0}$</div><div class="mn"><code>#</code> assigns the <b>initial condition</b> for each ODE.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-1 EQUATRAN code walk 2 -->
+<section class="slide" data-title="EQUATRAN: batch energy + jacket" id="s-code-b2">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (2 of 2)</p><h2>Energy balance, heat transfer &amp; tank geometry</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>batch_energy.eq</div>
+<div class="cw-body"><span class="c">//Energy balance</span>
+Q+Ws-r1*V*HRX1-r2*V*HRX2
+   =(NA*CpA+NB*CpB+...+NF*CpF)*<span class="b">T'</span>
+HRX1= HRX01+delCp1*(T-TR)
+delCp1=1*CpC+3*CpD-2*CpB-CpA
+<span class="c">//Jacket heat transfer</span>
+Q=U*A*LMTD
+LMTD=((Tcwin-T)-(Tcwout-T))
+    /(LOGE((Tcwin-T)/(Tcwout-T)))
+Q=mCW*Cp*(Tcwin-Tcwout)
+<span class="c">//Tank geometry + power</span>
+V=_pi*(Tank^2)/4*Z; Tank=Z; D=Tank/3
+Re=liqden*D^2*N/vis
+Ws=Np*liqden*N^3*D^5
+<span class="c">//integrate</span>
+integral t[0,0.19] step 0.001 by rkv</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">Q+Ws−Σrj·V·HRXj = ΣNi·Cpi·T'</div><div class="me">$\dot Q+\dot W_s-\sum_j r_jV\Delta H_{Rxj}=\big(\sum_iN_iC_{p,i}\big)\dfrac{dT}{dt}$</div><div class="mn">One ODE for $T$; couples straight back into every $k_j(T)$.</div></div>
+      <div class="map-row"><div class="mc">Q=U*A*LMTD ; Q=mCW*Cp*ΔT</div><div class="me">$\dot Q=UA\,\Delta T_{LM}=\dot m_{cw}C_p\Delta T_{cw}$</div><div class="mn">Two ways to write $\dot Q$ → solves for area $A$ <i>and</i> coolant flow $\dot m_{cw}$. <code>LOGE</code> = natural log.</div></div>
+      <div class="map-row"><div class="mc">integral t[0,0.19] … by rkv</div><div class="me">Runge–Kutta march in time</div><div class="mn"><code>by rkv</code> = variable-step RK; <code>step</code> sets the reporting interval.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-1 results -->
+<section class="slide" data-title="Batch: results">
+  <div class="s-head"><p class="kicker">What EQUATRAN returns</p><h2>Sizing &amp; agitation results</h2></div>
+  <div class="grow" style="justify-content:center">
+    <div class="chips" style="margin-bottom:18px">
+      <span class="chip">Tank $T_k=Z=$ <b>1.85 m</b></span>
+      <span class="chip">Impeller $D=$ <b>0.62 m</b></span>
+      <span class="chip">Area $A=$ <b>13.5 m²</b></span>
+      <span class="chip cold">$Re=$ <b>6.37×10⁵</b> (turbulent)</span>
+      <span class="chip">$\dot W_s=$ <b>532 W</b></span>
+    </div>
+    <div class="two-col even">
+      <div class="callout note">Because $Re=6.4\times10^5\gg10^4$, the flow is fully turbulent, so $N_p=1.27$ is valid and $\dot W_s$ is a fixed ≈0.5 kW — small next to the reaction heat.</div>
+      <div class="callout aside">The cooling-water flow $\dot m_{cw}$ rises and falls with the reaction heat load; it peaks while the fast forward reaction dominates, then eases as the batch approaches equilibrium.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-1 INTERACTIVE 2: iso vs adia vs noniso -->
+<section class="slide" data-title="Iso vs adiabatic vs non-iso" id="s-batchmode">
+  <div class="s-head"><p class="kicker">Interactive 2 — the same batch, three thermal policies</p><h2>Isothermal vs Adiabatic vs Non-isothermal</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Cooling for the non-iso case $UA$ (W/K) <span class="val" id="bmUAval"></span></label>
+        <input type="range" id="bmUA" min="200" max="6000" step="100" value="1500"></div>
+      <div class="sim-controls hint">Dashed grey = <b>isothermal</b> (perfect control at $T_0$). Red = <b>adiabatic</b> ($\dot Q=0$, heat trapped). Blue = <b>non-isothermal</b> with your jacket.</div>
+      <div class="sim-out" style="gap:4px;padding:14px;margin-top:12px">
+        <div class="bignum" id="bmPeak">–</div>
+        <div style="font-size:15px;color:var(--muted)">non-iso peak T</div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="bmCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-1 quiz -->
+<section class="slide" data-title="Quiz — batch">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — non-isothermal batch</h2></div>
+  <div class="quiz-q" data-qid="qb1">
+    <p class="q-text">In the adiabatic batch run the temperature climbs far above 50 °C. Why must the mole and energy balances be integrated <i>simultaneously</i>?</p>
+    <button class="q-opt" data-explain="Volume is constant here, so that is not the coupling. The coupling is thermal.">Because the reactor volume changes with temperature</button>
+    <button class="q-opt" data-correct data-explain="Correct. Each $k_j$ depends on $T$ through Arrhenius, and $T$ depends on the reaction heat $\sum r_jV\Delta H_{Rxj}$ — which depends back on the $C_i$. The two ODE sets feed each other every instant.">Because $k_j(T)$ links the rates to $T$, and the reaction heat links $T$ back to the rates</button>
+    <button class="q-opt" data-explain="Shaft work here is ~0.5 kW — negligible against the reaction heat. It is not the reason for coupling.">Because the shaft work dominates the energy balance</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+<!-- ============================ LECTURE 9-2 : SEMI-BATCH ============================ -->
+<section class="slide section-slide" data-title="Lecture 9-2" data-sec="Lecture 9-2">
+  <div class="big">9-2</div>
+  <p class="lbl">Lecture 9-2</p>
+  <p class="q">How to design an unsteady-state, non-isothermal semi-batch reactor?</p>
+</section>
+
+<!-- 9-2 mole balance -->
+<section class="slide" data-title="Semi-batch mole balance">
+  <div class="s-head"><p class="kicker">One reactant fed continuously → volume grows</p><h2>Semi-batch reactor — mole balance</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <p class="tag">Species fed at $F_{A0}$, no outflow</p>
+      <div class="eq-box sm">$$\frac{dN_A}{dt}=F_{A0}+\big(\nu_{1A}r_1+\nu_{2A}r_2\big)V$$</div>
+      <div class="eq-box sm">$$\frac{dN_i}{dt}=\Big(\sum_j\nu_{ij}r_j\Big)V\quad(i\neq A)$$</div>
+    </div>
+    <div class="stack">
+      <p class="tag">Volume is now a state variable</p>
+      <div class="eq-box sm">$$\frac{dV}{dt}=v_0\qquad V(0)=V_0$$</div>
+      <p class="eq-note orange">Because $V$ changes, always convert with $C_i=N_i/V$ <i>after</i> updating both $N_i$ and $V$.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9-2 energy balance -->
+<section class="slide" data-title="Semi-batch energy balance">
+  <div class="s-head"><p class="kicker">The feed enters cold — it must be heated to $T$</p><h2>Semi-batch reactor — energy balance</h2></div>
+  <div class="eq-box">$$\Big(\textstyle\sum_i N_iC_{p,i}\Big)\frac{dT}{dt}=\dot Q-\sum_j r_jV\Delta H_{Rxj}-\sum_i F_{i0}C_{p,i}\,(T-T_F)$$</div>
+  <div class="eq-step"><span>$-\sum_i F_{i0}C_{p,i}(T-T_F)$</span><span class="why"><b>new</b> term: sensible heat to warm the incoming feed from $T_F$ to $T$</span></div>
+  <div class="eq-step"><span>$\dot W_s\approx 0$</span><span class="why">for this example, shaft work ≪ heat of reaction</span></div>
+  <div class="eq-step"><span>$\dot Q=UA\,(T_{cool}-T)$</span><span class="why">jacket removes (or adds) heat toward a coolant temperature</span></div>
+</section>
+
+<!-- 9-2 example setup -->
+<section class="slide" data-title="Example: semi-batch">
+  <div class="s-head"><p class="kicker">Worked example — feed A into a charge of B</p><h2>Semi-batch reactor, non-isothermal</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <ul class="clean">
+        <li>Start: $V_0=3\ \text{m}^3$ of liquid, $C_{B0}=10\ \text{mol/m}^3$, $T_0=30\,°\text{C}$.</li>
+        <li>Feed: $F_{A0}=1\ \text{mol/s}$ at $v_0=0.1\ \text{m}^3/\text{s}$, $T_F=30\,°\text{C}$.</li>
+        <li>Reaction 2 here is endothermic: $\Delta H^{\circ}_{Rx2}=+20{,}000\ \text{J/mol}$.</li>
+      </ul>
+      <div class="callout note">Coolant available at $T_{cool}=15\,°\text{C}$; compare <b>adiabatic</b> vs <b>$UA=1000$ W/K</b>.</div>
+    </div>
+    <div class="stack">
+      <div class="callout q"><b>Find:</b> the concentration &amp; temperature profiles for adiabatic and cooled operation — and check for a runaway.</div>
+      <div class="eq-box sm">$$A+2B \rightleftharpoons C+3D\qquad 2A+C\rightarrow E+F$$</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-2 EQUATRAN code walk 1 -->
+<section class="slide" data-title="EQUATRAN: semi-batch mole" id="s-code-sb1">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (1 of 2)</p><h2>Feed terms &amp; the growing volume</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>semibatch_mole.eq</div>
+<div class="cw-body"><span class="c">//Mass balance (A is fed)</span>
+<span class="b">NA'</span>=FA0+(-r1-2*r2)*V
+NB'=(-2*r1)*V
+NC'=(r1-r2)*V
+ND'=(3*r1)*V
+NE'=r2*V ; NF'=r2*V
+<span class="c">//Volume grows with the feed</span>
+<span class="b">V'</span>= v0 ; v0=0.1 ; <span class="k">V#3</span>
+FA0= 1 ; FB0=0
+<span class="c">//concentrations use the live V</span>
+CA=NA/V; CB=NB/V; CC=NC/V
+<span class="c">//initial condition</span>
+<span class="k">NA#CA0*V0; NB#CB0*V0</span>
+CB0=10; CA0=0</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">NA' = FA0 + (-r1-2*r2)*V</div><div class="me">$\dfrac{dN_A}{dt}=F_{A0}+(\nu_{1A}r_1+\nu_{2A}r_2)V$</div><div class="mn">Only $A$ carries the $F_{A0}$ inflow term; the others are generation-only.</div></div>
+      <div class="map-row"><div class="mc">V' = v0</div><div class="me">$\dfrac{dV}{dt}=v_0$</div><div class="mn">Volume is integrated like any other state — the tank fills at $0.1\ \text{m}^3/\text{s}$.</div></div>
+      <div class="map-row"><div class="mc">CA=NA/V</div><div class="me">$C_A=N_A/V$</div><div class="mn">Divide by the <b>current</b> $V$, not $V_0$ — dilution is automatic.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-2 EQUATRAN code walk 2 -->
+<section class="slide" data-title="EQUATRAN: semi-batch energy" id="s-code-sb2">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (2 of 2)</p><h2>Energy balance with feed enthalpy</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>semibatch_energy.eq</div>
+<div class="cw-body"><span class="c">//Energy balance</span>
+Q-r1*V*HRX1-r2*V*HRX2
+   =(NA*CpA+...+NF*CpF)*<span class="b">T'</span>
+   +FA0*CpA*(T-TF)+FB0*CpB*(T-TF)
+TF=30 ; <span class="k">T#30</span>
+<span class="c">//Heat transfer (jacket)</span>
+Q= UA*(Tcool-T)
+UA= 1000 ; Tcool= 15
+<span class="c">//Heat of reaction at T</span>
+HRX1= HRX01+delCp1*(T-TR)
+HRX2= HRX02+delCp2*(T-TR)
+HRX01=-10000 ; HRX02=20000
+<span class="c">//integrate</span>
+integral t[0,30] step 0.05 by rkv</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">… = ΣNi·Cpi·T' + FA0·CpA·(T−TF)</div><div class="me">$\big(\sum N_iC_{p,i}\big)\dfrac{dT}{dt}+F_{A0}C_{p,A}(T-T_F)$</div><div class="mn">The feed term is the price of heating cold reactant to reactor temperature.</div></div>
+      <div class="map-row"><div class="mc">Q = UA*(Tcool−T)</div><div class="me">$\dot Q=UA\,(T_{cool}-T)$</div><div class="mn">Set <code>UA=0</code> for adiabatic. Positive when $T&gt;T_{cool}$ → heat leaves.</div></div>
+      <div class="map-row"><div class="mc">HRX2 = HRX02 + delCp2*(T−TR)</div><div class="me">$\Delta H_{Rx2}=\Delta H^{\circ}_{Rx2}+\Delta C_{p,2}(T-T_R)$</div><div class="mn">Here $\Delta H^{\circ}_{Rx2}=+20{,}000$ — reaction 2 <i>absorbs</i> heat.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-2 INTERACTIVE 1: semi-batch sim -->
+<section class="slide" data-title="Semi-batch virtual lab" id="s-semibatch">
+  <div class="s-head"><p class="kicker">Interactive 1 — fill, react, and grow</p><h2>Semi-batch: concentration, temperature &amp; volume</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Cooling capacity $UA$ (W/K) <span class="val" id="sbUAval"></span></label>
+        <input type="range" id="sbUA" min="0" max="2000" step="50" value="1000"></div>
+      <div class="sim-out" style="gap:4px;padding:14px">
+        <div class="bignum" id="sbV">–</div>
+        <div style="font-size:15px;color:var(--muted)">final volume (m³)</div>
+        <div class="chips" style="justify-content:center;margin-top:6px"><span class="chip" id="sbT"></span></div>
+      </div>
+      <div class="sim-controls hint">$V$ grows $3\rightarrow6\ \text{m}^3$ as $A$ is fed. Right axis = temperature.</div>
+    </div>
+    <div class="chart-box"><canvas id="sbCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-2 INTERACTIVE 2: runaway explorer -->
+<section class="slide" data-title="Runaway explorer" id="s-runaway2">
+  <div class="s-head"><p class="kicker">Interactive 2 — the cliff edge of cooling</p><h2>How little cooling triggers a runaway?</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Cooling capacity $UA$ (W/K) <span class="val" id="ruUAval"></span></label>
+        <input type="range" id="ruUA" min="0" max="1500" step="25" value="900"></div>
+      <div class="sim-out" style="gap:4px;padding:14px">
+        <div class="bignum" id="ruTag">–</div>
+        <div style="font-size:15px;color:var(--muted)" id="ruTag2">status</div>
+      </div>
+      <div class="sim-controls hint">Below a critical $UA$, the exothermic forward reaction outruns heat removal and $T$ shoots up — a <b>thermal runaway</b>.</div>
+    </div>
+    <div class="chart-box"><canvas id="ruCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- ============================ LECTURE 9-3 : CSTR STABILITY ============================ -->
+<section class="slide section-slide" data-title="Lecture 9-3" data-sec="Lecture 9-3">
+  <div class="big">9-3</div>
+  <p class="lbl">Lecture 9-3</p>
+  <p class="q">How to determine the stability of a CSTR at the specified operating conditions?</p>
+</section>
+
+<!-- 9-3 stability concept -->
+<section class="slide" data-title="Why study startup?">
+  <div class="s-head"><p class="kicker">The dangerous minutes are the first ones</p><h2>Stability &amp; the approach to steady state</h2></div>
+  <div class="two-col">
+    <ul class="clean">
+      <li>During <b>startup</b>, how $T$ and $C$ approach their steady-state values matters as much as the values themselves.</li>
+      <li>A significant temperature <b>overshoot</b> can degrade product or reactant.</li>
+      <li>Overshoot may push the reactor into an <b>unsafe</b> region — past its practical stability limit.</li>
+    </ul>
+    <div class="callout note">The clearest way to see the approach is the <b>temperature–concentration phase plane</b>: plot $T$ against $C_A$ and watch the trajectory spiral into the steady state.</div>
+  </div>
+</section>
+
+<!-- 9-3 CSTR balances -->
+<section class="slide" data-title="CSTR unsteady balances">
+  <div class="s-head"><p class="kicker">Mixed-flow, but now time-dependent</p><h2>CSTR — unsteady mole &amp; energy balance</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <p class="tag">Mole balance</p>
+      <div class="eq-box sm">$$\frac{dN_i}{dt}=F_{i0}-F_i+\Big(\sum_j\nu_{ij}r_j\Big)V$$</div>
+      <p class="eq-note">$F_i=C_iv_0$, $C_i=N_i/V$, $V$ constant.</p>
+    </div>
+    <div class="stack">
+      <p class="tag">Energy balance</p>
+      <div class="eq-box sm">$$\Big(\sum_iN_iC_{p,i}\Big)\frac{dT}{dt}=\dot Q+\dot W_s-\sum_j r_jV\Delta H_{Rxj}-\sum_iF_{i0}C_{p,i}(T-T_F)$$</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-3 example setup -->
+<section class="slide" data-title="Example: CSTR (unsteady)">
+  <div class="s-head"><p class="kicker">Worked example — same chemistry, flowing now</p><h2>Mixed-flow reactor, non-isothermal startup</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <ul class="clean">
+        <li>$V=5\ \text{m}^3$; feed $F_{A0}=3$, $F_{B0}=10\ \text{mol/s}$, $v_0=10\ \text{m}^3/\text{s}$.</li>
+        <li>Initial contents at $T_0=50\,°\text{C}$; feed at $T_F=40\,°\text{C}$.</li>
+        <li>Space time $\tau=V/v_0=0.5\ \text{s}$ — a fast reactor.</li>
+      </ul>
+      <div class="callout note">Same jacket as 9-1: CW 35→43 °C, $U=500$, standard tank + PBT.</div>
+    </div>
+    <div class="callout q"><b>Find:</b> the concentration &amp; temperature trajectories from startup to steady state, and whether $T$ overshoots.</div>
+  </div>
+</section>
+
+<!-- 9-3 EQUATRAN code walk 1 -->
+<section class="slide" data-title="EQUATRAN: CSTR mole" id="s-code-c1">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (1 of 2)</p><h2>Unsteady mole balance (accumulation form)</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>cstr_mole.eq</div>
+<div class="cw-body"><span class="c">//Mass balance: in − out + gen</span>
+<span class="b">NA'</span>= FA0-FA+(-r1-2*r2)*V; <span class="k">NA#NA0</span>
+NB'= FB0-FB+(-2*r1)*V; <span class="k">NB#NB0</span>
+NC'= FC0-FC+(r1-r2)*V; <span class="k">NC#NC0</span>
+ND'= FD0-FD+(3*r1)*V;  <span class="k">ND#ND0</span>
+<span class="c">//flows &amp; concentrations</span>
+CA=NA/V; CB=NB/V
+CA=FA/v; v=v0
+FA0=3; FB0=10; v0=10; V=5
+<span class="c">//initial condition</span>
+CA0=0.3; CB0=1; NA0=CA0*V</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">NA' = FA0 − FA + (−r1−2r2)*V</div><div class="me">$\dfrac{dN_A}{dt}=F_{A0}-F_A+\big(\nu_{1A}r_1+\nu_{2A}r_2\big)V$</div><div class="mn">The full unsteady CSTR: accumulation = in − out + generation.</div></div>
+      <div class="map-row"><div class="mc">CA=FA/v ; v=v0</div><div class="me">$C_A=F_A/v_0$</div><div class="mn">Outlet concentration = tank concentration (perfect mixing).</div></div>
+      <div class="map-row"><div class="mc">at steady state → NA' = 0</div><div class="me">$0=F_{A0}-F_A+\dots$</div><div class="mn">Drop the derivative and you recover the algebraic CSTR design equation.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-3 EQUATRAN code walk 2 -->
+<section class="slide" data-title="EQUATRAN: CSTR energy" id="s-code-c2">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (2 of 2)</p><h2>Unsteady energy balance</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>cstr_energy.eq</div>
+<div class="cw-body"><span class="c">//Energy balance</span>
+Q+Ws-r1*V*HRX1-r2*V*HRX2
+  =(NA*CpA+...+NF*CpF)*<span class="b">T'</span>
+  +FA0*CpA*(T-TF)+FB0*CpB*(T-TF)
+  +...
+<span class="k">T#T0</span>; T0=50 ; TF=40
+<span class="c">//Jacket (co-current sign)</span>
+Q=-U*A*LMTD
+LMTD=((T-Tcwin)-(T-Tcwout))
+    /(LOGE((T-Tcwin)/(T-Tcwout)))
+<span class="c">//integrate the startup</span>
+integral t[0,0.6] step 0.0001 by rkv</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">… = ΣNi·Cpi·T' + ΣFi0·Cpi·(T−TF)</div><div class="me">$\big(\sum N_iC_{p,i}\big)\dfrac{dT}{dt}+\sum_iF_{i0}C_{p,i}(T-T_F)$</div><div class="mn">The transient term $\sum N_iC_{p,i}\,T'$ is what produces the startup overshoot.</div></div>
+      <div class="map-row"><div class="mc">Q = −U*A*LMTD</div><div class="me">$\dot Q=-UA\,\Delta T_{LM}$</div><div class="mn">Sign flips vs the batch: here $T&gt;T_{cw}$, so the reactor <i>loses</i> heat to the jacket.</div></div>
+      <div class="map-row"><div class="mc">integral t[0,0.6] step 1e-4</div><div class="me">fine time step</div><div class="mn">A fast reactor ($\tau=0.5\,$s) needs a small step to resolve the overshoot.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-3 INTERACTIVE 1: startup dynamics -->
+<section class="slide" data-title="CSTR startup dynamics" id="s-cstrstart">
+  <div class="s-head"><p class="kicker">Interactive 1 — will it overshoot?</p><h2>CSTR startup: temperature &amp; conversion vs time</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Cooling capacity $UA$ (W/K) <span class="val" id="csUAval"></span></label>
+        <input type="range" id="csUA" min="0" max="8000" step="200" value="2000"></div>
+      <div class="sl"><label>Start-up temperature $T_0$ (°C) <span class="val" id="csT0val"></span></label>
+        <input type="range" id="csT0" min="40" max="90" step="1" value="50"></div>
+      <div class="sim-out" style="gap:4px;padding:12px">
+        <div class="bignum" id="csTss">–</div>
+        <div style="font-size:14px;color:var(--muted)">steady-state T · overshoot <span id="csOS"></span></div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="csCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-3 INTERACTIVE 2: phase plane -->
+<section class="slide" data-title="Temperature–concentration phase plane" id="s-phase">
+  <div class="s-head"><p class="kicker">Interactive 2 — the trajectory, not the timeline</p><h2>The $T$–$C_A$ phase plane</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Cooling capacity $UA$ (W/K) <span class="val" id="phUAval"></span></label>
+        <input type="range" id="phUA" min="0" max="8000" step="200" value="2500"></div>
+      <div class="sl"><label>Start-up temperature $T_0$ (°C) <span class="val" id="phT0val"></span></label>
+        <input type="range" id="phT0" min="40" max="90" step="1" value="70"></div>
+      <div class="sim-controls hint">Each point is one instant. A big loop before the dot settles = a large overshoot. The ● marks the steady state.</div>
+    </div>
+    <div class="chart-box"><canvas id="phCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-3 batch vs CSTR -->
+<section class="slide" data-title="Batch vs mixed-flow">
+  <div class="s-head"><p class="kicker">Same chemistry, two reactor philosophies</p><h2>Batch vs CSTR — what differs</h2></div>
+  <table class="compare">
+    <tr><th>Feature</th><th>Batch (9-1)</th><th>CSTR / mixed-flow (9-3)</th></tr>
+    <tr><td>Flow terms</td><td>none ($F=0$)</td><td>$F_{i0}-F_i$ present</td></tr>
+    <tr><td>Independent variable</td><td>time $t$</td><td>time $t$ (→ steady state)</td></tr>
+    <tr><td>Final state</td><td>equilibrium / full conversion</td><td>a <b>steady</b> $T,\,C$ set by $\tau$</td></tr>
+    <tr><td>Thermal risk</td><td>peak during the batch</td><td>overshoot during <b>startup</b></td></tr>
+    <tr><td>Energy balance extra term</td><td>—</td><td>feed sensible heat $\sum F_{i0}C_{p,i}(T-T_F)$</td></tr>
+  </table>
+</section>
+
+<!-- 9-3 quiz -->
+<section class="slide" data-title="Quiz — CSTR stability">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — CSTR startup</h2></div>
+  <div class="quiz-q" data-qid="qc1">
+    <p class="q-text">Why is the temperature–concentration phase plane more insightful than plotting $T(t)$ alone during startup?</p>
+    <button class="q-opt" data-explain="It is not about speed of computation — both come from the same integration.">It integrates the ODEs faster</button>
+    <button class="q-opt" data-correct data-explain="Correct. The phase plane shows the coupled path of $T$ and $C_A$ at once: a wide loop before settling reveals an overshoot that could cross a safety or degradation limit, which a single $T(t)$ curve can hide.">It shows the coupled $T$–$C$ trajectory, exposing overshoot toward unsafe regions</button>
+    <button class="q-opt" data-explain="The steady state is the same point regardless of how you plot it; the phase plane just shows the path taken to reach it.">It changes where the steady state lies</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+<!-- ============================ LECTURE 9-4 : RUNAWAY ============================ -->
+<section class="slide section-slide" data-title="Lecture 9-4" data-sec="Lecture 9-4">
+  <div class="big">9-4</div>
+  <p class="lbl">Lecture 9-4</p>
+  <p class="q">How to determine the runaway conditions for a CSTR?</p>
+</section>
+
+<!-- 9-4 runaway concept -->
+<section class="slide" data-title="Thermal runaway">
+  <div class="s-head"><p class="kicker">When heat generation outpaces heat removal</p><h2>Thermal runaway</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="callout q">Highly exothermic reaction + <b>rate of heat removal ≪ rate of heat generation</b> → temperature accelerates, which accelerates the rate, which generates more heat…</div>
+      <ul class="clean">
+        <li>Heat generated $G(T)$ rises like an <b>S-curve</b> (Arrhenius, saturating at full conversion).</li>
+        <li>Heat removed $R(T)=UA(T-T_a)$ is a <b>straight line</b> in $T$.</li>
+        <li>Runaway when the line no longer intersects the low branch of the S-curve.</li>
+      </ul>
+    </div>
+    <div class="eq-box sm">$$G(T)=(-\Delta H_{Rx})\,r(T)V$$<div style="height:10px"></div>$$R(T)=UA\,(T-T_a)$$<div style="height:6px"></div><p class="eq-note red">Runaway ⇔ $G(T) > R(T)$ for all reachable $T$</p></div>
+  </div>
+</section>
+
+<!-- 9-4 homework problem -->
+<section class="slide" data-title="Problem: critical area">
+  <div class="s-head"><p class="kicker">Take-home problem — find the tipping point</p><h2>Mixed-flow reactor: the critical heat-transfer area</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$A\rightarrow B\quad(\text{1st order, exothermic})$$</div>
+      <ul class="clean">
+        <li>$V=0.20\ \text{m}^3$, $C_{A0}=0.02\ \text{mol/m}^3$, $T_0=85\,°\text{C}$.</li>
+        <li>$\dot m_0=90\ \text{kg/min}$, $T_F=40\,°\text{C}$, $MW_A=90\ \text{g/mol}$, $\rho=900\ \text{kg/m}^3$.</li>
+        <li>Coolant $T_{cool}=35\,°\text{C}$, high flow, $U=120\ \text{W/m}^2\text{K}$.</li>
+      </ul>
+    </div>
+    <div class="callout q"><b>Find:</b> the critical heat-transfer area $A_{crit}$ <i>below which</i> the reaction runs away and the reactor explodes. $\dot W_s\approx0$; $-\Delta H_{Rx}=250\ \text{J/g}$, $C_p=2\ \text{J/gK}$.</div>
+  </div>
+</section>
+
+<!-- 9-4 EQUATRAN code walk -->
+<section class="slide" data-title="EQUATRAN: runaway CSTR" id="s-code-ru">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations</p><h2>Getting $k(T)$ straight from two measurements</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>runaway.eq</div>
+<div class="cw-body"><span class="c">//A --> B  (mass balance)</span>
+<span class="b">NA'</span>=FA0-FA-r1*V; NB'=FB0-FB+r1*V
+r1=k1*CA
+k1=k10*exp((E1/R)*((1/(Tref+273))
+        -(1/(T+273))))
+<span class="c">//two measured k's = two equations</span>
+<span class="n">1.1/60</span>= k10*exp((E1/R)*(1/313-1/313))
+<span class="n">3.4/60</span>= k10*exp((E1/R)*(1/313-1/323))
+<span class="c">//Energy balance (mass basis)</span>
+Q-r1*V*HRX1=Den*v0*1000*Cpmass*(T-TF)
+   +(V*Den*Cpmass*1000)*<span class="b">T'</span>
+Q=-U*A*(T-Tcool); U=120; <span class="n">A=0.1</span>
+integral t[0,100] step 0.01 by rkv</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">1.1/60 = k10*exp(…) ; 3.4/60 = k10*exp(…)</div><div class="me">$k(40°)=\tfrac{1.1}{60},\; k(50°)=\tfrac{3.4}{60}$</div><div class="mn">Two data points written as <b>two equations</b> — EQUATRAN solves the unknowns $k_{10}$ and $E_1$ for you. No hand log-fit.</div></div>
+      <div class="map-row"><div class="mc">Q = −U*A*(T−Tcool)</div><div class="me">$\dot Q=-UA(T-T_{cool})$</div><div class="mn"><code>A</code> is the knob: sweep it and watch where the steady branch disappears.</div></div>
+      <div class="map-row"><div class="mc">(V*Den*Cpmass*1000)*T'</div><div class="me">$\rho V c_p\dfrac{dT}{dt}$</div><div class="mn">Thermal inertia of the charge — sets how fast a runaway develops.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-4 INTERACTIVE 1: critical area -->
+<section class="slide" data-title="Critical-area finder" id="s-critarea">
+  <div class="s-head"><p class="kicker">Interactive 1 — shrink the cooler until it explodes</p><h2>Find $A_{crit}$: temperature trajectory vs heat-transfer area</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Heat-transfer area $A$ (m²) <span class="val" id="caAval"></span></label>
+        <input type="range" id="caA" min="0.02" max="1.2" step="0.02" value="0.30"></div>
+      <div class="sim-out" style="gap:4px;padding:14px">
+        <div class="bignum" id="caTag">–</div>
+        <div style="font-size:14px;color:var(--muted)" id="caTag2">status</div>
+      </div>
+      <div class="sim-controls hint">Reduce $A$ and the removal line drops below the generation curve — the steady branch vanishes and $T$ runs away.</div>
+    </div>
+    <div class="chart-box"><canvas id="caCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-4 INTERACTIVE 2: Semenov diagram -->
+<section class="slide" data-title="Heat generation vs removal" id="s-semenov">
+  <div class="s-head"><p class="kicker">Interactive 2 — the Semenov / van Heerden picture</p><h2>$G(T)$ vs $R(T)$: the tangency that sets $A_{crit}$</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Heat-transfer area $A$ (m²) <span class="val" id="seAval"></span></label>
+        <input type="range" id="seA" min="0.02" max="1.2" step="0.02" value="0.30"></div>
+      <div class="sim-controls hint">Blue S-curve = heat <b>generated</b> $G(T)$. Red line = heat <b>removed</b> $R(T)=UA(T-T_a)$. When the line is only <b>tangent</b> to the curve, you are at $A_{crit}$.</div>
+      <div class="sim-out" style="gap:4px;padding:14px;margin-top:10px">
+        <div class="bignum" id="seN">–</div>
+        <div style="font-size:14px;color:var(--muted)">curve crossings (2 = stable, 0 = runaway)</div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="seCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-4 quiz -->
+<section class="slide" data-title="Quiz — runaway">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — thermal runaway</h2></div>
+  <div class="quiz-q" data-qid="qr1">
+    <p class="q-text">Reducing the heat-transfer area $A$ triggers runaway because it…</p>
+    <button class="q-opt" data-explain="Rate depends on $T$ and $C$, not directly on $A$. $A$ acts through the heat-removal line.">increases the reaction rate constant $k$</button>
+    <button class="q-opt" data-correct data-explain="Correct. $R(T)=UA(T-T_a)$: a smaller $A$ lowers the slope of the removal line until it can no longer meet the low branch of the $G(T)$ S-curve, so the only stable operating point is the hot (runaway) one.">lowers the slope of the removal line $R(T)$ until it no longer intersects the low branch of $G(T)$</button>
+    <button class="q-opt" data-explain="The heat of reaction $\Delta H_{Rx}$ is a property of the chemistry, unchanged by the cooler size.">makes the reaction more exothermic</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- ============================ LECTURE 9-5 : PFR PDE ============================ -->
+<section class="slide section-slide" data-title="Lecture 9-5" data-sec="Lecture 9-5">
+  <div class="big">9-5</div>
+  <p class="lbl">Lecture 9-5</p>
+  <p class="q">How to compute the unsteady-state, non-isothermal tubular plug-flow reactor?</p>
+</section>
+
+<!-- 9-5 PFR mole balance -->
+<section class="slide" data-title="PFR mole balance (PDE)">
+  <div class="s-head"><p class="kicker">Now both time <i>and</i> position matter</p><h2>PFR — unsteady mole balance</h2></div>
+  <div class="two-col even">
+    <div class="stack">
+      <p class="tag">Shell balance on a slice $dV$</p>
+      <div class="eq-box sm">$$\frac{\partial C_i}{\partial t}=\sum_j\nu_{ij}r_j-\frac{\partial F_i}{\partial V}$$</div>
+    </div>
+    <div class="stack">
+      <p class="tag">Differentiated w.r.t. volume</p>
+      <div class="eq-box sm">$$\frac{1}{V}\frac{\partial N_i}{\partial t}=\sum_j\nu_{ij}r_j-\frac{\partial F_i}{\partial V}$$</div>
+      <p class="eq-note orange">A <b>PDE</b>: $C_i(t,V)$. Accumulation + convective flux − reaction.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9-5 PFR energy balance -->
+<section class="slide" data-title="PFR energy balance (PDE)">
+  <div class="s-head"><p class="kicker">$V$ and $t$ are the two independent variables</p><h2>PFR — unsteady energy balance</h2></div>
+  <div class="eq-box">$$\Big(\sum_i C_iC_{p,i}\Big)\frac{\partial T}{\partial t}=-\sum_j r_j\Delta H_{Rxj}-\Big(\sum_i F_iC_{p,i}\Big)\frac{\partial T}{\partial V}+\dot Q_a$$</div>
+  <div class="eq-step"><span>$\dfrac{\partial T}{\partial t}$</span><span class="why">local heating/cooling — how $T$ at a point evolves in time</span></div>
+  <div class="eq-step"><span>$\big(\sum F_iC_{p,i}\big)\dfrac{\partial T}{\partial V}$</span><span class="why">convection — hot fluid carried downstream</span></div>
+  <div class="eq-step"><span>adiabatic here → $\dot Q_a=0$</span><span class="why">the example bed has no wall cooling</span></div>
+</section>
+
+<!-- 9-5 method of lines concept -->
+<section class="slide" data-title="Method of lines">
+  <div class="s-head"><p class="kicker">Turn one PDE into many ODEs</p><h2>The method of lines: slice the reactor</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <ul class="clean">
+        <li>Chop the reactor into $n$ nodes of size $\Delta V=V/(n-1)$.</li>
+        <li>Replace the spatial derivative with a <b>backward (upwind) difference</b>: $\dfrac{\partial F_i}{\partial V}\approx\dfrac{F_{i,j}-F_{i,j-1}}{\Delta V}$.</li>
+        <li>Each node then obeys an <b>ODE in time</b> — solve all $n$ together.</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="eq-box sm">$$\frac{1}{\Delta V}\frac{dN_{i,j}}{dt}=\sum_j\nu r-\frac{F_{i,j}-F_{i,j-1}}{\Delta V}$$</div>
+      <div class="callout note">Node 1 = inlet <b>boundary condition</b> ($F_i=F_{i0}$, $T=T_F$). Nodes 2…n are integrated. Backward difference because information flows <b>downstream</b>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-5 example setup -->
+<section class="slide" data-title="Example: unsteady PFR">
+  <div class="s-head"><p class="kicker">Worked example — adiabatic tubular reactor</p><h2>Unsteady non-isothermal PFR</h2></div>
+  <div class="two-col">
+    <ul class="clean">
+      <li>$V=5\ \text{m}^3$ bed; $C_{A0}=0.3$, $C_{B0}=1\ \text{mol/m}^3$.</li>
+      <li>$F_{A0}=3$, $F_{B0}=10\ \text{mol/s}$, $v_0=10\ \text{m}^3/\text{s}$.</li>
+      <li>Feed &amp; initial temperatures 40 °C / 50 °C; adiabatic wall.</li>
+      <li>Discretize with $n=11$ nodes.</li>
+    </ul>
+    <div class="callout q"><b>Find:</b> the concentration &amp; temperature profiles as a function of <b>both</b> time and bed volume — until the reactor reaches steady state.</div>
+  </div>
+</section>
+
+<!-- 9-5 EQUATRAN code walk 1 -->
+<section class="slide" data-title="EQUATRAN: PFR MOL mass" id="s-code-p1">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (1 of 2)</p><h2>Vectorized mole balance over the nodes</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>pfr_mol_mass.eq</div>
+<div class="cw-body"><span class="c">//declare node arrays</span>
+<span class="b">local n=11</span>
+var NA(n),NB(n),...,FA(n),...,CA(n),...
+<span class="c">//mass balance on nodes 2..n</span>
+(1/dV)*NA'(2:n)=-1*r1(2:n)-2*r2(2:n)
+   -((FA(2:n)-FA(1:n-1))/dV)
+V=5; dV=V/(n-1)
+CA=NA/dV;  CA=FA/v
+<span class="c">//boundary + initial condition</span>
+<span class="k">FA(1)=FA0</span>; FA0=3
+<span class="k">NA#NA0</span>; NA0=CA0*dV; CA0=0.3
+integral t[0,0.8] step 0.0001</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">(1/dV)*NA'(2:n) = −r1−2r2 − (FA(2:n)−FA(1:n−1))/dV</div><div class="me">$\dfrac{1}{\Delta V}\dfrac{dN_{A,j}}{dt}=\nu r-\dfrac{F_{A,j}-F_{A,j-1}}{\Delta V}$</div><div class="mn"><code>(2:n)</code> = "all interior nodes at once"; <code>(1:n-1)</code> is the upstream neighbour.</div></div>
+      <div class="map-row"><div class="mc">FA(1)=FA0</div><div class="me">$F_{A,1}=F_{A0}$</div><div class="mn">Node 1 is the inlet <b>boundary condition</b>, fixed for all time.</div></div>
+      <div class="map-row"><div class="mc">NA#NA0</div><div class="me">$N_{A,j}(0)=N_{A0}$</div><div class="mn">Every interior node starts from the same initial charge.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-5 EQUATRAN code walk 2 -->
+<section class="slide" data-title="EQUATRAN: PFR MOL energy" id="s-code-p2">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (2 of 2)</p><h2>Energy balance over the same nodes</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>pfr_mol_energy.eq</div>
+<div class="cw-body"><span class="c">//energy balance, nodes 2..n</span>
+-r1(2:n)*HRX1(2:n)-r2(2:n)*HRX2(2:n)
+ =(CA(2:n)*CpA+...+CF(2:n)*CpF)
+      *<span class="b">T'(2:n)</span>
+ +((T(2:n)-T(1:n-1))/dV)
+      *(FA(2:n)*CpA+...+FF(2:n)*CpF)
+<span class="k">T#T0</span>; T0=50
+<span class="k">T(1)=TF</span>; TF=40
+HRX1=HRX01+delCp1*(T-TR)
+trend T(1),T(2),...,T(n) step 0.01</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">−Σ rj·HRXj = (ΣCi·Cpi)·T'(2:n) + (ΔT/dV)(ΣFi·Cpi)</div><div class="me">$-\sum r_j\Delta H_{Rxj}=\big(\sum C_iC_{p,i}\big)\dfrac{\partial T}{\partial t}+\dfrac{\Delta T}{\Delta V}\sum F_iC_{p,i}$</div><div class="mn">Accumulation + convection = reaction heat. Same upwind $\Delta T$ as the mass balance.</div></div>
+      <div class="map-row"><div class="mc">T(1)=TF</div><div class="me">$T_1=T_F$</div><div class="mn">Inlet temperature is the thermal boundary condition.</div></div>
+      <div class="map-row"><div class="mc">trend T(1)…T(n)</div><div class="me">watch every node</div><div class="mn">Plotting all nodes vs time shows the thermal front sweep down the bed to steady state.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-5 INTERACTIVE 1: node T vs time -->
+<section class="slide" data-title="PFR: nodes approaching steady state" id="s-pfrnode">
+  <div class="s-head"><p class="kicker">Interactive 1 — the thermal front marches downstream</p><h2>Node temperatures vs time</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Number of nodes shown $n$ <span class="val" id="pnNval"></span></label>
+        <input type="range" id="pnN" min="4" max="11" step="1" value="6"></div>
+      <div class="sim-controls hint">Each curve is one position in the bed. The <b>inlet</b> stays at 40 °C; downstream nodes heat up and reach their steady values one after another.</div>
+      <div class="sim-out" style="gap:4px;padding:14px;margin-top:10px">
+        <div class="bignum" id="pnTexit">–</div>
+        <div style="font-size:14px;color:var(--muted)">steady exit T</div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="pnCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-5 INTERACTIVE 2: spatial profile vs time -->
+<section class="slide" data-title="PFR: profile along the bed" id="s-pfrprofile">
+  <div class="s-head"><p class="kicker">Interactive 2 — scrub through time</p><h2>Temperature &amp; conversion along the bed</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Time $t$ (s) <span class="val" id="ppTval"></span></label>
+        <input type="range" id="ppT" min="0" max="0.8" step="0.02" value="0.8"></div>
+      <div class="sim-controls hint">Drag time from 0 to steady state. Watch the temperature (red) and conversion (green) profiles fill in from the inlet outward.</div>
+      <div class="sim-out" style="gap:4px;padding:14px;margin-top:10px">
+        <div class="bignum" id="ppXA">–</div>
+        <div style="font-size:14px;color:var(--muted)">exit conversion $X_A$</div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="ppCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-5 quiz -->
+<section class="slide" data-title="Quiz — PFR PDE">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — unsteady PFR</h2></div>
+  <div class="quiz-q" data-qid="qp1">
+    <p class="q-text">In the method of lines, why is the spatial derivative written as a <i>backward</i> difference $\dfrac{F_{i,j}-F_{i,j-1}}{\Delta V}$?</p>
+    <button class="q-opt" data-correct data-explain="Correct. Convection carries information downstream, so each node depends on its upstream neighbour. A backward (upwind) difference respects that direction and stays numerically stable.">Because convection carries information downstream — each node depends on the one upstream</button>
+    <button class="q-opt" data-explain="Accuracy order is similar for forward vs backward at first order; the real reason is the physical direction of flow (upwinding for stability).">Because it is more accurate than a forward difference</button>
+    <button class="q-opt" data-explain="The inlet condition is applied at node 1 separately; it is not why the interior stencil points upstream.">Because node 1 has no temperature</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+<!-- ============================ LECTURE 9-6 : PBR PDE ============================ -->
+<section class="slide section-slide" data-title="Lecture 9-6" data-sec="Lecture 9-6">
+  <div class="big">9-6</div>
+  <p class="lbl">Lecture 9-6</p>
+  <p class="q">How to compute the unsteady-state, non-isothermal fixed-bed (catalytic) reactor?</p>
+</section>
+
+<!-- 9-6 PBR balances -->
+<section class="slide" data-title="PBR balances">
+  <div class="s-head"><p class="kicker">Same PDE, now over catalyst — plus pressure drop</p><h2>Fixed-bed reactor — the three coupled fields</h2></div>
+  <div class="cards">
+    <div class="card card-blue"><h3>Mole</h3><p>$$\frac{1}{\rho_b}\frac{\partial C_i}{\partial t}=\nu r-\frac{1}{\rho_b}\frac{\partial F_i}{\partial(A_c z)}$$<br><span style="font-size:15px;color:var(--muted)">rates are per mass of catalyst</span></p></div>
+    <div class="card card-red"><h3>Energy</h3><p>$$\big(\textstyle\sum C_iC_{p,i}\big)\frac{\partial T}{\partial t}=\rho_b\Big(-\sum r_j\Delta H_{Rxj}\Big)-\dots$$<br><span style="font-size:15px;color:var(--muted)">adiabatic bed</span></p></div>
+    <div class="card card-orange"><h3>Momentum</h3><p>$$\frac{\partial P}{\partial z}=-\beta_0\,\frac{P_0}{P}\frac{T}{T_0}\frac{F_T}{F_{T0}}$$<br><span style="font-size:15px;color:var(--muted)">Ergun pressure drop</span></p></div>
+  </div>
+  <div class="callout note">Catalyst weight replaces volume: $W=\rho_b A_c z$, with bulk density $\rho_b=(1-\varepsilon)\rho_p$ and cross-section $A_c=v_0/v_s$.</div>
+</section>
+
+<!-- 9-6 Ergun detail -->
+<section class="slide" data-title="Ergun in a transient bed">
+  <div class="s-head"><p class="kicker">Pressure sets velocity sets residence time</p><h2>The Ergun equation, node by node</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$\beta_0=\frac{f\,G^2}{\rho_F d_p},\quad f=\frac{1-\varepsilon}{\varepsilon^3}\Big(1.75+\frac{150(1-\varepsilon)}{Re}\Big)$$</div>
+      <div class="eq-box sm">$$Re=\frac{G\,d_p}{\mu_F},\qquad G=\frac{\rho_F v_0}{A_c}$$</div>
+    </div>
+    <div class="stack">
+      <div class="callout">As $P$ falls, the gas expands, $v$ rises, residence time drops — so pressure, flow and conversion are all coupled.</div>
+      <div class="eq-box sm">$$\frac{v}{v_0}=\frac{P_0}{P}\frac{T}{T_0}\frac{F_T}{F_{T0}}\quad(\text{ideal gas})$$</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-6 problem setup -->
+<section class="slide" data-title="Example: unsteady PBR">
+  <div class="s-head"><p class="kicker">Worked example — adiabatic catalytic bed, gas phase</p><h2>Unsteady non-isothermal PBR</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <ul class="clean">
+        <li>$F_{A0}=3$, $F_{B0}=10\ \text{mol/s}$, $v_0=10\ \text{m}^3/\text{s}$, $v_s=15\ \text{m/s}$.</li>
+        <li>$P_F=20\ \text{bar}$, $T_F=T_0=30\,°\text{C}$ (adiabatic).</li>
+        <li>$d_p=5\ \text{mm}$, $\varepsilon=0.50$, $\rho_p=1200\ \text{kg/m}^3$, $\mu_F=0.03\ \text{cP}$.</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="callout q"><b>Find:</b> the 1-D concentration, temperature and pressure profiles along the bed at successive times, until steady state.</div>
+      <table class="data">
+        <tr><th></th><th>$\Delta H^{\circ}$ (kJ/mol)</th><th>$k_{30}$</th></tr>
+        <tr><td>Rxn 1</td><td>−65</td><td>0.0485</td></tr>
+        <tr><td>Rxn 2</td><td>−175</td><td>0.00106</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 9-6 EQUATRAN code walk 1 -->
+<section class="slide" data-title="EQUATRAN: PBR MOL" id="s-code-pb1">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (1 of 2)</p><h2>Mass &amp; energy over the bed nodes</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>pbr_mol.eq</div>
+<div class="cw-body"><span class="c">//bulk density &amp; cross-section</span>
+denb=(1-void)*denp
+Ac=v0/vs
+z=0.1; <span class="b">dz=z/(n-1)</span>
+<span class="c">//mass balance on nodes 2..n</span>
+(1/denb/(Ac*dz))*<span class="b">NA'(2:n)</span>=-1*r1(2:n)-2*r2(2:n)
+   -((FA(2:n)-FA(1:n-1))/denb/(Ac*dz))
+CA=NA/(Ac*dz); CA=FA/v
+<span class="c">//energy balance (adiabatic)</span>
+-r1(2:n)*HRX1(2:n)-r2(2:n)*HRX2(2:n)
+ =(CA*CpAm+...)*<span class="b">T'(2:n)</span>/denb
+ +((T(2:n)-T(1:n-1))/denb/(Ac*dz))
+      *(FA*CpAm+...)</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">denb=(1−void)*denp ; Ac=v0/vs</div><div class="me">$\rho_b=(1-\varepsilon)\rho_p,\;\; A_c=v_0/v_s$</div><div class="mn">Convert catalyst-weight rates to a length coordinate $z$: $dW=\rho_bA_c\,dz$.</div></div>
+      <div class="map-row"><div class="mc">(1/denb/(Ac·dz))·NA'(2:n) = …</div><div class="me">$\dfrac{1}{\rho_bA_c\Delta z}\dfrac{dN_{A,j}}{dt}=\nu r-\dfrac{F_{A,j}-F_{A,j-1}}{\rho_bA_c\Delta z}$</div><div class="mn">Identical MOL stencil as the PFR — only the volume element changed.</div></div>
+      <div class="map-row"><div class="mc">T'(2:n)/denb</div><div class="me">accumulation ÷ $\rho_b$</div><div class="mn">Energy stored in the fluid; reaction heat is generated per unit catalyst mass.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-6 EQUATRAN code walk 2 -->
+<section class="slide" data-title="EQUATRAN: PBR Ergun" id="s-code-pb2">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations (2 of 2)</p><h2>Ergun pressure &amp; ideal-gas velocity</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>pbr_ergun.eq</div>
+<div class="cw-body"><span class="c">//pressure profile (Ergun)</span>
+(P(2:n)-P(1:n-1))/dz=-b0*(P(1:n-1)/P(2:n))
+   *(T(2:n)/T(1:n-1))*(FT(2:n)/FT(1:n-1))
+b0=f*(G^2)/denF/dp
+f=((1-void)/void^3)*(1.75+150*(1-void)/NRe)
+NRe=G*dp/visF; G=denF*v0/Ac
+<span class="c">//ideal gas: velocity from P,T,FT</span>
+PF*v0=FT0*R*TF
+v(2:n)/v(1:n-1)=(P(1:n-1)/P(2:n))
+   *(T(2:n)/T(1:n-1))*(FT(2:n)/FT(1:n-1))
+<span class="k">P(1)=PF</span>; <span class="k">T(1)=TF</span>; <span class="k">v(1)=v0</span>
+integral t[0,0.02] step 0.0001</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">(P(2:n)−P(1:n−1))/dz = −b0·(P0/P)(T/T0)(FT/FT0)</div><div class="me">$\dfrac{\partial P}{\partial z}=-\beta_0\dfrac{P_0}{P}\dfrac{T}{T_0}\dfrac{F_T}{F_{T0}}$</div><div class="mn">Ergun differenced along $z$; pressure drop grows where gas is hot and expanded.</div></div>
+      <div class="map-row"><div class="mc">f = ((1−void)/void^3)(1.75 + 150(1−void)/NRe)</div><div class="me">$f=\dfrac{1-\varepsilon}{\varepsilon^3}\Big(1.75+\dfrac{150(1-\varepsilon)}{Re}\Big)$</div><div class="mn">Ergun friction factor: viscous (150/Re) + inertial (1.75) losses.</div></div>
+      <div class="map-row"><div class="mc">v(2:n)/v(1:n−1) = (P0/P)(T/T0)(FT/FT0)</div><div class="me">$\dfrac{v}{v_0}=\dfrac{P_0}{P}\dfrac{T}{T_0}\dfrac{F_T}{F_{T0}}$</div><div class="mn">Ideal-gas velocity update — closes the pressure–velocity–conversion loop.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9-6 INTERACTIVE 1: PBR profiles -->
+<section class="slide" data-title="PBR: profiles along the bed" id="s-pbrprofile">
+  <div class="s-head"><p class="kicker">Interactive 1 — concentration, temperature &amp; pressure</p><h2>Fixed-bed profiles vs time</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Time $t$ (s) <span class="val" id="pbTval"></span></label>
+        <input type="range" id="pbT" min="0" max="0.8" step="0.02" value="0.8"></div>
+      <div class="sim-controls hint">Left axis: $C_A$ (blue) &amp; $C_C$ (green). Right axis: temperature (red). Scrub time to watch the reaction front and the exotherm develop toward steady state.</div>
+      <div class="sim-out" style="gap:4px;padding:14px;margin-top:8px">
+        <div class="bignum" id="pbTe">–</div>
+        <div style="font-size:14px;color:var(--muted)">exit temperature</div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="pbCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- 9-6 INTERACTIVE 2: Ergun explorer -->
+<section class="slide" data-title="Ergun pressure explorer" id="s-ergun">
+  <div class="s-head"><p class="kicker">Interactive 2 — packing choices, pressure penalty</p><h2>Pressure drop vs particle size &amp; voidage</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Particle diameter $d_p$ (mm) <span class="val" id="egDval"></span></label>
+        <input type="range" id="egD" min="1" max="12" step="0.5" value="5"></div>
+      <div class="sl"><label>Bed voidage $\varepsilon$ <span class="val" id="egEval"></span></label>
+        <input type="range" id="egE" min="0.35" max="0.6" step="0.01" value="0.5"></div>
+      <div class="sim-out" style="gap:4px;padding:12px">
+        <div class="bignum" id="egDP">–</div>
+        <div style="font-size:14px;color:var(--muted)">ΔP over bed (bar)</div>
+      </div>
+    </div>
+    <div class="chart-box"><canvas id="egCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- ============================ ACTIVITY : PROBLEM I ============================ -->
+<section class="slide section-slide" data-title="Activity" data-sec="Activity">
+  <div class="big">▶</div>
+  <p class="lbl">Week activity</p>
+  <p class="q">Problem I — from a 100 mL lab reactor to a 50 L plant</p>
+</section>
+
+<!-- Activity statement -->
+<section class="slide" data-title="Problem I — the system">
+  <div class="s-head"><p class="kicker">Multi-reaction batch with a solid catalyst</p><h2>Problem I: catalytic conversion of G</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$G\rightarrow H+3W$$$$H+2W\rightarrow L+F$$$$H+F\rightarrow M+W$$</div>
+      <p class="eq-note">Catalytic (rates per gram of catalyst): $r_{1s}=k_{1s}C_G$, $r_{2s}=k_{2s}C_H$, $r_{3s}=k_{3s}C_H$.</p>
+    </div>
+    <div class="stack">
+      <div class="callout note"><b>Lab:</b> $V_L=100$ mL, $m_{cat,L}=0.5$ g, at 120 °C: $k_1=0.0015$, $k_2=0.0019$, $k_3=0.0013\ \text{min}^{-1}$; $E_a=64,\,60.8,\,70.2$ kJ/mol.</div>
+      <div class="callout q"><b>Plant:</b> $V=50$ L, 3 % catalyst loading. Predict $X_G$, yields $Y_H,Y_L,Y_M$ and selectivity vs time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Activity scale-up concept -->
+<section class="slide" data-title="Lab → plant scale-up">
+  <div class="s-head"><p class="kicker">The trick: normalize the rate to catalyst mass</p><h2>Turning a lab $k$ into a catalyst-specific $k_s$</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box sm">$$V_L\,k_1=m_{cat,L}\,k_{1s0}\;\Rightarrow\;k_{1s0}=\frac{V_L k_1}{m_{cat,L}}$$</div>
+      <p class="eq-note">$k_{1s0}$ has units of L·min⁻¹·g<sub>cat</sub>⁻¹ — a property of the <b>catalyst</b>, not the vessel.</p>
+    </div>
+    <div class="stack">
+      <ul class="clean">
+        <li>Mass balance per catalyst mass: $\dfrac{1}{m_{cat}}\dfrac{dN_i}{dt}=\sum_j\nu_{ij}r_{js}$.</li>
+        <li>Plant catalyst load: $m_{cat}=0.03\,(V\!\cdot\!1000)$ g.</li>
+        <li>Same $k_{s0}$, new $V$ and $m_{cat}$ → predicted plant performance.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Activity EQUATRAN code -->
+<section class="slide" data-title="EQUATRAN: Problem I" id="s-code-act">
+  <div class="s-head"><p class="kicker">EQUATRAN — code ↔ equations</p><h2>Solution A: balances + scale-up + energy</h2></div>
+  <div class="codemap">
+    <div class="codewin">
+      <div class="cw-bar"><span class="cw-dot"></span>problemI.eq</div>
+<div class="cw-body"><span class="c">//rate law (per g catalyst)</span>
+r1s=k1s*CG; r2s=k2s*CH; r3s=k3s*CH
+<span class="c">//scale-up from lab</span>
+VL*k1 = mcatL*k1s0
+k2s0= VL*k2/mcatL; k3s0= VL*k3/mcatL
+<span class="c">//mass balance (per mcat)</span>
+1/mcat*<span class="b">NG'</span>= -r1s; <span class="k">NG#NG0</span>
+1/mcat*NH'= r1s-r2s-r3s; <span class="k">NH#NH0</span>
+1/mcat*NL'= r2s
+mcat=3/100*(V*1000)
+<span class="c">//energy balance (adiabatic)</span>
+Q+Ws-r1s*mcat*HRX1-...=(NG*CpG+...)*<span class="b">T'</span>
+Q=0; Ws=0; <span class="k">T#120</span>
+integral t[0,200] step 1 by rkv</div>
+    </div>
+    <div class="map-list">
+      <div class="map-row"><div class="mc">VL*k1 = mcatL*k1s0</div><div class="me">$V_Lk_1=m_{cat,L}k_{1s0}$</div><div class="mn">One line performs the scale-up — EQUATRAN solves for the catalyst-specific $k_{1s0}$.</div></div>
+      <div class="map-row"><div class="mc">1/mcat*NG' = −r1s</div><div class="me">$\dfrac{1}{m_{cat}}\dfrac{dN_G}{dt}=-r_{1s}$</div><div class="mn">Rates are per gram of catalyst, so the balance is divided by $m_{cat}$.</div></div>
+      <div class="map-row"><div class="mc">Q=0; Ws=0; T#120</div><div class="me">adiabatic, isothermal start 120 °C</div><div class="mn">The exotherm then moves $T$; $k_{js}(T)$ follow via Arrhenius.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Activity interactive -->
+<section class="slide" data-title="Problem I: plant predictor" id="s-probI">
+  <div class="s-head"><p class="kicker">Interactive — your plant reactor</p><h2>Predicted conversion, yield &amp; selectivity</h2></div>
+  <div class="sim chartsim">
+    <div class="sim-controls">
+      <div class="sl"><label>Operating temperature $T$ (°C) <span class="val" id="piTval"></span></label>
+        <input type="range" id="piT" min="100" max="160" step="2" value="120"></div>
+      <div class="sim-out" style="gap:4px;padding:12px">
+        <div class="bignum" id="piXG">–</div>
+        <div style="font-size:14px;color:var(--muted)">final $X_G$ · sel. L <span id="piSL"></span></div>
+      </div>
+      <div class="sim-controls hint">Higher $T$ speeds every step and drives intermediate $H$ onward — lifting conversion <i>and</i> $L$ yield. But the highest-$E_a$ path (to $M$) accelerates fastest, so pushing $T$ too far tilts the $L{:}M$ split toward $M$.</div>
+    </div>
+    <div class="chart-box"><canvas id="piCanvas"></canvas></div>
+  </div>
+</section>
+
+<!-- Activity solution note -->
+<section class="slide" data-title="Problem I: takeaway">
+  <div class="s-head"><p class="kicker">Why the scale-up works</p><h2>What Problem I teaches</h2></div>
+  <div class="grow" style="justify-content:center">
+    <div class="reveal">
+      <button class="reveal-btn">Reveal the design lesson</button>
+      <div class="reveal-body">
+        <ul class="clean">
+          <li>Because $k_{s}$ is normalized to catalyst mass, the <b>same kinetics</b> predict both the 100 mL lab and the 50 L plant — only $V$ and $m_{cat}$ change.</li>
+          <li>Selectivity to $L$ vs $M$ is an <b>Arrhenius competition</b>: the step with the higher $E_a$ wins as $T$ rises, so temperature is the key design handle.</li>
+          <li>Solving mole + energy together catches any exotherm that would shift that competition during operation.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FINAL QUIZ ============================ -->
+<section class="slide" data-title="Quiz — PDE reactors">
+  <div class="s-head"><p class="kicker">Check your understanding</p><h2>Quiz — fixed-bed &amp; scale-up</h2></div>
+  <div class="quiz-q" data-qid="qf1">
+    <p class="q-text">In the unsteady PBR, why does pressure couple to conversion?</p>
+    <button class="q-opt" data-correct data-explain="Correct. As P drops along the bed, the ideal gas expands so v rises and residence time falls; less contact time changes conversion, which changes $F_T$, which feeds back into the Ergun term. All three fields are linked.">As $P$ falls the gas expands, $v$ rises and residence time drops — changing conversion, which feeds back to $F_T$</button>
+    <button class="q-opt" data-explain="The rate constant depends on temperature, not directly on total pressure in this formulation; the coupling is through velocity and residence time.">Because $k$ depends directly on total pressure</button>
+    <button class="q-opt" data-explain="Voidage is fixed by the packing; it does not change with pressure during operation.">Because the bed voidage changes with pressure</button>
+    <div class="q-explain"></div>
+  </div>
+  <div class="quiz-q" data-qid="qf2">
+    <p class="q-text">What makes the lab-to-plant scale-up in Problem I valid?</p>
+    <button class="q-opt" data-explain="Vessel volume alone does not transfer — the same 0.0015/min lab constant would predict the wrong plant rate without normalizing to catalyst.">Both reactors have the same volume</button>
+    <button class="q-opt" data-correct data-explain="Correct. Writing the rate per gram of catalyst ($k_s = V k / m_{cat}$) makes it an intrinsic catalyst property, so it carries from the 100 mL lab to the 50 L plant unchanged.">The rate is normalized to catalyst mass, making $k_s$ an intrinsic property</button>
+    <button class="q-opt" data-explain="Temperature matters a great deal here (it sets selectivity) — the scale-up is not temperature-independent.">The reaction is independent of temperature</button>
+    <div class="q-explain"></div>
+  </div>
+</section>
+
+<!-- ============================ KEY TAKEAWAYS ============================ -->
+<section class="slide" data-title="Key takeaways">
+  <div class="s-head"><p class="kicker">Exit ticket</p><h2>Key Takeaways</h2></div>
+  <div class="grow">
+    <div class="tk"><div class="n">1</div><p>Unsteady non-isothermal design = <b>mole balance + energy balance in time</b>, always coupled through $k(T)$ and $\Delta H_{Rx}$.</p></div>
+    <div class="tk"><div class="n">2</div><p>Reactor type sets the math: batch/semi-batch/CSTR → <b>ODEs in $t$</b>; PFR &amp; fixed-bed → <b>PDEs</b> solved by the <b>method of lines</b> (add Ergun for gas beds).</p></div>
+    <div class="tk"><div class="n">3</div><p>Watch <b>startup overshoot</b> and the <b>heat-removal vs heat-generation</b> balance — too little cooling means <b>thermal runaway</b>.</p></div>
+    <div class="tk"><div class="n">4</div><p>Normalize rates to <b>catalyst mass</b> and one set of kinetics scales from lab to plant.</p></div>
+    <div class="tk"><div class="n">5</div><p>In EQUATRAN one skeleton — balances + rate law + <code>integral … by rkv</code> (or nodal <code>(2:n)</code> arrays) — solves every reactor here.</p></div>
+    <p class="quiz-score"></p>
+  </div>
+</section>
+
+</div>
+
+<div id="progress"></div>
+<div id="hud">
+  <button id="btnToc" title="Contents (T)">☰</button>
+  <button id="btnPrev" title="Previous (←)">‹</button>
+  <button id="btnNext" title="Next (→)">›</button>
+</div>
+<div id="toc"><div class="panel"><h3>CONTENTS</h3><div id="tocList"></div></div></div>
+
+<script>
+/* ================= Deck engine ================= */
+const DECK_META = { course: '2105604 ADV CHE KINETICS' };  // footer text — set per deck
+
+const el = id => document.getElementById(id);
+const cs = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function fmt(x, d = 3){
+  if (!isFinite(x)) return '–';
+  if (x !== 0 && (Math.abs(x) < 1e-3 || Math.abs(x) >= 1e5)) return x.toExponential(d - 1);
+  return parseFloat(x.toPrecision(d)).toString();
+}
+function mix(c1, c2, t){
+  const p = c => [1,3,5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const a = p(c1), b = p(c2);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+const Deck = (() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = -1;
+  const enterCbs = [];   // {key, fn, once, fired}
+
+  // footer stamping
+  let _sec = '';
+  slides.forEach((s, i) => {
+    if (s.dataset.sec) _sec = s.dataset.sec;
+    if (s.classList.contains('title-slide') || s.classList.contains('section-slide') || s.dataset.nofooter !== undefined) return;
+    const f = document.createElement('div');
+    f.className = 's-foot';
+    f.innerHTML = `<span>${DECK_META.course}</span><span class="s-sec">${_sec}</span><span>${i + 1} / ${slides.length}</span>`;
+    s.appendChild(f);
+  });
+
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    location.hash = '#/' + (cur + 1);
+    el('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+    [...document.querySelectorAll('#tocList a')].forEach((a, j) => a.classList.toggle('cur', j === cur));
+    fireEnter(false);
+  }
+  function fireEnter(onlyUnfired){
+    enterCbs.forEach(c => {
+      const hit = (typeof c.key === 'number') ? c.key === cur : slides[cur].id === c.key;
+      if (!hit) return;
+      if (onlyUnfired && c.fired) return;
+      if (c.once && c.fired) return;
+      try{ c.fn(); c.fired = true; }catch(e){ console.error(e); }
+    });
+  }
+  // Deep-link safety: if the first slide shown needs a CDN lib (e.g. Chart.js) that
+  // hasn't loaded yet, its enter callback throws; retry once everything has loaded.
+  addEventListener('load', () => fireEnter(true));
+  function onEnter(key, fn, opts = {}){ enterCbs.push({ key, fn, once: !!opts.once, fired: false }); }
+
+  // TOC
+  const list = el('tocList');
+  slides.forEach((s, i) => {
+    if (s.dataset.sec){ const h = document.createElement('div'); h.className = 'sec'; h.textContent = s.dataset.sec; list.appendChild(h); }
+    const a = document.createElement('a');
+    a.href = '#/' + (i + 1);
+    a.textContent = (i + 1) + '. ' + (s.dataset.title || s.querySelector('h1,h2,.q')?.textContent.slice(0, 60) || 'Slide');
+    a.onclick = e => { e.preventDefault(); goTo(i); toc(false); };
+    list.appendChild(a);
+  });
+  function toc(open){ el('toc').classList.toggle('open', open ?? !el('toc').classList.contains('open')); }
+  el('toc').addEventListener('click', e => { if (e.target === el('toc')) toc(false); });
+  el('btnToc').onclick = () => toc();
+  el('btnPrev').onclick = () => goTo(cur - 1);
+  el('btnNext').onclick = () => goTo(cur + 1);
+
+  // keyboard
+  addEventListener('keydown', e => {
+    if (['ArrowRight',' ','PageDown'].includes(e.key)){ e.preventDefault(); goTo(cur + 1); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); goTo(cur - 1); }
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End') goTo(slides.length - 1);
+    else if (e.key.toLowerCase() === 't') toc();
+    else if (e.key === 'Escape') toc(false);
+    else if (e.key.toLowerCase() === 'f'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+    else if (e.key.toLowerCase() === 'o') debugOverflow();
+  });
+
+  // Overflow debugger (press O): measures every slide against the 1280x720 stage,
+  // outlines offenders in red and lists them in the console. Use before class.
+  function debugOverflow(){
+    const st = el('stage').getBoundingClientRect();
+    const sc = st.width / 1280;
+    const report = [];
+    slides.forEach((s, i) => {
+      const wasActive = s.classList.contains('active');
+      if (!wasActive) s.classList.add('active');
+      s.querySelectorAll('*').forEach(n => {
+        const r = n.getBoundingClientRect();
+        if ((!r.width && !r.height) || n.closest('.q-explain')) return;
+        const past = Math.max(r.bottom - st.bottom, r.right - st.right) / sc;
+        if (past > 2){
+          n.style.outline = '3px solid red';
+          report.push(`slide ${i + 1}: <${n.tagName.toLowerCase()} class="${n.className}"> ${Math.round(past)}px past edge`);
+        }
+      });
+      if (!wasActive) s.classList.remove('active');
+    });
+    if (report.length){ console.warn('OVERFLOW REPORT\n' + report.join('\n')); }
+    window.__overflowReport = report;
+    alert(report.length ? report.length + ' overflowing element(s) outlined red - see console' : 'No overflow - all slides fit 1280x720');
+    return report;
+  }
+
+  // swipe
+  let x0 = null;
+  addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 60) goTo(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
+
+  // scale stage to window
+  function fit(){
+    const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.98;
+    el('stage').style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  // hash routing (agenda links, deep links, back/forward)
+  function hashIndex(){ const m = location.hash.match(/#\/(\d+)/); return m ? +m[1] - 1 : NaN; }
+  addEventListener('hashchange', () => { const i = hashIndex(); if (!isNaN(i) && i !== cur) goTo(i); });
+  const h0 = hashIndex();
+  goTo(isNaN(h0) ? 0 : h0);
+
+  return { goTo, onEnter, get current(){ return cur; }, get count(){ return slides.length; } };
+})();
+
+/* ================= KaTeX ================= */
+const KATEX_OPTS = { delimiters: [
+  { left: '$$', right: '$$', display: true },
+  { left: '$', right: '$', display: false },
+  { left: '\\(', right: '\\)', display: false },
+  { left: '\\[', right: '\\]', display: true }
+], throwOnError: false };
+document.addEventListener('DOMContentLoaded', () => {
+  const tryRender = () => window.renderMathInElement
+    ? renderMathInElement(document.body, KATEX_OPTS)
+    : setTimeout(tryRender, 120);
+  tryRender();
+});
+
+/* ================= Quiz engine ================= */
+const Quiz = { score: 0, answered: 0, total: document.querySelectorAll('.quiz-q').length };
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const exp = q.querySelector('.q-explain');
+  q.querySelectorAll('.q-opt').forEach(opt => opt.addEventListener('click', () => {
+    if (q.dataset.done) return;
+    q.dataset.done = '1';
+    const ok = opt.hasAttribute('data-correct');
+    opt.classList.add(ok ? 'right' : 'wrong');
+    q.querySelectorAll('.q-opt[data-correct]').forEach(c => c.classList.add('right'));
+    q.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+    if (exp){
+      exp.innerHTML = opt.getAttribute('data-explain') || '';
+      exp.classList.add('show');
+      if (window.renderMathInElement) renderMathInElement(exp, KATEX_OPTS);
+    }
+    Quiz.answered++; if (ok) Quiz.score++;
+    document.querySelectorAll('.quiz-score').forEach(s =>
+      s.textContent = `Quiz score: ${Quiz.score} / ${Quiz.total}` + (Quiz.answered < Quiz.total ? ` (${Quiz.total - Quiz.answered} unanswered)` : ''));
+  }));
+});
+
+/* ================= Reveal blocks (Socratic click-to-show) ================= */
+document.querySelectorAll('.reveal-btn').forEach(b =>
+  b.addEventListener('click', () => b.closest('.reveal').classList.add('open')));
+
+/* ================= Helpers for simulations ================= */
+function bindSlider(id, fn){
+  const s = el(id);
+  const h = () => fn(+s.value);
+  s.addEventListener('input', h); h();
+  return s;
+}
+
+/* ================= Simulations ================= */
+/* ================= Non-Isothermal Reactor sims ================= */
+const RGAS = 8.314;
+const cvar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function arr(k0,E,Tref,T){ return k0*Math.exp((E/RGAS)*(1/(Tref+273)-1/(T+273))); }
+if (window.Chart){
+  Chart.defaults.font.family = "Montserrat,Prompt,sans-serif";
+  Chart.defaults.font.size = 14;
+  Chart.defaults.color = cvar('--muted');
+}
+const C_NAVY=()=>cvar('--navy'), C_BLUE=()=>cvar('--blue'), C_RED=()=>cvar('--red'),
+      C_GREEN=()=>cvar('--green'), C_ORANGE=()=>cvar('--orange'), C_LINE=()=>cvar('--line');
+
+function baseChart(id, datasets, xcfg, ycfg, extra){
+  return new Chart(el(id), {
+    type:'line',
+    data:{ datasets },
+    options:Object.assign({
+      animation:false, responsive:true, maintainAspectRatio:false,
+      interaction:{ intersect:false, mode:'nearest', axis:'x' },
+      plugins:{ legend:{ display:true, labels:{ boxWidth:14, usePointStyle:true, font:{size:13} } },
+                tooltip:{ enabled:true } },
+      scales:Object.assign({
+        x:Object.assign({ type:'linear', title:{ display:true, text:xcfg.text, font:{size:13} }, grid:{ display:false } }, xcfg.lim||{}),
+        y:Object.assign({ title:{ display:true, text:ycfg.text, font:{size:13} }, grid:{ color:C_LINE() } }, ycfg.lim||{})
+      }, extra&&extra.scales?extra.scales:{})
+    }, extra&&extra.options?extra.options:{})
+  });
+}
+function ds(label,color,axis,dash){ return { label, data:[], borderColor:color, backgroundColor:'transparent',
+  pointRadius:0, borderWidth:3, tension:.25, yAxisID:axis||'y', borderDash:dash||[] }; }
+
+/* ================= Lecture 9 simulations ================= */
+const CpM=[8,5,13,18,3,7];        // A B C D E F  (J/mol·K)
+const DCP1=49, DCP2=-19;          // ΔCp for reactions 1,2
+const GREY=()=>cvar('--muted');
+function rk4(f,y,t,h){
+  const a=f(t,y), b=f(t+h/2,y.map((v,i)=>v+h/2*a[i])),
+        c=f(t+h/2,y.map((v,i)=>v+h/2*b[i])), d=f(t+h,y.map((v,i)=>v+h*c[i]));
+  return y.map((v,i)=>v+h/6*(a[i]+2*b[i]+2*c[i]+d[i]));
+}
+function sub(a,n){ if(a.length<=n)return a; const st=Math.ceil(a.length/n),o=[];
+  for(let i=0;i<a.length;i+=st)o.push(a[i]); if(o[o.length-1]!==a[a.length-1])o.push(a[a.length-1]); return o; }
+function dax(txt,mn,mx){ return {position:'right',title:{display:true,text:txt,font:{size:13}},grid:{drawOnChartArea:false},min:mn,max:mx}; }
+
+/* ---------- 9-1 : batch two-reaction model ---------- */
+function batchRun(UA,T0){
+  const V=5,Tcool=30,H1=-10000,H2=-20000,TR=25,h=0.0005,tend=0.19;
+  let y=[0.3*V,1*V,0,0,0,0,T0];
+  const f=(t,Y)=>{ const N=Y.slice(0,6).map(x=>Math.max(x,0)),T=Y[6],C=N.map(x=>x/V);
+    const k1=arr(10,35000,40,T),k2=arr(5,45000,40,T),k3=arr(2,30000,40,T);
+    const r1=k1*C[0]*C[1]*C[1]-k2*C[2]*Math.pow(C[3],3), r2=k3*C[0]*C[0]*C[2];
+    const dN=[V*(-r1-2*r2),V*(-2*r1),V*(r1-r2),V*(3*r1),V*r2,V*r2];
+    const H1t=H1+DCP1*(T-TR),H2t=H2+DCP2*(T-TR);
+    const NCp=N.reduce((s,n,i)=>s+n*CpM[i],0)||1;
+    return [...dN,(UA*(Tcool-T)-r1*V*H1t-r2*V*H2t)/NCp]; };
+  const rows=[];
+  for(let t=0;t<=tend+1e-9;t+=h){ rows.push([t,...y]); const yn=rk4(f,y,t,h); if(!yn.every(isFinite))break; y=yn; }
+  return rows;   // [t,NA..NF,T]
+}
+let bC;
+function batchU(){ if(!bC)return; const UA=+el('bUA').value,T0=+el('bT0').value;
+  el('bUAval').textContent=UA+' W/K'; el('bT0val').textContent=T0+' °C';
+  const R=batchRun(UA,T0),V=5,CA=[],CC=[],CD=[],T=[]; let Tmax=-1e9;
+  sub(R,120).forEach(r=>{CA.push({x:r[0],y:r[1]/V});CC.push({x:r[0],y:r[3]/V});CD.push({x:r[0],y:r[4]/V});T.push({x:r[0],y:r[7]});});
+  R.forEach(r=>{if(r[7]>Tmax)Tmax=r[7];});
+  bC.data.datasets[0].data=CA;bC.data.datasets[1].data=CC;bC.data.datasets[2].data=CD;bC.data.datasets[3].data=T;bC.update('none');
+  el('bTmax').textContent=Math.round(Tmax)+' °C';
+  const XA=(1.5-R[R.length-1][1])/1.5;
+  el('bXA').innerHTML='conversion X<sub>A</sub> = <b>'+XA.toFixed(2)+'</b>';
+  el('bXA').className='chip '+(Tmax>110?'hot':'ok'); }
+Deck.onEnter('s-batch',()=>{ bC=baseChart('bCanvas',
+  [ds('CA',C_RED(),'y'),ds('CC',C_GREEN(),'y'),ds('CD',C_BLUE(),'y'),ds('Temperature',C_ORANGE(),'y1')],
+  {text:'time t (s)',lim:{min:0,max:0.19}},{text:'C (mol/m³)',lim:{min:0}},
+  {scales:{y1:dax('T (°C)',20,200)}});
+  ['bUA','bT0'].forEach(i=>el(i).addEventListener('input',batchU)); batchU(); },{once:true});
+
+/* ---------- 9-1 : iso vs adia vs non-iso ---------- */
+let bmC;
+function bmU(){ if(!bmC)return; const UA=+el('bmUA').value,T0=50; el('bmUAval').textContent=UA+' W/K';
+  const ad=batchRun(0,T0),no=batchRun(UA,T0),iso=[],adia=[],non=[]; let peak=-1e9;
+  sub(ad,100).forEach(r=>{iso.push({x:r[0],y:T0});adia.push({x:r[0],y:Math.min(r[7],260)});});
+  sub(no,100).forEach(r=>non.push({x:r[0],y:r[7]}));
+  no.forEach(r=>{if(r[7]>peak)peak=r[7];});
+  bmC.data.datasets[0].data=iso;bmC.data.datasets[1].data=adia;bmC.data.datasets[2].data=non;bmC.update('none');
+  el('bmPeak').textContent=Math.round(peak)+' °C'; }
+Deck.onEnter('s-batchmode',()=>{ bmC=baseChart('bmCanvas',
+  [Object.assign(ds('isothermal',GREY(),'y',[6,5]),{borderWidth:1.5}),ds('adiabatic',C_RED(),'y'),ds('non-isothermal',C_BLUE(),'y')],
+  {text:'time t (s)',lim:{min:0,max:0.19}},{text:'Temperature (°C)',lim:{min:40,max:260}});
+  ['bmUA'].forEach(i=>el(i).addEventListener('input',bmU)); bmU(); },{once:true});
+
+/* ---------- 9-2 : semi-batch model (feed A, growing V) ---------- */
+function semibatchRun(UA){
+  const v0=0.1,FA0=1,V0=3,CB0=10,Tcool=30,H1=-10000,H2=20000,TR=25,h=0.003,tend=30;
+  let y=[0,CB0*V0,0,0,0,0,V0,30],run=false;
+  const f=(t,Y)=>{ const N=Y.slice(0,6).map(x=>Math.max(x,1e-12)),Vv=Math.max(Y[6],1e-6),T=Y[7],C=N.map(x=>x/Vv);
+    const k1=arr(10,35000,40,T),k2=arr(10,30000,40,T),k3=arr(5,30000,40,T);
+    const r1=k1*C[0]*C[1]*C[1]-k2*C[2]*Math.pow(C[3],3), r2=k3*C[0]*C[0]*C[2];
+    const dN=[FA0+(-r1-2*r2)*Vv,(-2*r1)*Vv,(r1-r2)*Vv,(3*r1)*Vv,r2*Vv,r2*Vv];
+    const H1t=H1+DCP1*(T-TR),H2t=H2+DCP2*(T-TR);
+    const NCp=N.reduce((s,n,i)=>s+n*CpM[i],0)||1;
+    return [...dN,v0,(UA*(Tcool-T)-r1*Vv*H1t-r2*Vv*H2t-FA0*CpM[0]*(T-30))/NCp]; };
+  const rows=[];
+  for(let t=0;t<=tend+1e-9;t+=h){ rows.push([t,...y]); const yn=rk4(f,y,t,h); if(!yn.every(isFinite)||Math.abs(yn[7])>400){run=true;break;} y=yn; }
+  return {rows,run};   // [t,NA..NF,V,T]
+}
+let sbC;
+function sbU(){ if(!sbC)return; const UA=+el('sbUA').value; el('sbUAval').textContent=UA+' W/K';
+  const {rows,run}=semibatchRun(UA),CB=[],CD=[],T=[];
+  sub(rows,120).forEach(r=>{const V=r[7];CB.push({x:r[0],y:r[2]/V});CD.push({x:r[0],y:r[4]/V});T.push({x:r[0],y:Math.max(0,Math.min(r[8],350))});});
+  sbC.data.datasets[0].data=CB;sbC.data.datasets[1].data=CD;sbC.data.datasets[2].data=T;sbC.update('none');
+  const last=rows[rows.length-1],Tp=Math.round(Math.max(...rows.map(r=>r[8])));
+  el('sbV').textContent=last[7].toFixed(1);
+  el('sbT').innerHTML=run?'peak T = <b>runaway ⚠</b>':'peak T = <b>'+Tp+' °C</b>';
+  el('sbT').className='chip '+(run?'hot':'ok'); }
+Deck.onEnter('s-semibatch',()=>{ sbC=baseChart('sbCanvas',
+  [ds('CB',C_RED(),'y'),ds('CD',C_GREEN(),'y'),ds('Temperature',C_ORANGE(),'y1')],
+  {text:'time t (s)',lim:{min:0,max:30}},{text:'C (mol/m³)',lim:{min:0}},
+  {scales:{y1:dax('T (°C)',0,360)}});
+  ['sbU'].forEach(()=>{}); el('sbUA').addEventListener('input',sbU); sbU(); },{once:true});
+
+/* ---------- 9-2 : runaway explorer ---------- */
+let ruC;
+function ruU(){ if(!ruC)return; const UA=+el('ruUA').value; el('ruUAval').textContent=UA+' W/K';
+  const {rows,run}=semibatchRun(UA),T=[];
+  sub(rows,120).forEach(r=>T.push({x:r[0],y:Math.max(0,Math.min(r[8],350))}));
+  ruC.data.datasets[0].data=T; ruC.data.datasets[0].borderColor=run?C_RED():C_GREEN(); ruC.update('none');
+  el('ruTag').textContent=run?'RUNAWAY':'CONTROLLED'; el('ruTag').style.color=run?C_RED():C_GREEN();
+  el('ruTag2').textContent=run?'cooling too weak ⚠':'stable operation ✓'; }
+Deck.onEnter('s-runaway2',()=>{ ruC=baseChart('ruCanvas',
+  [ds('reactor T',C_GREEN(),'y')],
+  {text:'time t (s)',lim:{min:0,max:30}},{text:'Temperature (°C)',lim:{min:0,max:360}},
+  {options:{plugins:{legend:{display:false}}}});
+  el('ruUA').addEventListener('input',ruU); ruU(); },{once:true});
+
+/* ---------- 9-3 : CSTR startup dynamics ---------- */
+function cstrRun(UA,T0){
+  const V=5,v0=10,FA0=3,FB0=10,TF=40,H1=-10000,H2=-20000,TR=25,Tcool=30,h=0.0005,tend=0.6;
+  let y=[0.3*V,1*V,0,0,0,0,T0]; const F0=[FA0,FB0,0,0,0,0];
+  const f=(t,Y)=>{ const N=Y.slice(0,6).map(x=>Math.max(x,0)),T=Y[6],C=N.map(x=>x/V),F=C.map(x=>x*v0);
+    const k1=arr(10,35000,40,T),k2=arr(5,45000,40,T),k3=arr(2,30000,40,T);
+    const r1=k1*C[0]*C[1]*C[1]-k2*C[2]*Math.pow(C[3],3), r2=k3*C[0]*C[0]*C[2];
+    const nu=[-r1-2*r2,-2*r1,r1-r2,3*r1,r2,r2],dN=nu.map((n,i)=>F0[i]-F[i]+n*V);
+    const H1t=H1+DCP1*(T-TR),H2t=H2+DCP2*(T-TR);
+    const NCp=N.reduce((s,n,i)=>s+n*CpM[i],0)||1, sens=(F0[0]*CpM[0]+F0[1]*CpM[1])*(T-TF);
+    return [...dN,(UA*(Tcool-T)-r1*V*H1t-r2*V*H2t-sens)/NCp]; };
+  const rows=[];
+  for(let t=0;t<=tend+1e-9;t+=h){ rows.push([t,...y]); const yn=rk4(f,y,t,h); if(!yn.every(isFinite))break; y=yn; }
+  return rows;  // [t,NA..NF,T]
+}
+let csC;
+function csU(){ if(!csC)return; const UA=+el('csUA').value,T0=+el('csT0').value;
+  el('csUAval').textContent=UA+' W/K'; el('csT0val').textContent=T0+' °C';
+  const R=cstrRun(UA,T0),T=[],X=[]; let Tmax=-1e9;
+  sub(R,120).forEach(r=>{T.push({x:r[0],y:r[7]});X.push({x:r[0],y:(1.5-r[1])/1.5});});
+  R.forEach(r=>{if(r[7]>Tmax)Tmax=r[7];}); const Tss=R[R.length-1][7];
+  csC.data.datasets[0].data=T; csC.data.datasets[1].data=X; csC.update('none');
+  el('csTss').textContent=Math.round(Tss)+' °C'; el('csOS').textContent='+'+Math.round(Tmax-Tss)+' °C'; }
+Deck.onEnter('s-cstrstart',()=>{ csC=baseChart('csCanvas',
+  [ds('Temperature',C_RED(),'y'),ds('Conversion XA',C_GREEN(),'y1')],
+  {text:'time t (s)',lim:{min:0,max:0.6}},{text:'Temperature (°C)',lim:{min:40}},
+  {scales:{y1:dax('Conversion XA',0,1)}});
+  ['csUA','csT0'].forEach(i=>el(i).addEventListener('input',csU)); csU(); },{once:true});
+
+/* ---------- 9-3 : phase plane ---------- */
+let phC;
+function phU(){ if(!phC)return; const UA=+el('phUA').value,T0=+el('phT0').value;
+  el('phUAval').textContent=UA+' W/K'; el('phT0val').textContent=T0+' °C';
+  const R=cstrRun(UA,T0),pts=[]; sub(R,160).forEach(r=>pts.push({x:r[1]/5,y:r[7]}));
+  const last=R[R.length-1];
+  phC.data.datasets[0].data=pts; phC.data.datasets[1].data=[{x:last[1]/5,y:last[7]}]; phC.update('none'); }
+Deck.onEnter('s-phase',()=>{ phC=baseChart('phCanvas',
+  [ds('trajectory',C_NAVY(),'y'),Object.assign(ds('steady state',C_RED(),'y'),{showLine:false,pointRadius:7,pointBackgroundColor:C_RED()})],
+  {text:'CA (mol/m³)',lim:{min:0,max:0.3}},{text:'Temperature (°C)',lim:{min:40}});
+  ['phUA','phT0'].forEach(i=>el(i).addEventListener('input',phU)); phU(); },{once:true});
+
+/* ---------- 9-4 : Semenov thermal model (shared) ---------- */
+const SEM={E:90000,k0tau:8e12,Gmax:140,Ta:35,Cth:4};
+function semG(TC){ const T=TC+273,Da=SEM.k0tau*Math.exp(-SEM.E/(RGAS*T)); return SEM.Gmax*Da/(1+Da); }
+function semSlope(A){ return 0.05+0.6*A; }
+function semTraj(A){ let T=55,out=[[0,55]],ra=false; const h=0.1,tend=100;
+  for(let t=h;t<=tend+1e-9;t+=h){ const f=Tx=>(semG(Tx)-semSlope(A)*(Tx-SEM.Ta))/SEM.Cth;
+    const k1=f(T),k2=f(T+h/2*k1),k3=f(T+h/2*k2),k4=f(T+h*k3); T+=h/6*(k1+2*k2+2*k3+k4);
+    if(T>400){out.push([t,400]);ra=true;break;} out.push([t,T]); }
+  return {out,ra}; }
+let caC;
+function caU(){ if(!caC)return; const A=+el('caA').value; el('caAval').textContent=A.toFixed(2)+' m²';
+  const {out,ra}=semTraj(A);
+  caC.data.datasets[0].data=sub(out,120).map(p=>({x:p[0],y:p[1]})); caC.data.datasets[0].borderColor=ra?C_RED():C_GREEN(); caC.update('none');
+  el('caTag').textContent=ra?'RUNAWAY':'CONTROLLED'; el('caTag').style.color=ra?C_RED():C_GREEN();
+  el('caTag2').textContent=ra?'A < A_crit ≈ 0.33 m² ⚠':'A > A_crit ≈ 0.33 m² ✓'; }
+Deck.onEnter('s-critarea',()=>{ caC=baseChart('caCanvas',
+  [ds('reactor T',C_GREEN(),'y')],
+  {text:'time t (s)',lim:{min:0,max:100}},{text:'Temperature (°C)',lim:{min:35,max:400}},
+  {options:{plugins:{legend:{display:false}}}});
+  el('caA').addEventListener('input',caU); caU(); },{once:true});
+let seC;
+function seU(){ if(!seC)return; const A=+el('seA').value; el('seAval').textContent=A.toFixed(2)+' m²';
+  const G=[],Rl=[]; let prev=null,cross=0;
+  for(let TC=35;TC<=150;TC+=1){ const g=semG(TC),r=semSlope(A)*(TC-SEM.Ta); G.push({x:TC,y:g}); Rl.push({x:TC,y:r});
+    const d=g-r; if(prev!==null&&Math.sign(d)!==Math.sign(prev))cross++; prev=d; }
+  seC.data.datasets[0].data=G; seC.data.datasets[1].data=Rl; seC.update('none');
+  el('seN').textContent=cross; el('seN').style.color=cross>=2?C_GREEN():C_RED(); }
+Deck.onEnter('s-semenov',()=>{ seC=baseChart('seCanvas',
+  [ds('G(T) generated',C_BLUE(),'y'),ds('R(T) removed',C_RED(),'y')],
+  {text:'Temperature (°C)',lim:{min:35,max:150}},{text:'Heat rate (kW)',lim:{min:0,max:150}});
+  el('seA').addEventListener('input',seU); seU(); },{once:true});
+
+/* ---------- 9-5 / 9-6 : method-of-lines solver (cached) ---------- */
+let MOLcache=null;
+function molSolve(){
+  if(MOLcache)return MOLcache;
+  const n=11,Vtot=5,dV=Vtot/(n-1),FA0=3,FB0=10,v=10,TF=40,T0=50,H1=-10000,H2=-20000,TR=25;
+  const F0=[FA0,FB0,0,0,0,0], C0=[0.3,1,0,0,0,0];
+  let N=[],T=[];
+  for(let s=0;s<6;s++){ N[s]=new Array(n).fill(C0[s]*dV); }
+  for(let j=0;j<n;j++)T[j]=T0; T[0]=TF;
+  function deriv(N,T){
+    const C=[],F=[]; for(let s=0;s<6;s++){C[s]=[];F[s]=[];for(let j=0;j<n;j++){C[s][j]=Math.max(N[s][j],0)/dV;F[s][j]=C[s][j]*v;}}
+    const dN=[]; for(let s=0;s<6;s++)dN[s]=new Array(n).fill(0);
+    const dT=new Array(n).fill(0);
+    for(let j=1;j<n;j++){
+      const k1=arr(10,35000,40,T[j]),k2=arr(5,45000,40,T[j]),k3=arr(2,30000,40,T[j]);
+      const r1=k1*C[0][j]*C[1][j]*C[1][j]-k2*C[2][j]*Math.pow(C[3][j],3), r2=k3*C[0][j]*C[0][j]*C[2][j];
+      const nu=[-r1-2*r2,-2*r1,r1-r2,3*r1,r2,r2];
+      for(let s=0;s<6;s++){ const Fp=(j===1)?F0[s]:F[s][j-1]; dN[s][j]=dV*(nu[s]-(F[s][j]-Fp)/dV); }
+      const H1t=H1+DCP1*(T[j]-TR),H2t=H2+DCP2*(T[j]-TR);
+      let SC=0,SF=0; for(let s=0;s<6;s++){SC+=C[s][j]*CpM[s];SF+=F[s][j]*CpM[s];}
+      const Tp=(j===1)?TF:T[j-1];
+      dT[j]=(-r1*H1t-r2*H2t-((T[j]-Tp)/dV)*SF)/(SC||1);
+    }
+    return {dN,dT};
+  }
+  const h=0.0004,tend=0.8,nst=Math.round(tend/h),save=Math.max(1,Math.round(nst/60));
+  const times=[],frames=[];
+  const snap=(N,T)=>{ const Tr=T.slice(),XA=[],CA=[],CC=[];
+    for(let j=0;j<n;j++){ const cA=Math.max(N[0][j],0)/dV,cB=Math.max(N[1][j],0)/dV,cE=Math.max(N[4][j],0)/dV;
+      CA.push(cA); CC.push(Math.max(N[2][j],0)/dV);
+      XA.push(((FB0-cB*v)/(2*FA0))+(2*cE*v/FA0)); }
+    return {T:Tr,XA,CA,CC}; };
+  for(let i=0;i<=nst;i++){
+    if(i%save===0){ times.push(i*h); frames.push(snap(N,T)); }
+    const a=deriv(N,T);
+    const N2=N.map((r,s)=>r.map((v2,j)=>v2+h/2*a.dN[s][j])), T2=T.map((v2,j)=>v2+h/2*a.dT[j]); T2[0]=TF;
+    const b=deriv(N2,T2);
+    const N3=N.map((r,s)=>r.map((v2,j)=>v2+h/2*b.dN[s][j])), T3=T.map((v2,j)=>v2+h/2*b.dT[j]); T3[0]=TF;
+    const c=deriv(N3,T3);
+    const N4=N.map((r,s)=>r.map((v2,j)=>v2+h*c.dN[s][j])), T4=T.map((v2,j)=>v2+h*c.dT[j]); T4[0]=TF;
+    const d=deriv(N4,T4);
+    N=N.map((r,s)=>r.map((v2,j)=>v2+h/6*(a.dN[s][j]+2*b.dN[s][j]+2*c.dN[s][j]+d.dN[s][j])));
+    T=T.map((v2,j)=>v2+h/6*(a.dT[j]+2*b.dT[j]+2*c.dT[j]+d.dT[j])); T[0]=TF;
+    for(let s=0;s<6;s++)for(let j=0;j<n;j++)if(N[s][j]<0)N[s][j]=0;
+  }
+  MOLcache={n,dV,times,frames}; return MOLcache;
+}
+/* 9-5 nodes vs time */
+let pnC;
+function pnU(){ if(!pnC)return; const nn=+el('pnN').value; el('pnNval').textContent=nn;
+  const P=molSolve(),idx=[]; for(let k=0;k<nn;k++) idx.push(Math.round(k*(P.n-1)/(nn-1)));
+  pnC.data.datasets=idx.map((node,i)=>({label:(node===0?'inlet':'node '+node),
+    data:P.times.map((t,ti)=>({x:t,y:P.frames[ti].T[node]})),
+    borderColor:mix(C_BLUE(),C_RED(),nn>1?i/(nn-1):0),backgroundColor:'transparent',pointRadius:0,borderWidth:2.5,tension:.2}));
+  pnC.update('none');
+  el('pnTexit').textContent=Math.round(P.frames[P.frames.length-1].T[P.n-1])+' °C'; }
+Deck.onEnter('s-pfrnode',()=>{ pnC=baseChart('pnCanvas',[],
+  {text:'time t (s)',lim:{min:0,max:0.8}},{text:'Temperature (°C)',lim:{min:40}});
+  el('pnN').addEventListener('input',pnU); pnU(); },{once:true});
+/* 9-5 spatial profile vs time */
+let ppC;
+function ppU(){ if(!ppC)return; const tt=+el('ppT').value; el('ppTval').textContent=tt.toFixed(2)+' s';
+  const P=molSolve(); let fi=0; for(let i=0;i<P.times.length;i++) if(P.times[i]<=tt+1e-9)fi=i;
+  const fr=P.frames[fi],Tp=[],Xp=[]; for(let j=0;j<P.n;j++){ const z=j/(P.n-1)*5; Tp.push({x:z,y:fr.T[j]}); Xp.push({x:z,y:Math.max(0,fr.XA[j])}); }
+  ppC.data.datasets[0].data=Tp; ppC.data.datasets[1].data=Xp; ppC.update('none');
+  el('ppXA').textContent=Math.max(0,fr.XA[P.n-1]).toFixed(2); }
+Deck.onEnter('s-pfrprofile',()=>{ ppC=baseChart('ppCanvas',
+  [ds('Temperature',C_RED(),'y'),ds('Conversion XA',C_GREEN(),'y1')],
+  {text:'bed volume V (m³)',lim:{min:0,max:5}},{text:'Temperature (°C)',lim:{min:40}},
+  {scales:{y1:dax('Conversion XA',0,1)}});
+  el('ppT').addEventListener('input',ppU); ppU(); },{once:true});
+/* 9-6 PBR concentration/T profile vs time (shares MOL cache) */
+let pbC;
+function pbU(){ if(!pbC)return; const tt=+el('pbT').value; el('pbTval').textContent=tt.toFixed(2)+' s';
+  const P=molSolve(); let fi=0; for(let i=0;i<P.times.length;i++) if(P.times[i]<=tt+1e-9)fi=i;
+  const fr=P.frames[fi],CA=[],CC=[],T=[]; for(let j=0;j<P.n;j++){ const z=j/(P.n-1); CA.push({x:z,y:fr.CA[j]}); CC.push({x:z,y:fr.CC[j]}); T.push({x:z,y:fr.T[j]}); }
+  pbC.data.datasets[0].data=CA; pbC.data.datasets[1].data=CC; pbC.data.datasets[2].data=T; pbC.update('none');
+  el('pbTe').textContent=Math.round(fr.T[P.n-1])+' °C'; }
+Deck.onEnter('s-pbrprofile',()=>{ pbC=baseChart('pbCanvas',
+  [ds('CA',C_BLUE(),'y'),ds('CC',C_GREEN(),'y'),ds('Temperature',C_RED(),'y1')],
+  {text:'relative bed position z/L',lim:{min:0,max:1}},{text:'C (mol/m³)',lim:{min:0}},
+  {scales:{y1:dax('T (°C)',40)}});
+  el('pbT').addEventListener('input',pbU); pbU(); },{once:true});
+/* fix pbT slider range to seconds after load handled in HTML */
+
+/* ---------- 9-6 : Ergun pressure explorer ---------- */
+function ergunB0(dp_mm,eps){ const FA0=3,FB0=10,v0=10,vs=15,MwA=0.05,MwB=0.032,visF=3e-5;
+  const dp=dp_mm/1000,Ac=v0/vs,denF=(FA0*MwA+FB0*MwB)/v0,G=denF*v0/Ac;
+  const NRe=G*dp/visF,f=((1-eps)/Math.pow(eps,3))*(1.75+150*(1-eps)/NRe);
+  return f*G*G/denF/dp; }
+let egC;
+function egU(){ if(!egC)return; const dp=+el('egD').value,eps=+el('egE').value;
+  el('egDval').textContent=dp.toFixed(1)+' mm'; el('egEval').textContent=eps.toFixed(2);
+  const b0=ergunB0(dp,eps),L=1,P0=20e5,prof=[];
+  for(let z=0;z<=L+1e-9;z+=0.05) prof.push({x:z,y:(P0-b0*z)/1e5});
+  egC.data.datasets[0].data=prof; egC.update('none');
+  el('egDP').textContent=(b0*L/1e5).toFixed(3); }
+Deck.onEnter('s-ergun',()=>{ egC=baseChart('egCanvas',
+  [ds('Pressure',C_ORANGE(),'y')],
+  {text:'bed length z (m)',lim:{min:0,max:1}},{text:'Pressure (bar)',lim:{min:0,max:20.5}},
+  {options:{plugins:{legend:{display:false}}}});
+  ['egD','egE'].forEach(i=>el(i).addEventListener('input',egU)); egU(); },{once:true});
+
+/* ---------- Activity : Problem I plant predictor ---------- */
+function probIRun(Tset){
+  const VL=0.1,mcatL=0.5,V=50,mcat=0.03*V*1000,TR=120;
+  const k1s0=VL*0.0015/mcatL,k2s0=VL*0.0019/mcatL,k3s0=VL*0.0013/mcatL;
+  const kA=(k0,Ea)=>k0*Math.exp((Ea/RGAS)*(1/(TR+273)-1/(Tset+273)));
+  const k1=kA(k1s0,64000),k2=kA(k2s0,60800),k3=kA(k3s0,70200);
+  const CG0=(20/180)/0.1,CW0=(90/18)/0.1;
+  let y=[CG0*V,0,0,0,0,CW0*V]; const NG0=CG0*V,h=0.5,tend=200;
+  const f=(t,Y)=>{ const NG=Math.max(Y[0],0),NH=Math.max(Y[1],0),CG=NG/V,CH=NH/V;
+    const r1=k1*CG,r2=k2*CH,r3=k3*CH;
+    return [mcat*(-r1),mcat*(r1-r2-r3),mcat*r2,mcat*(r2-r3),mcat*r3,mcat*(3*r1-2*r2+r3)]; };
+  const rows=[];
+  for(let t=0;t<=tend+1e-9;t+=h){ rows.push([t,...y]); y=rk4(f,y,t,h); for(let i=0;i<6;i++)if(y[i]<0)y[i]=0; }
+  return {rows,NG0};
+}
+let piC;
+function piU(){ if(!piC)return; const Tset=+el('piT').value; el('piTval').textContent=Tset+' °C';
+  const {rows,NG0}=probIRun(Tset),XG=[],SL=[],YM=[];
+  rows.forEach(r=>{ const conv=NG0-r[1]; XG.push({x:r[0],y:conv/NG0});
+    SL.push({x:r[0],y:conv>1e-6?r[3]/conv:0}); YM.push({x:r[0],y:r[5]/NG0}); });
+  piC.data.datasets[0].data=XG; piC.data.datasets[1].data=SL; piC.data.datasets[2].data=YM; piC.update('none');
+  const last=rows[rows.length-1],conv=NG0-last[1];
+  el('piXG').textContent=(conv/NG0).toFixed(2); el('piSL').textContent='= '+(conv>1e-6?last[3]/conv:0).toFixed(2); }
+Deck.onEnter('s-probI',()=>{ piC=baseChart('piCanvas',
+  [ds('Conversion XG',C_GREEN(),'y'),ds('Selectivity to L',C_BLUE(),'y'),ds('Yield M',C_ORANGE(),'y')],
+  {text:'time t (min)',lim:{min:0,max:200}},{text:'fraction',lim:{min:0,max:1}});
+  el('piT').addEventListener('input',piU); piU(); },{once:true});
+</script>
+</body>
+</html>
