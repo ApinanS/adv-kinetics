@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 2 — Reaction Rate Expression (Interactive)</title>
+
+<!-- Fonts: Montserrat (Latin) + Prompt (Thai) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --navy:#1F497D; --blue:#4F81BD; --red:#C00000; --green:#1A8038; --orange:#D97706;
+  --ink:#1F2937; --muted:#6B7280; --line:#E5E7EB; --card:#F7F9FC; --bg:#FFFFFF;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; background:#ECEFF3; overflow:hidden;
+  font-family:'Montserrat','Prompt',system-ui,sans-serif; color:var(--ink)}
+
+/* ---------- Stage: fixed 1280x720, scaled to fit ---------- */
+#stage{width:1280px; height:720px; position:absolute; top:50%; left:50%;
+  transform-origin:center; background:var(--bg); box-shadow:0 10px 40px rgba(31,73,125,.18); overflow:hidden}
+
+/* ---------- Slides ---------- */
+.slide{position:absolute; inset:0; display:none; flex-direction:column;
+  padding:52px 72px 62px; background:var(--bg); overflow:hidden}
+.slide svg{max-width:100%; max-height:440px}
+.slide.active{display:flex}
+.s-head{margin-bottom:22px}
+.kicker{font-size:15px; font-weight:600; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin-bottom:8px}
+.s-head h2{font-size:34px; font-weight:700; color:var(--navy); line-height:1.2}
+.s-foot{position:absolute; left:72px; right:72px; bottom:24px; display:flex; justify-content:space-between; gap:20px;
+  font-size:15px; font-weight:500; color:var(--muted)}
+.grow{flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0}
+.s-foot .s-sec{color:var(--blue)}
+
+/* Title slide */
+.title-slide{justify-content:center; align-items:flex-start; border-top:6px solid var(--navy)}
+.title-slide .pill{display:inline-block; font-size:15px; font-weight:600; letter-spacing:.12em;
+  color:var(--navy); border:1.5px solid var(--navy); border-radius:999px; padding:6px 18px; margin-bottom:34px}
+.title-slide .lecno{font-size:22px; font-weight:600; color:var(--blue); margin-bottom:10px}
+.title-slide h1{font-size:58px; font-weight:800; color:var(--navy); line-height:1.12; margin-bottom:28px; max-width:1000px}
+.title-slide .rule{width:88px; height:4px; background:var(--blue); margin-bottom:28px}
+.title-slide .who{font-size:17px; color:var(--muted); line-height:1.7}
+.title-slide .who b{color:var(--ink); font-weight:600}
+
+/* Section divider */
+.section-slide{justify-content:center; background:var(--bg)}
+.section-slide .big{position:absolute; top:26px; right:56px; font-size:150px; font-weight:800;
+  color:var(--navy); opacity:.08; line-height:1}
+.section-slide .lbl{font-size:19px; font-weight:700; letter-spacing:.14em; color:var(--blue);
+  text-transform:uppercase; margin-bottom:18px}
+.section-slide .q{font-size:42px; font-weight:700; color:var(--red); line-height:1.25; max-width:1000px}
+
+/* Agenda / chapter hub */
+.agenda{display:flex; flex-direction:column; gap:12px; max-width:1080px; width:100%}
+a.agenda-item{display:flex; align-items:center; gap:24px; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 26px}
+a.agenda-item:hover{border-color:var(--navy); box-shadow:0 4px 14px rgba(31,73,125,.12)}
+.agenda-item .no{flex:0 0 64px; font-size:23px; font-weight:800; color:var(--navy)}
+.agenda-item .qq{font-size:19px; font-weight:500; line-height:1.35}
+.agenda-item .go{margin-left:auto; color:var(--blue); font-size:24px}
+
+/* Cards */
+.cards{display:grid; gap:22px; grid-auto-columns:1fr; grid-auto-flow:column}
+.cards.wrap{grid-auto-flow:row; grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px 26px}
+.card h3{font-size:22px; font-weight:600; color:var(--navy); margin-bottom:10px}
+.card p{font-size:19px; line-height:1.5}
+.card .ic{width:34px; height:34px; margin-bottom:12px}
+.card-red{border-top:4px solid var(--red)} .card-green{border-top:4px solid var(--green)}
+.card-blue{border-top:4px solid var(--blue)} .card-orange{border-top:4px solid var(--orange)}
+
+/* Equations */
+.eq-box{background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:26px 34px; text-align:center; font-size:28px; margin:8px 0}
+.eq-note{font-size:18px; margin-top:12px; text-align:center}
+.eq-note.green{color:var(--green)} .eq-note.orange{color:var(--orange)} .eq-note.red{color:var(--red)}
+.eq-step{display:flex; align-items:center; gap:34px; padding:12px 6px; border-bottom:1px solid var(--line); font-size:22px}
+.eq-step:last-child{border-bottom:none}
+.eq-step .why{font-size:17px; color:var(--muted); flex:1; text-align:right}
+
+/* Comparison table */
+table.compare{width:100%; border-collapse:collapse; font-size:20px}
+.compare th{background:var(--card); color:var(--navy); font-weight:700; padding:13px 18px;
+  border:1px solid var(--line); text-align:center}
+.compare td{padding:14px 18px; border:1px solid var(--line); text-align:center}
+.compare td:first-child{font-weight:600; text-align:left}
+
+/* Callouts */
+.callout{border-left:5px solid var(--navy); background:var(--card); border-radius:0 12px 12px 0;
+  padding:15px 22px; font-size:20px; margin:12px 0}
+.callout.q{border-color:var(--red)} .callout.note{border-color:var(--green)} .callout.aside{border-color:var(--orange)}
+
+/* Layout helpers */
+.two-col{display:grid; grid-template-columns:11fr 9fr; gap:40px; align-items:center; flex:1}
+.stack>*+*{margin-top:18px}
+ul.clean{list-style:none} ul.clean li{font-size:21px; line-height:1.5; padding-left:30px; position:relative; margin-bottom:12px}
+ul.clean li::before{content:''; position:absolute; left:0; top:.55em; width:10px; height:10px; border-radius:3px; background:var(--blue)}
+
+/* Simulation */
+.sim{display:grid; grid-template-columns:2fr 3fr; grid-template-rows:minmax(0,1fr); gap:38px; align-items:center; flex:1; min-height:0}
+.sim-controls .sl{margin-bottom:20px}
+.sim-controls label{display:flex; justify-content:space-between; font-size:19px; font-weight:500; margin-bottom:6px}
+.val{font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--navy); height:30px; cursor:pointer}
+.sim-controls{align-self:center; min-width:0}
+.sim-out{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; text-align:center;
+  display:flex; flex-direction:column; justify-content:center; align-self:stretch; min-height:0; overflow:hidden}
+.sim-out svg{max-height:100%; min-height:0}
+.bignum{font-size:44px; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums}
+.simread{font-size:20px; font-weight:600; color:var(--navy); margin-top:10px; font-variant-numeric:tabular-nums}
+.simread .u{color:var(--muted); font-weight:500; font-size:16px}
+.chart-box{position:relative; flex:1 1 auto; min-height:180px; max-height:430px; min-width:0}
+.chart-box>canvas{position:absolute; inset:0; width:100% !important; height:100% !important}
+
+/* toggle buttons for sims */
+.tgls{display:flex; gap:10px; margin-bottom:16px}
+.tgl{font:inherit; font-size:16px; font-weight:600; color:var(--navy); background:var(--bg);
+  border:1.5px solid var(--line); border-radius:9px; padding:8px 14px; cursor:pointer}
+.tgl.active{background:var(--navy); color:#fff; border-color:var(--navy)}
+
+/* Reveal */
+.reveal-btn{font:inherit; font-size:19px; font-weight:600; color:var(--navy); background:var(--bg);
+  border:2px solid var(--navy); border-radius:10px; padding:10px 26px; cursor:pointer}
+.reveal-btn:hover{background:var(--navy); color:#fff}
+.reveal-body{display:none; margin-top:16px}
+.reveal.open .reveal-body{display:block} .reveal.open .reveal-btn{display:none}
+
+/* Quiz */
+.quiz-q{max-width:1040px; width:100%}
+.q-text{font-size:23px; font-weight:600; margin-bottom:20px; line-height:1.45}
+.q-opt{display:block; width:100%; text-align:left; font:inherit; font-size:20px; padding:13px 22px;
+  margin-bottom:11px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; cursor:pointer}
+.q-opt:hover{border-color:var(--navy)}
+.q-opt.right{border-color:var(--green); background:#EDF7F0; color:var(--green); font-weight:600}
+.q-opt.wrong{border-color:var(--red); background:#FBEDED; color:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-explain{display:none; border-left:5px solid var(--blue); background:var(--card);
+  padding:15px 22px; border-radius:0 12px 12px 0; font-size:18px; line-height:1.5; margin-top:12px}
+.q-explain.show{display:block}
+.quiz-score{font-size:21px; font-weight:700; color:var(--navy)}
+
+/* Takeaways */
+.tk{display:flex; gap:22px; align-items:flex-start; margin-bottom:18px}
+.tk .n{flex:0 0 38px; height:38px; border-radius:50%; background:var(--navy); color:#fff;
+  font-weight:700; font-size:18px; display:flex; align-items:center; justify-content:center}
+.tk p{font-size:22px; line-height:1.4; padding-top:5px}
+
+/* HUD (not scaled) */
+#hud{position:fixed; right:18px; bottom:14px; display:flex; gap:8px; z-index:50}
+#hud button{width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff;
+  font-size:18px; color:var(--navy); cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#hud button:hover{background:var(--card)}
+#progress{position:fixed; left:0; bottom:0; height:4px; background:var(--blue); width:0; z-index:60; transition:width .2s}
+#toc{position:fixed; inset:0; background:rgba(15,25,40,.55); display:none; z-index:100; align-items:center; justify-content:center}
+#toc.open{display:flex}
+#toc .panel{background:#fff; border-radius:16px; padding:34px 40px; max-height:80vh; overflow:auto; min-width:420px}
+#toc h3{color:var(--navy); font-size:20px; margin-bottom:18px; letter-spacing:.08em}
+#toc a{display:block; padding:8px 6px; font-size:16px; color:var(--ink); text-decoration:none; border-radius:8px}
+#toc a:hover{background:var(--card)} #toc a.cur{color:var(--navy); font-weight:700}
+#toc .sec{margin-top:10px; font-weight:700; color:var(--blue); font-size:14px; letter-spacing:.1em; text-transform:uppercase}
+
+.katex{font-size:1.05em}
+svg text{font-family:'Montserrat','Prompt',sans-serif}
+
+/* Print: one slide per landscape page */
+@media print{
+  html,body{overflow:visible; background:#fff}
+  #stage{position:static; transform:none !important; width:1280px; height:auto; box-shadow:none}
+  .slide{display:flex !important; position:relative; width:1280px; height:720px; page-break-after:always; border-bottom:1px solid var(--line)}
+  #hud,#progress,#toc{display:none !important}
+}
+@page{size:landscape}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+<!-- ================= 1. TITLE ================= -->
+<section class="slide title-slide" data-title="Title">
+  <span class="pill">2105604 ADV CHE KINETICS</span>
+  <p class="lecno">Lecture 2</p>
+  <h1>Reaction Rate Expression</h1>
+  <div class="rule"></div>
+  <p class="who"><b>Assoc. Prof. Dr. Apinan Soottitantawat</b><br>
+    Department of Chemical Engineering, Faculty of Engineering<br>
+    Chulalongkorn University · apinan.s@chula.ac.th</p>
+</section>
+
+<!-- ================= 2. AGENDA HUB ================= -->
+<section class="slide" data-title="Agenda">
+  <div class="s-head"><p class="kicker">Today — six guiding questions</p><h2>How do we build a rate expression?</h2></div>
+  <div class="grow agenda">
+    <a class="agenda-item" href="#/3"><span class="no">2-1</span><span class="qq">What is the rate expression for an elementary single reaction?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/11"><span class="no">2-2</span><span class="qq">How do we obtain the rate expression for a non-elementary reaction?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/17"><span class="no">2-3</span><span class="qq">Rate expression from multiple elementary steps (chain reactions)?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/22"><span class="no">2-4</span><span class="qq">Rate expression for an equilibrium (reversible) reaction?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/27"><span class="no">2-5</span><span class="qq">What is the rate expression for an enzymatic reaction?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/35"><span class="no">2-6</span><span class="qq">What is the rate expression for a microorganism (bioprocess) reaction?</span><span class="go">&#8594;</span></a>
+    <a class="agenda-item" href="#/47"><span class="no">&#10003;</span><span class="qq">Check yourself — quiz &amp; key takeaways</span><span class="go">&#8594;</span></a>
+  </div>
+</section>
+
+<!-- ================= LECTURE 2-1 ================= -->
+<section class="slide section-slide" data-title="Lecture 2-1" data-sec="Lecture 2-1">
+  <div class="big">2-1</div>
+  <p class="lbl">Lecture 2-1</p>
+  <p class="q">What is the rate expression for a reaction controlled by an <span style="color:var(--navy)">elementary single reaction?</span></p>
+</section>
+
+<!-- 4. What is an elementary reaction -->
+<section class="slide" data-title="Elementary reaction">
+  <div class="s-head"><p class="kicker">Definition</p><h2>What is an elementary reaction?</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-blue"><h3>Single step</h3><p>The reaction happens in <b>one step</b> — reactants convert to products directly, with no detectable intermediate.</p></div>
+      <div class="card card-green"><h3>Collision-driven</h3><p>The rate is set by the <b>collision</b> of reactant molecules in the system (2 or 3 reactants meeting).</p></div>
+      <div class="card card-orange"><h3>Order = stoichiometry</h3><p>Because there is one step, the reaction order equals the molecularity read from the balanced equation.</p></div>
+    </div>
+    <div class="callout aside" style="margin-top:22px">Homogeneous, non-catalytic: everything happens in a single fluid phase.</div>
+  </div>
+</section>
+
+<!-- 5. Factors affecting rate -->
+<section class="slide" data-title="What sets the rate">
+  <div class="s-head"><p class="kicker">Before we write an equation</p><h2>What does the reaction rate depend on?</h2></div>
+  <div class="grow">
+    <div class="cards wrap">
+      <div class="card card-green"><h3>✓ Reactant concentration</h3><p>More reactant → more collisions → faster rate. This is the heart of the rate law.</p></div>
+      <div class="card card-green"><h3>✓ Temperature</h3><p>Sets the fraction of collisions energetic enough to react (Arrhenius).</p></div>
+      <div class="card card-red"><h3>✗ Stirrer speed</h3><p>For a true homogeneous reaction, mixing does <b>not</b> change the intrinsic rate.</p></div>
+      <div class="card card-red"><h3>✗ Product concentration / pressure*</h3><p>Not in the forward elementary rate law (*pressure only via concentration for gases).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Power law equation -->
+<section class="slide" data-title="Rate law — power law">
+  <div class="s-head"><p class="kicker">Elementary reaction · Lecture 2-1</p><h2>The rate law is a power law of concentrations</h2></div>
+  <div class="grow stack">
+    <div class="eq-box">$$a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
+      \qquad r_1 = k_r\, C_A^{\,a}\, C_B^{\,b}$$</div>
+    <div class="eq-step">$k_r$ = reaction rate constant<span class="why">temperature-dependent (next slide)</span></div>
+    <div class="eq-step">$a + b$ = overall order of reaction<span class="why">for elementary steps, $a,b$ = stoichiometric coefficients</span></div>
+    <div class="eq-step">$[\,r_1\,] = \dfrac{\text{mol}}{\text{m}^3\cdot\text{s}}$<span class="why">rate is intensive — per unit volume</span></div>
+  </div>
+</section>
+
+<!-- 7. INTERACTIVE: order of reaction explorer -->
+<section class="slide" data-title="Order explorer" id="sl-order">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>How the order $n$ shapes $\;r = k\,C_A^{\,n}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Order $n$ <span class="val" id="ordNval"></span></label>
+        <input type="range" id="ordN" min="0" max="3" step="0.5" value="1"></div>
+      <div class="sl"><label>Rate constant $k$ <span class="val" id="ordKval"></span></label>
+        <input type="range" id="ordK" min="0.2" max="2" step="0.1" value="1"></div>
+      <div class="callout note">$n=0$: flat (rate independent of $C_A$). $n=1$: straight line. $n=2$: upward curve.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvOrder"></canvas></div>
+      <div class="simread">at $C_A = 1.5$: &nbsp;<span id="ordOut"></span> <span class="u">mol/(m³·s)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Arrhenius equation -->
+<section class="slide" data-title="Arrhenius equation">
+  <div class="s-head"><p class="kicker">Temperature dependence</p><h2>Arrhenius equation — how $T$ enters the rate</h2></div>
+  <div class="grow stack">
+    <div class="eq-box">$$k(T) = A\, e^{-E_a/RT}
+      \qquad\Longrightarrow\qquad
+      k(T) = k(T_0)\, e^{\frac{E_a}{R}\left(\frac{1}{T_0}-\frac{1}{T}\right)}$$</div>
+    <div class="eq-step">$A$ = frequency (pre-exponential) factor<span class="why">collision frequency &amp; orientation</span></div>
+    <div class="eq-step">$E_a$ = activation energy (kJ/mol)<span class="why">energy barrier the collision must clear</span></div>
+    <div class="eq-step">$R$ = gas constant, $8.314$ J/(mol·K)<span class="why">two-point form avoids needing $A$</span></div>
+  </div>
+</section>
+
+<!-- 9. INTERACTIVE: Arrhenius -->
+<section class="slide" data-title="Arrhenius simulator" id="sl-arr">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>Temperature &amp; barrier set the rate constant $\;k = A e^{-E_a/RT}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Temperature $T$ <span class="val" id="arrTval"></span></label>
+        <input type="range" id="arrT" min="300" max="900" step="10" value="500"></div>
+      <div class="sl"><label>Activation energy $E_a$ <span class="val" id="arrEaval"></span></label>
+        <input type="range" id="arrEa" min="20" max="200" step="5" value="80"></div>
+      <div class="callout note">Higher $E_a$ → the curve is flatter at low $T$ and rises more steeply. Note the log axis.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvArr"></canvas></div>
+      <div class="simread">$k$ at the marker: &nbsp;<span id="arrOut"></span> <span class="u">s⁻¹</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. INTERACTIVE: Arrhenius linearized ln k vs 1/T -->
+<section class="slide" data-title="Arrhenius plot (ln k vs 1/T)" id="sl-arrlin">
+  <div class="s-head"><p class="kicker">Interactive — the linearized Arrhenius plot</p><h2>Why $\ln k$ vs $1/T$ is a straight line</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Activation energy $E_a$ <span class="val" id="alEaval"></span></label>
+        <input type="range" id="alEa" min="20" max="200" step="5" value="80"></div>
+      <div class="sl"><label>Pre-exponential $A=10^{p}$ <span class="val" id="alAval"></span></label>
+        <input type="range" id="alA" min="8" max="14" step="0.5" value="11"></div>
+      <div class="callout note">Take logs: $\ln k = \ln A - \dfrac{E_a}{R}\cdot\dfrac{1}{T}$ &nbsp;— slope $=-E_a/R$, intercept $=\ln A$.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvArrLin"></canvas></div>
+      <div class="simread">slope $=-E_a/R=$ <span id="alOut"></span> <span class="u">K</span> &nbsp;·&nbsp; a steeper slope ⇒ larger $E_a$</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LECTURE 2-2 ================= -->
+<section class="slide section-slide" data-title="Lecture 2-2" data-sec="Lecture 2-2">
+  <div class="big">2-2</div>
+  <p class="lbl">Lecture 2-2</p>
+  <p class="q">How do we obtain the rate expression for a <span style="color:var(--navy)">non-elementary reaction?</span></p>
+</section>
+
+<!-- 11. Non-elementary reactions -->
+<section class="slide" data-title="Non-elementary reactions">
+  <div class="s-head"><p class="kicker">Definition</p><h2>A non-elementary reaction is a sum of hidden steps</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-blue"><h3>Apparent reaction</h3><p>The overall equation is really many <b>elementary sub-steps</b> added together — the visible reaction is only the net result.</p></div>
+      <div class="card card-green"><h3>Chemical path</h3><p>Adsorption, surface reaction, desorption — the molecular events that consume and form species.</p></div>
+      <div class="card card-orange"><h3>Physical path</h3><p>External &amp; internal mass transfer, heat and momentum transfer that feed the chemical steps.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. Rate expression properties -->
+<section class="slide" data-title="Rate expression form">
+  <div class="s-head"><p class="kicker">What the rate law looks like</p><h2>Do not expect a clean power law</h2></div>
+  <div class="grow stack">
+    <div class="callout note">The measured rate is the <b>sum</b> of the rates of many sub-steps combined.</div>
+    <div class="callout aside">The form need <b>not</b> be a power law — it is often a ratio of concentration terms.</div>
+    <div class="callout q">Even if it looks like a power law, the exponent (order) need <b>not</b> be an integer — e.g. order $\tfrac{3}{2}$ appears in Lecture 2-3.</div>
+  </div>
+</section>
+
+<!-- 13. Target -->
+<section class="slide" data-title="Target of the derivation">
+  <div class="s-head"><p class="kicker">Why we bother</p><h2>Target: a rate in <em>measurable</em> variables</h2></div>
+  <div class="grow stack">
+    <div class="callout note">Write the rate using quantities we can actually measure — usually the <b>limiting reactant</b> or the <b>primary product</b> concentration.</div>
+    <div class="eq-box" style="font-size:24px">$$\text{Fluid phase: } r = f(T,\,C_{\text{limiting}})
+      \qquad \text{Solid catalytic: } r = f(T,\,C_{\text{limiting, bulk}})$$</div>
+    <div class="callout aside">The expression then feeds reactor design through the mass &amp; energy balances.</div>
+  </div>
+</section>
+
+<!-- 14. Procedure flow -->
+<section class="slide" data-title="Three-step procedure">
+  <div class="s-head"><p class="kicker">The workflow</p><h2>How to determine a rate expression</h2></div>
+  <div class="grow" style="justify-content:center">
+    <svg viewBox="0 0 1140 300" style="width:100%">
+      <!-- step 1 -->
+      <rect x="20" y="110" width="230" height="90" rx="10" fill="#EEF3FA" stroke="var(--navy)" stroke-width="2"/>
+      <text x="135" y="145" text-anchor="middle" font-size="17" font-weight="700" fill="var(--navy)">Step 1</text>
+      <text x="135" y="170" text-anchor="middle" font-size="15" fill="var(--ink)">Propose the reaction</text>
+      <text x="135" y="190" text-anchor="middle" font-size="15" fill="var(--ink)">mechanism / pathway</text>
+      <!-- arrow -->
+      <line x1="250" y1="155" x2="315" y2="155" stroke="var(--muted)" stroke-width="2"/>
+      <polygon points="315,150 327,155 315,160" fill="var(--muted)"/>
+      <!-- step 2 -->
+      <rect x="330" y="110" width="230" height="90" rx="10" fill="#EEF3FA" stroke="var(--navy)" stroke-width="2"/>
+      <text x="445" y="145" text-anchor="middle" font-size="17" font-weight="700" fill="var(--navy)">Step 2</text>
+      <text x="445" y="170" text-anchor="middle" font-size="15" fill="var(--ink)">Derive the rate</text>
+      <text x="445" y="190" text-anchor="middle" font-size="15" fill="var(--ink)">expression</text>
+      <line x1="560" y1="155" x2="625" y2="155" stroke="var(--muted)" stroke-width="2"/>
+      <polygon points="625,150 637,155 625,160" fill="var(--muted)"/>
+      <!-- step 3 diamond -->
+      <polygon points="755,110 855,155 755,200 655,155" fill="#FBF5EC" stroke="var(--orange)" stroke-width="2"/>
+      <text x="755" y="150" text-anchor="middle" font-size="15" font-weight="700" fill="var(--orange)">Step 3</text>
+      <text x="755" y="172" text-anchor="middle" font-size="14" fill="var(--ink)">Fit the data?</text>
+      <!-- yes -->
+      <line x1="855" y1="155" x2="920" y2="155" stroke="var(--green)" stroke-width="2"/>
+      <polygon points="920,150 932,155 920,160" fill="var(--green)"/>
+      <text x="888" y="146" text-anchor="middle" font-size="13" fill="var(--green)" font-weight="600">yes</text>
+      <rect x="935" y="118" width="185" height="74" rx="10" fill="#EDF7F0" stroke="var(--green)" stroke-width="2"/>
+      <text x="1027" y="150" text-anchor="middle" font-size="14" fill="var(--ink)">Rate expression +</text>
+      <text x="1027" y="170" text-anchor="middle" font-size="14" fill="var(--ink)">$k$, $E_a$ obtained</text>
+      <!-- no loop back -->
+      <line x1="755" y1="200" x2="755" y2="250" stroke="var(--red)" stroke-width="2"/>
+      <line x1="755" y1="250" x2="135" y2="250" stroke="var(--red)" stroke-width="2"/>
+      <line x1="135" y1="250" x2="135" y2="203" stroke="var(--red)" stroke-width="2"/>
+      <polygon points="130,215 135,203 140,215" fill="var(--red)"/>
+      <text x="445" y="270" text-anchor="middle" font-size="13" fill="var(--red)" font-weight="600">no → revise the mechanism</text>
+      <text x="135" y="90" text-anchor="middle" font-size="13" fill="var(--muted)">data · theory · literature</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 15. RLS + PSSH -->
+<section class="slide" data-title="Two derivation tools">
+  <div class="s-head"><p class="kicker">Step 2, in detail</p><h2>Two tools to collapse the mechanism</h2></div>
+  <div class="grow">
+    <div class="cards">
+      <div class="card card-red"><h3>1 · Rate-limiting step (RLS)</h3><p>The <b>slowest</b> step controls the overall rate. Any non-limiting reversible step is taken to be at equilibrium ($r=0$).</p></div>
+      <div class="card card-green"><h3>2 · Pseudo-steady-state (PSSH)</h3><p>Reactive intermediates — radicals, surface / enzyme complexes — are assumed to have net rate $\approx 0$: they form and vanish as fast as they appear.</p></div>
+    </div>
+    <div class="callout aside" style="margin-top:22px">Both tools remove the unmeasurable intermediates, leaving a rate in measurable concentrations.</div>
+  </div>
+</section>
+
+<!-- ================= LECTURE 2-3 ================= -->
+<section class="slide section-slide" data-title="Lecture 2-3" data-sec="Lecture 2-3">
+  <div class="big">2-3</div>
+  <p class="lbl">Lecture 2-3</p>
+  <p class="q">Rate expression from <span style="color:var(--navy)">multiple elementary steps</span> — a chain reaction</p>
+</section>
+
+<!-- 17. Acetaldehyde mechanism -->
+<section class="slide" data-title="Acetaldehyde pyrolysis">
+  <div class="s-head"><p class="kicker">Worked system · pyrolysis of acetaldehyde</p><h2>An apparent reaction hides four elementary steps</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:24px">$$\mathrm{CH_3CHO} \xrightarrow{\;k_{\text{eff}}\;} \mathrm{CH_4 + CO}$$</div>
+    <table class="compare" style="font-size:19px">
+      <tr><th>Step</th><th>Elementary reaction</th><th>Rate const.</th></tr>
+      <tr><td>Initiation</td><td>$\mathrm{CH_3CHO} \xrightarrow{\;k_a\;} \mathrm{CH_3^{\bullet} + CHO^{\bullet}}$</td><td>$k_a$</td></tr>
+      <tr><td style="color:var(--red)">Propagation (RLS)</td><td>$\mathrm{CH_3CHO + CH_3^{\bullet}} \xrightarrow{\;k_b\;} \mathrm{CH_4 + CH_3CO^{\bullet}}$</td><td>$k_b$</td></tr>
+      <tr><td>Propagation</td><td>$\mathrm{CH_3CO^{\bullet}} \;\underset{k_c'}{\overset{k_c}{\rightleftharpoons}}\; \mathrm{CH_3^{\bullet} + CO}$</td><td>$k_c,\,k_c'$</td></tr>
+      <tr><td>Termination</td><td>$\mathrm{2\,CH_3^{\bullet}} \xrightarrow{\;k_d\;} \mathrm{C_2H_6}$</td><td>$k_d$</td></tr>
+    </table>
+    <p class="eq-note green">Reversible steps use $\rightleftharpoons$; a reversible non-limiting step is taken at equilibrium ($r=0$), while the irreversible RLS ($\rightarrow$) controls the overall rate.</p>
+  </div>
+</section>
+
+<!-- 18. PSSH derivation -->
+<section class="slide" data-title="PSSH derivation">
+  <div class="s-head"><p class="kicker">Applying PSSH to the radicals</p><h2>Sum the reaction rates of each radical to zero</h2></div>
+  <div class="grow stack">
+    <div class="callout note">Radicals $\mathrm{CH_3^{\bullet}},\ \mathrm{CHO^{\bullet}},\ \mathrm{CH_3CO^{\bullet}}$ are intermediates ⇒ each net rate $=0$. &nbsp;Let $C_A \equiv C_{\mathrm{CH_3CHO}}$.</div>
+    <div class="eq-box" style="font-size:17px">$$r_{\mathrm{CH_3^{\bullet}}} = \underbrace{k_a C_A}_{\text{initiation}} - \underbrace{k_b C_A C_{\mathrm{CH_3^{\bullet}}}}_{\text{step b}} + \underbrace{k_c C_{\mathrm{CH_3CO^{\bullet}}}}_{\text{step c}} - \underbrace{2k_d C_{\mathrm{CH_3^{\bullet}}}^{2}}_{\text{termination}} = 0$$</div>
+    <div class="eq-step">Propagation terms (b, c) cancel &nbsp;⇒&nbsp; $k_a C_A = 2k_d C_{\mathrm{CH_3^{\bullet}}}^{2}$<span class="why">initiation balances termination</span></div>
+    <div class="eq-step">$\displaystyle C_{\mathrm{CH_3^{\bullet}}} = \left(\tfrac{k_a}{2k_d}\,C_A\right)^{1/2}$<span class="why">solve for the radical concentration</span></div>
+  </div>
+</section>
+
+<!-- 19. 3/2 order result -->
+<section class="slide" data-title="Three-halves order">
+  <div class="s-head"><p class="kicker">The result · Lecture 2-3</p><h2>Substitute the radical back into the RLS</h2></div>
+  <div class="grow stack">
+    <div class="eq-step">From the RLS (step b): &nbsp;$-r_{\mathrm{CH_3CHO}} = k_b\,C_A\,C_{\mathrm{CH_3^{\bullet}}}$<span class="why">rate set by the slow step</span></div>
+    <div class="eq-step">Insert $C_{\mathrm{CH_3^{\bullet}}} = \left(\tfrac{k_a}{2k_d}\,C_A\right)^{1/2}$ from the previous slide<span class="why">eliminate the unmeasurable radical</span></div>
+    <div class="eq-box">$$-r_{\mathrm{CH_3CHO}} = k_b\left(\frac{k_a}{2k_d}\right)^{1/2} C_{\mathrm{CH_3CHO}}^{3/2}
+      \;=\; k_{\text{eff}}\, C_{\mathrm{CH_3CHO}}^{3/2}$$</div>
+    <div class="callout q">Overall order $\tfrac{3}{2}$ — non-integer — even though every hidden step is elementary.</div>
+  </div>
+</section>
+
+<!-- 20. INTERACTIVE: 3/2 order -->
+<section class="slide" data-title="Order 3/2 simulator" id="sl-th">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>The three-halves law vs integer orders</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>$k_{\text{eff}}$ <span class="val" id="thKval"></span></label>
+        <input type="range" id="thK" min="0.2" max="2" step="0.1" value="1"></div>
+      <div class="sl"><label>$C_{\mathrm{CH_3CHO}}$ (marker) <span class="val" id="thCval"></span></label>
+        <input type="range" id="thC" min="0.2" max="4" step="0.1" value="2"></div>
+      <div class="callout note">The $3/2$ curve (navy) sits between first order (blue) and second order (orange).</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvTh"></canvas></div>
+      <div class="simread">$-r$ at marker: &nbsp;<span id="thOut"></span> <span class="u">mol/(m³·s)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LECTURE 2-4 ================= -->
+<section class="slide section-slide" data-title="Lecture 2-4" data-sec="Lecture 2-4">
+  <div class="big">2-4</div>
+  <p class="lbl">Lecture 2-4</p>
+  <p class="q">What is the rate expression for an <span style="color:var(--navy)">equilibrium (reversible) reaction?</span></p>
+</section>
+
+<!-- 22. Equilibrium net rate -->
+<section class="slide" data-title="Reversible net rate">
+  <div class="s-head"><p class="kicker">Worked system · glycerol carbonate synthesis</p><h2>Net rate = forward − reverse</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:22px">$$\text{DMC} + \text{Glycerol} \underset{k'_{-1}}{\overset{k'_{1}}{\rightleftharpoons}} \text{Glycerol carbonate} + 2\,\text{CH}_3\text{OH}$$</div>
+    <div class="eq-box">$$r'_1 = k'_1 C_D C_{Gly} - k'_{-1} C_{GC} C_{Me}
+      = k'_1\!\left(C_D C_{Gly} - \frac{C_{GC} C_{Me}}{K_e}\right)$$</div>
+    <p class="eq-note green">At equilibrium $r'_1 = 0$ — the bracket vanishes, recovering the equilibrium constant.</p>
+  </div>
+</section>
+
+<!-- 23. Ke & van't Hoff -->
+<section class="slide" data-title="Equilibrium constant vs T">
+  <div class="s-head"><p class="kicker">Temperature dependence of $K_e$</p><h2>The equilibrium constant is a ratio of rate constants</h2></div>
+  <div class="grow stack">
+    <div class="eq-box">$$K_e = \frac{k_1}{k_{-1}}
+      \qquad\Longrightarrow\qquad
+      K_e(T) = K_e(T_0)\, e^{\frac{\Delta H^{\circ}_{rxn}}{R}\left(\frac{1}{T_0}-\frac{1}{T}\right)}$$</div>
+    <div class="eq-step">$E_1 - E_{-1} = \Delta H_{rxn}$<span class="why">barrier difference = heat of reaction</span></div>
+    <div class="eq-step">Exothermic $\Delta H < 0$: &nbsp;$K_e$ <b>falls</b> as $T$ rises<span class="why">van't Hoff — heat is a product</span></div>
+    <div class="eq-step">Endothermic $\Delta H > 0$: &nbsp;$K_e$ <b>rises</b> as $T$ rises<span class="why">heat is a reactant</span></div>
+  </div>
+</section>
+
+<!-- 24. Activation energy diagram -->
+<section class="slide" data-title="Activation energy">
+  <div class="s-head"><p class="kicker">Energy landscape</p><h2>Forward and reverse barriers set $\Delta H_{rxn}$</h2></div>
+  <div class="grow" style="justify-content:center">
+    <svg viewBox="0 0 1140 320" style="width:100%">
+      <!-- Exothermic -->
+      <text x="285" y="26" text-anchor="middle" font-size="18" font-weight="700" fill="var(--green)">Exothermic ( ΔH &lt; 0 )</text>
+      <line x1="70" y1="270" x2="500" y2="270" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="70" y1="270" x2="70" y2="60" stroke="var(--muted)" stroke-width="2"/>
+      <text x="40" y="165" text-anchor="middle" font-size="14" fill="var(--muted)" transform="rotate(-90 40 165)">Energy</text>
+      <path d="M110,150 C170,150 190,80 250,80 C310,80 330,225 430,225" fill="none" stroke="var(--red)" stroke-width="3"/>
+      <line x1="110" y1="150" x2="430" y2="150" stroke="var(--line)" stroke-dasharray="5 4"/>
+      <line x1="250" y1="80" x2="250" y2="150" stroke="var(--navy)" stroke-width="1.5"/>
+      <text x="262" y="120" font-size="13" fill="var(--navy)">$E_1$</text>
+      <line x1="430" y1="150" x2="430" y2="225" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="440" y="195" font-size="13" fill="var(--green)">ΔH</text>
+      <text x="110" y="142" font-size="13" fill="var(--muted)">reactants</text>
+      <text x="390" y="245" font-size="13" fill="var(--muted)">products</text>
+      <!-- Endothermic -->
+      <text x="855" y="26" text-anchor="middle" font-size="18" font-weight="700" fill="var(--orange)">Endothermic ( ΔH &gt; 0 )</text>
+      <line x1="640" y1="270" x2="1070" y2="270" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="640" y1="270" x2="640" y2="60" stroke="var(--muted)" stroke-width="2"/>
+      <path d="M680,225 C740,225 760,70 820,70 C880,70 900,150 1000,150" fill="none" stroke="var(--red)" stroke-width="3"/>
+      <line x1="680" y1="225" x2="820" y2="225" stroke="var(--line)" stroke-dasharray="5 4"/>
+      <line x1="820" y1="70" x2="820" y2="225" stroke="var(--navy)" stroke-width="1.5"/>
+      <text x="832" y="150" font-size="13" fill="var(--navy)">$E_1$</text>
+      <line x1="1000" y1="150" x2="1000" y2="225" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="1010" y="195" font-size="13" fill="var(--orange)">ΔH</text>
+      <text x="680" y="245" font-size="13" fill="var(--muted)">reactants</text>
+      <text x="960" y="142" font-size="13" fill="var(--muted)">products</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 25. INTERACTIVE: Ke vs T -->
+<section class="slide" data-title="Ke vs T simulator" id="sl-ke">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>Equilibrium constant vs temperature (van't Hoff)</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Heat of reaction $\Delta H_{rxn}$ <span class="val" id="keDHval"></span></label>
+        <input type="range" id="keDH" min="-80" max="80" step="5" value="-40"></div>
+      <div class="sl"><label>$K_e$ at $T_0=298$ K <span class="val" id="keK0val"></span></label>
+        <input type="range" id="keK0" min="0.2" max="5" step="0.1" value="1"></div>
+      <div class="callout note">Slide $\Delta H$ negative → curve slopes <b>down</b> (exothermic). Positive → slopes <b>up</b> (endothermic).</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvKe"></canvas></div>
+      <div class="simread">$K_e$ at 500 K: &nbsp;<span id="keOut"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LECTURE 2-5 ================= -->
+<section class="slide section-slide" data-title="Lecture 2-5" data-sec="Lecture 2-5">
+  <div class="big">2-5</div>
+  <p class="lbl">Lecture 2-5</p>
+  <p class="q">What is the rate expression for an <span style="color:var(--navy)">enzymatic reaction?</span></p>
+</section>
+
+<!-- 27. Enzyme pathway -->
+<section class="slide" data-title="Enzyme pathway">
+  <div class="s-head"><p class="kicker">The mechanism, pictorially</p><h2>Substrate binds, reacts, product leaves</h2></div>
+  <div class="grow" style="justify-content:center">
+    <svg viewBox="0 0 1140 260" style="width:100%">
+      <!-- stage 1: E + S -->
+      <path d="M70,150 a55,55 0 1 1 0.1,0 M70,150 l0,-30 a30,30 0 0 1 0,-25" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+      <circle cx="70" cy="150" r="55" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+      <path d="M55,105 q15,20 30,0" fill="var(--bg)" stroke="var(--navy)" stroke-width="2"/>
+      <rect x="60" y="55" width="20" height="20" rx="4" fill="var(--green)"/>
+      <text x="70" y="230" text-anchor="middle" font-size="15" fill="var(--ink)">E + S</text>
+      <text x="120" y="72" font-size="13" fill="var(--muted)">substrate</text>
+      <line x1="145" y1="150" x2="205" y2="150" stroke="var(--muted)" stroke-width="2"/>
+      <polygon points="205,145 217,150 205,155" fill="var(--muted)"/>
+      <!-- stage 2: E·S -->
+      <circle cx="320" cy="150" r="55" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+      <rect x="310" y="95" width="20" height="20" rx="4" fill="var(--green)"/>
+      <text x="320" y="230" text-anchor="middle" font-size="15" fill="var(--ink)">E·S complex</text>
+      <line x1="395" y1="150" x2="455" y2="150" stroke="var(--muted)" stroke-width="2"/>
+      <polygon points="455,145 467,150 455,155" fill="var(--muted)"/>
+      <!-- stage 3: reacting -->
+      <circle cx="570" cy="150" r="55" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+      <polygon points="560,100 582,100 571,118" fill="var(--orange)"/>
+      <text x="570" y="230" text-anchor="middle" font-size="15" fill="var(--ink)">reaction</text>
+      <line x1="645" y1="150" x2="705" y2="150" stroke="var(--muted)" stroke-width="2"/>
+      <polygon points="705,145 717,150 705,155" fill="var(--muted)"/>
+      <!-- stage 4: product leaves -->
+      <circle cx="820" cy="150" r="55" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+      <polygon points="880,70 905,70 892,90" fill="var(--orange)"/>
+      <path d="M865,110 q15,-15 25,-25" fill="none" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 3"/>
+      <text x="820" y="230" text-anchor="middle" font-size="15" fill="var(--ink)">E + P</text>
+      <text x="915" y="66" font-size="13" fill="var(--muted)">product</text>
+      <!-- overall -->
+      <text x="1010" y="120" text-anchor="middle" font-size="20" font-weight="700" fill="var(--navy)">E + S</text>
+      <text x="1010" y="150" text-anchor="middle" font-size="20" fill="var(--muted)">↓</text>
+      <text x="1010" y="180" text-anchor="middle" font-size="20" font-weight="700" fill="var(--navy)">E + P</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 28. Simple mechanism -->
+<section class="slide" data-title="Enzyme mechanism">
+  <div class="s-head"><p class="kicker">Two elementary steps</p><h2>Adsorption then reaction</h2></div>
+  <div class="grow stack">
+    <div class="eq-step" style="font-size:24px">$\mathrm{E + S} \underset{k_2}{\overset{k_1}{\rightleftharpoons}} \mathrm{E{\cdot}S}$<span class="why">1 · adsorption — enzyme–substrate complex forms</span></div>
+    <div class="eq-step" style="font-size:24px">$\mathrm{E{\cdot}S} \xrightarrow{\;k_3\;} \mathrm{E + P}$<span class="why">2 · reaction — product releases, enzyme recovered</span></div>
+    <div class="callout note">Total enzyme is conserved: &nbsp;$C_{E_T} = C_E + C_{E{\cdot}S}$ &nbsp;— we can measure $C_{E_T}$, $C_S$, $C_P$, but not the complex.</div>
+  </div>
+</section>
+
+<!-- 29. Michaelis-Menten derivation -->
+<section class="slide" data-title="Michaelis–Menten">
+  <div class="s-head"><p class="kicker">PSSH on the complex → Michaelis–Menten</p><h2>Eliminate the complex to get a measurable rate</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:21px">$$\mathrm{E + S}\;\underset{k_2}{\overset{k_1}{\rightleftharpoons}}\;\mathrm{E{\cdot}S}\;\xrightarrow{\;k_3\;}\;\mathrm{E + P}$$</div>
+    <div class="eq-step">$r_{E{\cdot}S} = k_1 C_E C_S - (k_2+k_3)C_{E{\cdot}S} = 0$<span class="why">PSSH: complex is at steady state</span></div>
+    <div class="eq-step">$C_{E{\cdot}S} = \dfrac{k_1}{k_2+k_3}C_E C_S$, &nbsp; sub into $C_{E_T}$<span class="why">use the enzyme balance</span></div>
+    <div class="eq-box">$$r_P = k_3 C_{E{\cdot}S} = \frac{V_{max}\,C_S}{K_M + C_S},
+      \quad V_{max}=k_3 C_{E_T},\ K_M=\frac{k_2+k_3}{k_1}$$</div>
+  </div>
+</section>
+
+<!-- 30. INTERACTIVE: Michaelis-Menten -->
+<section class="slide" data-title="Michaelis–Menten simulator" id="sl-mm">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>Saturation kinetics: $\;r_P = \dfrac{V_{max} C_S}{K_M + C_S}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>$V_{max}$ <span class="val" id="mmVval"></span></label>
+        <input type="range" id="mmVmax" min="1" max="10" step="0.5" value="6"></div>
+      <div class="sl"><label>$K_M$ <span class="val" id="mmKval"></span></label>
+        <input type="range" id="mmKM" min="1" max="20" step="1" value="5"></div>
+      <div class="callout note">At $C_S = K_M$ the rate is exactly $\tfrac12 V_{max}$ (dashed lines). Large $C_S$ → rate saturates at $V_{max}$.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvMM"></canvas></div>
+      <div class="simread">half-saturation at $C_S=K_M=$ <span id="mmOut"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 31. INTERACTIVE: Lineweaver-Burk -->
+<section class="slide" data-title="Lineweaver–Burk simulator" id="sl-lb">
+  <div class="s-head"><p class="kicker">Interactive — linearize to find the constants</p><h2>Lineweaver–Burk: $\;\dfrac{1}{r_P} = \dfrac{K_M}{V_{max}}\dfrac{1}{C_S} + \dfrac{1}{V_{max}}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>$V_{max}$ <span class="val" id="lbVval"></span></label>
+        <input type="range" id="lbVmax" min="1" max="10" step="0.5" value="6"></div>
+      <div class="sl"><label>$K_M$ <span class="val" id="lbKval"></span></label>
+        <input type="range" id="lbKM" min="1" max="20" step="1" value="5"></div>
+      <div class="callout note">A double-reciprocal plot is a straight line: slope $=K_M/V_{max}$, y-intercept $=1/V_{max}$, x-intercept $=-1/K_M$.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvLB"></canvas></div>
+      <div class="simread">slope $=K_M/V_{max}=$ <span id="lbOut"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 32. Inhibition concept -->
+<section class="slide" data-title="Enzyme inhibition">
+  <div class="s-head"><p class="kicker">When an inhibitor competes for the enzyme</p><h2>Two inhibition mechanisms</h2></div>
+  <div class="grow"><div class="cards">
+    <div class="card card-red">
+      <h3>Competitive</h3>
+      <svg viewBox="0 0 300 128" style="width:100%;max-height:126px">
+        <path d="M50,118 L50,58 Q50,34 82,34 L112,34 L125,54 L138,34 L168,34 Q200,34 200,58 L200,118 Z" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+        <polygon points="112,36 138,36 125,54" fill="var(--red)"/>
+        <text x="125" y="26" text-anchor="middle" font-size="13" fill="var(--red)" font-weight="700">I</text>
+        <rect x="236" y="40" width="24" height="24" rx="4" fill="var(--green)"/>
+        <text x="248" y="32" text-anchor="middle" font-size="13" fill="var(--green)" font-weight="700">S</text>
+        <line x1="234" y1="52" x2="204" y2="52" stroke="var(--muted)" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="248" y="82" text-anchor="middle" font-size="12" fill="var(--red)">blocked</text>
+        <text x="125" y="112" text-anchor="middle" font-size="12.5" fill="var(--navy)">same active site</text>
+      </svg>
+      <p style="font-size:16px;margin-top:8px">$I$ occupies the active site ⇒ apparent $K_M\!\uparrow$, $V_{max}$ same.</p>
+      <p style="font-size:18px;margin-top:8px">$r_P = \dfrac{V_{max} C_S}{C_S + K_M\!\left(1+\frac{C_I}{K_I}\right)}$</p>
+    </div>
+    <div class="card card-orange">
+      <h3>Non-competitive</h3>
+      <svg viewBox="0 0 300 128" style="width:100%;max-height:126px">
+        <path d="M70,118 L70,58 Q70,34 102,34 L132,34 L145,54 L158,34 L188,34 Q220,34 220,58 L220,118 Z" fill="#DCE6F4" stroke="var(--navy)" stroke-width="2"/>
+        <rect x="133" y="30" width="24" height="24" rx="4" fill="var(--green)"/>
+        <text x="145" y="22" text-anchor="middle" font-size="13" fill="var(--green)" font-weight="700">S</text>
+        <polygon points="52,92 76,92 64,70" fill="var(--red)"/>
+        <text x="64" y="66" text-anchor="middle" font-size="13" fill="var(--red)" font-weight="700">I</text>
+        <text x="145" y="112" text-anchor="middle" font-size="12.5" fill="var(--navy)">different (allosteric) site</text>
+      </svg>
+      <p style="font-size:16px;margin-top:8px">$I$ binds elsewhere ⇒ $V_{max}\!\downarrow$, $K_M$ same.</p>
+      <p style="font-size:18px;margin-top:8px">$r_P = \dfrac{V_{max}}{1+\frac{C_I}{K_I}}\cdot\dfrac{C_S}{K_M + C_S}$</p>
+    </div>
+  </div></div>
+</section>
+
+<!-- 33. INTERACTIVE: inhibition -->
+<section class="slide" data-title="Inhibition simulator" id="sl-inh">
+  <div class="s-head"><p class="kicker">Interactive — compare with the uninhibited curve</p><h2>How an inhibitor bends the rate curve</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="tgls">
+        <button class="tgl active" id="inhComp">Competitive</button>
+        <button class="tgl" id="inhNon">Non-competitive</button>
+      </div>
+      <div class="sl"><label>Inhibitor level $C_I/K_I$ <span class="val" id="inhIval"></span></label>
+        <input type="range" id="inhI" min="0" max="5" step="0.5" value="2"></div>
+      <div class="callout note">Grey dashed = no inhibitor. Competitive shifts the curve right; non-competitive pulls the plateau down.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvInh"></canvas></div>
+      <div class="simread"><span id="inhOut"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LECTURE 2-6 ================= -->
+<section class="slide section-slide" data-title="Lecture 2-6" data-sec="Lecture 2-6">
+  <div class="big">2-6</div>
+  <p class="lbl">Lecture 2-6</p>
+  <p class="q">What is the rate expression for a <span style="color:var(--navy)">microorganism (bioprocess) reaction?</span></p>
+</section>
+
+<!-- 35. Bioprocess concept -->
+<section class="slide" data-title="Bioprocess reaction">
+  <div class="s-head"><p class="kicker">Fermentation · Lecture 2-6</p><h2>Cells eat substrate to make more cells</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:24px">$$\text{cells} + \text{substrate} \xrightarrow{\text{microorganism}} \text{more cells} + \text{product}$$</div>
+    <div class="cards">
+      <div class="card card-green"><h3>Growth</h3><p>Microorganisms consume substrate and multiply — the cell number increases.</p></div>
+      <div class="card card-orange"><h3>By-product</h3><p>A chemical product forms alongside growth (e.g. ethanol, acetate).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 36. Batch growth phases -->
+<section class="slide" data-title="Batch growth phases">
+  <div class="s-head"><p class="kicker">Cell growth in a batch culture</p><h2>Four phases of a batch culture</h2></div>
+  <div class="grow" style="justify-content:center">
+    <svg viewBox="0 0 1060 350" style="width:100%">
+      <line x1="72" y1="292" x2="1012" y2="292" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="72" y1="292" x2="72" y2="26" stroke="var(--muted)" stroke-width="2"/>
+      <text x="542" y="330" text-anchor="middle" font-size="16" fill="var(--muted)">time</text>
+      <text x="34" y="160" text-anchor="middle" font-size="16" fill="var(--muted)" transform="rotate(-90 34 160)">ln (cell conc.)</text>
+      <line x1="250" y1="40" x2="250" y2="292" stroke="var(--line)" stroke-dasharray="5 4"/>
+      <line x1="560" y1="40" x2="560" y2="292" stroke="var(--line)" stroke-dasharray="5 4"/>
+      <line x1="782" y1="40" x2="782" y2="292" stroke="var(--line)" stroke-dasharray="5 4"/>
+      <path d="M92,242 L250,242 L560,86 L782,86 L962,196" fill="none" stroke="var(--navy)" stroke-width="3.5"/>
+      <text x="161" y="66" text-anchor="middle" font-size="17" font-weight="700" fill="var(--blue)">Lag</text>
+      <text x="161" y="88" text-anchor="middle" font-size="12.5" fill="var(--muted)">cells adapt</text>
+      <text x="405" y="66" text-anchor="middle" font-size="17" font-weight="700" fill="var(--green)">Log</text>
+      <text x="405" y="88" text-anchor="middle" font-size="12.5" fill="var(--muted)">exponential — Monod applies</text>
+      <text x="671" y="66" text-anchor="middle" font-size="17" font-weight="700" fill="var(--orange)">Stationary</text>
+      <text x="671" y="88" text-anchor="middle" font-size="12.5" fill="var(--muted)">growth ≈ death</text>
+      <text x="905" y="128" text-anchor="middle" font-size="17" font-weight="700" fill="var(--red)">Death</text>
+      <text x="905" y="150" text-anchor="middle" font-size="12.5" fill="var(--muted)">decline</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 37. INTERACTIVE: batch growth curve -->
+<section class="slide" data-title="Batch growth simulator" id="sl-batch">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>Watch the four phases form</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Max growth rate $\mu_{max}$ <span class="val" id="bMuval"></span></label>
+        <input type="range" id="bMu" min="0.2" max="1.5" step="0.1" value="0.7"></div>
+      <div class="sl"><label>Lag time <span class="val" id="bLagval"></span></label>
+        <input type="range" id="bLag" min="0" max="8" step="0.5" value="3"></div>
+      <div class="callout note">Steeper $\mu_{max}$ → faster log phase. Longer lag delays the whole curve.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvBatch"></canvas></div>
+      <div class="simread">plotting $\ln(\text{cell conc.})$ vs time</div>
+    </div>
+  </div>
+</section>
+
+<!-- 38. Monod equation -->
+<section class="slide" data-title="Monod equation">
+  <div class="s-head"><p class="kicker">Rate expression for cell growth</p><h2>Monod: growth saturates with substrate</h2></div>
+  <div class="grow stack">
+    <div class="eq-box">$$r_g = \mu\, C_C, \qquad \mu = \mu_{max}\frac{C_S}{K_S + C_S}$$</div>
+    <div class="eq-step">$r_g$ = cell growth rate, g/(dm³·s)<span class="why">$C_C$ = cell concentration</span></div>
+    <div class="eq-step">$\mu_{max}$ = maximum specific growth rate, s⁻¹<span class="why">$K_S$ = half-saturation (Michaelis-like)</span></div>
+    <div class="callout aside">Same mathematical form as Michaelis–Menten — concentrations are mass-based (g/L).</div>
+  </div>
+</section>
+
+<!-- 39. INTERACTIVE: Monod -->
+<section class="slide" data-title="Monod simulator" id="sl-monod">
+  <div class="s-head"><p class="kicker">Interactive — drag the sliders</p><h2>Specific growth rate $\;\mu = \dfrac{\mu_{max} C_S}{K_S + C_S}$</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>$\mu_{max}$ (h⁻¹) <span class="val" id="mMuval"></span></label>
+        <input type="range" id="mMu" min="0.2" max="1.5" step="0.1" value="0.7"></div>
+      <div class="sl"><label>$K_S$ (g/L) <span class="val" id="mKsval"></span></label>
+        <input type="range" id="mKs" min="1" max="15" step="1" value="5"></div>
+      <div class="callout note">$C_S \ll K_S$: first order in $S$. &nbsp;$C_S \gg K_S$: zero order, $\mu \to \mu_{max}$ (saturation).</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvMonod"></canvas></div>
+      <div class="simread">$\mu$ reaches $\tfrac12\mu_{max}$ at $C_S=K_S=$ <span id="monOut"></span> <span class="u">g/L</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 40. Substrate inhibition equation -->
+<section class="slide" data-title="Substrate inhibition">
+  <div class="s-head"><p class="kicker">When too much substrate is toxic</p><h2>Andrews (Haldane) model</h2></div>
+  <div class="two-col">
+    <div class="stack">
+      <div class="eq-box" style="font-size:26px">$$\mu(S) = \mu_{max}\,\frac{S}{K_S + S + \dfrac{S^2}{K_I}}$$</div>
+      <div class="eq-step" style="font-size:20px">Low $S$: $S^2/K_I$ negligible → rises like Monod<span class="why">$K_I$ = inhibition const.</span></div>
+      <div class="eq-step" style="font-size:20px">High $S$: $S^2/K_I$ dominates → $\mu$ <b>declines</b><span class="why">peak at $S^*=\sqrt{K_S K_I}$</span></div>
+    </div>
+    <svg viewBox="0 0 430 300" style="width:100%">
+      <line x1="46" y1="255" x2="418" y2="255" stroke="var(--muted)" stroke-width="2"/>
+      <line x1="46" y1="255" x2="46" y2="20" stroke="var(--muted)" stroke-width="2"/>
+      <text x="232" y="288" text-anchor="middle" font-size="15" fill="var(--muted)">substrate  S</text>
+      <text x="18" y="140" text-anchor="middle" font-size="15" fill="var(--muted)" transform="rotate(-90 18 140)">μ</text>
+      <path d="M46,255 C120,110 210,66 418,52" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="352" y="44" font-size="13" fill="var(--muted)">Monod (no inhibition)</text>
+      <path d="M46,255 C110,120 158,72 210,72 C284,72 340,158 408,214" fill="none" stroke="var(--navy)" stroke-width="3.5"/>
+      <text x="120" y="60" font-size="14" font-weight="700" fill="var(--navy)">Andrews</text>
+      <line x1="210" y1="72" x2="210" y2="255" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <circle cx="210" cy="72" r="5" fill="var(--red)"/>
+      <text x="210" y="273" text-anchor="middle" font-size="14" fill="var(--red)" font-weight="700">S*</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 41. INTERACTIVE: substrate inhibition -->
+<section class="slide" data-title="Substrate inhibition simulator" id="sl-subinh">
+  <div class="s-head"><p class="kicker">Interactive — compare with plain Monod</p><h2>The peak-then-decline of substrate inhibition</h2></div>
+  <div class="sim">
+    <div class="sim-controls">
+      <div class="sl"><label>Inhibition constant $K_I$ (g/L) <span class="val" id="siKIval"></span></label>
+        <input type="range" id="siKI" min="5" max="200" step="5" value="50"></div>
+      <div class="sl"><label>$K_S$ (g/L) <span class="val" id="siKsval"></span></label>
+        <input type="range" id="siKs" min="1" max="15" step="1" value="5"></div>
+      <div class="callout note">Grey dashed = Monod (no inhibition). Smaller $K_I$ → stronger inhibition, lower &amp; earlier peak.</div>
+    </div>
+    <div class="sim-out">
+      <div class="chart-box"><canvas id="cvSub"></canvas></div>
+      <div class="simread">optimal $S^{*}=\sqrt{K_S K_I}=$ <span id="siOut"></span> <span class="u">g/L</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 42. Product inhibition & generalized -->
+<section class="slide" data-title="Generalized kinetics">
+  <div class="s-head"><p class="kicker">Building up the full model</p><h2>Each factor switches on one behavior</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:19px">$$\mu(S,O_2,P) = \frac{\mu_{max}}{1+\frac{P}{K_{I,P}}}\cdot\frac{S}{K_S + S + \frac{S^2}{K_I}}\cdot\frac{O_2}{K_O + O_2}$$</div>
+    <div class="cards" style="gap:16px">
+      <div class="card card-green" style="padding:14px 16px">
+        <svg viewBox="0 0 170 62" style="width:100%;height:56px"><line x1="10" y1="52" x2="162" y2="52" stroke="var(--line)"/><line x1="10" y1="52" x2="10" y2="6" stroke="var(--line)"/><path d="M10,52 C42,18 96,11 162,9" fill="none" stroke="var(--green)" stroke-width="2.5"/></svg>
+        <p style="font-size:15px;margin-top:6px">$\frac{S}{K_S+S}$ — substrate limiting (saturates)</p>
+      </div>
+      <div class="card card-red" style="padding:14px 16px">
+        <svg viewBox="0 0 170 62" style="width:100%;height:56px"><line x1="10" y1="52" x2="162" y2="52" stroke="var(--line)"/><line x1="10" y1="52" x2="10" y2="6" stroke="var(--line)"/><path d="M10,52 C40,16 66,9 86,9 C118,9 138,34 162,50" fill="none" stroke="var(--red)" stroke-width="2.5"/></svg>
+        <p style="font-size:15px;margin-top:6px">$+\frac{S^2}{K_I}$ — substrate inhibition (peaks)</p>
+      </div>
+      <div class="card card-blue" style="padding:14px 16px">
+        <svg viewBox="0 0 170 62" style="width:100%;height:56px"><line x1="10" y1="52" x2="162" y2="52" stroke="var(--line)"/><line x1="10" y1="52" x2="10" y2="6" stroke="var(--line)"/><path d="M10,52 C42,20 96,12 162,10" fill="none" stroke="var(--blue)" stroke-width="2.5"/></svg>
+        <p style="font-size:15px;margin-top:6px">$\frac{O_2}{K_O+O_2}$ — oxygen limiting (saturates)</p>
+      </div>
+      <div class="card card-orange" style="padding:14px 16px">
+        <svg viewBox="0 0 170 62" style="width:100%;height:56px"><line x1="10" y1="52" x2="162" y2="52" stroke="var(--line)"/><line x1="10" y1="52" x2="10" y2="6" stroke="var(--line)"/><path d="M10,10 C52,13 96,36 162,50" fill="none" stroke="var(--orange)" stroke-width="2.5"/></svg>
+        <p style="font-size:15px;margin-top:6px">$\frac{1}{1+P/K_{I,P}}$ — product inhibition (falls)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WORKED EXAMPLES ================= -->
+<section class="slide" data-title="Worked Example I">
+  <div class="s-head"><p class="kicker">Worked example I · chain reaction</p><h2>Gas-phase oxidation of ethylene</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:21px">$$\mathrm{C_2H_4} + \tfrac12\,\mathrm{O_2} \rightarrow \mathrm{C_2H_4O}$$</div>
+    <table class="compare" style="font-size:18px">
+      <tr><th>Step</th><th>Elementary reaction</th></tr>
+      <tr><td>Initiation</td><td>$\mathrm{O_2} \xrightarrow{\;k_i\;} 2\,\mathrm{O^{\bullet}}$</td></tr>
+      <tr><td>Propagation</td><td>$\mathrm{O^{\bullet}} + \mathrm{C_2H_4} \xrightarrow{\;k_{p2}\;} \mathrm{C_2H_4O^{\bullet}}$</td></tr>
+      <tr><td>Propagation</td><td>$\mathrm{C_2H_4O^{\bullet}} + \mathrm{O_2} \xrightarrow{\;k_{p1}\;} \mathrm{C_2H_4O} + \mathrm{O^{\bullet}}$</td></tr>
+      <tr><td>Termination</td><td>$\mathrm{O^{\bullet}} + \mathrm{O^{\bullet}} \xrightarrow{\;k_t\;} \mathrm{O_2}$</td></tr>
+    </table>
+    <div class="reveal"><button class="reveal-btn">Show what happens (PSSH on O•)</button>
+      <div class="reveal-body"><div class="callout note">Initiation = termination gives $C_{\mathrm{O^{\bullet}}} \propto [\mathrm{O_2}]^{1/2}$, so $\;r_{\mathrm{EO}} \propto [\mathrm{C_2H_4}]\,[\mathrm{O_2}]^{1/2}$ — first order in ethylene, half order in oxygen.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Worked Example II">
+  <div class="s-head"><p class="kicker">Worked example II · bi-substrate enzyme</p><h2>Lactate dehydrogenase (ordered Bi-Bi)</h2></div>
+  <div class="grow stack">
+    <div class="eq-box" style="font-size:21px">$$\text{Lactate} + \text{NAD}^{+} \underset{}{\overset{\text{LDH}}{\rightleftharpoons}} \text{Pyruvate} + \text{NADH} + \text{H}^{+}$$</div>
+    <div class="callout q">With two substrates $A,B$ binding in order and PSSH on the complexes, what is the initial rate?</div>
+    <div class="reveal"><button class="reveal-btn">Show answer</button>
+      <div class="reveal-body"><div class="callout note">$v = \dfrac{V_{max}\,A\,B}{K_{iA}K_{mB} + K_{mB}A + K_{mA}B + AB}$ — reduces to Michaelis–Menten in $B$ when $A$ is saturating.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="Worked Example III">
+  <div class="s-head"><p class="kicker">Worked example III · microorganism</p><h2>Growth with substrate inhibition</h2></div>
+  <div class="grow stack">
+    <div class="eq-step" style="font-size:20px">$\mathrm{E + S} \underset{k_{-1}}{\overset{k_1}{\rightleftharpoons}} \mathrm{ES} \xrightarrow{\;k_2\;} \mathrm{E + growth}$<span class="why">productive path</span></div>
+    <div class="eq-step" style="font-size:20px">$\mathrm{ES + S} \underset{k_{-3}}{\overset{k_3}{\rightleftharpoons}} \mathrm{ESS}$ &nbsp;(dead-end complex)<span class="why">a 2nd substrate blocks the site at high $S$</span></div>
+    <div class="reveal"><button class="reveal-btn">Show what happens (SSA on ES, ESS)</button>
+      <div class="reveal-body">
+        <div class="eq-box" style="font-size:22px">$$\mu(S) = \mu_{max}\,\frac{S}{K_S + S + \frac{S^2}{K_I}}$$</div>
+        <p class="eq-note green">Checks: &nbsp;$S \ll K_S \Rightarrow \mu \propto S$ &nbsp;·&nbsp; $S \gg \sqrt{K_S K_I} \Rightarrow \mu \to 0$ (substrate-inhibited).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="slide" data-title="Quiz 1">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-1</p><h2>Quiz 1 — Elementary rate law</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q1">
+    <p class="q-text">For an elementary reaction $a\mathrm{A} + b\mathrm{B} \to c\mathrm{C} + d\mathrm{D}$, the rate expression follows:</p>
+    <button class="q-opt" data-correct data-explain="Correct. For an elementary step the orders equal the stoichiometric coefficients: $r = k\,C_A^{a} C_B^{b}$.">The stoichiometric coefficients as powers of the concentrations &nbsp;($r=k\,C_A^{a}C_B^{b}$)</button>
+    <button class="q-opt" data-explain="Zero order means the rate is independent of concentration — that only happens in saturation limits, not for an elementary reaction.">Zero-order dependence on all reactants</button>
+    <button class="q-opt" data-explain="First order in every reactant would require every stoichiometric coefficient to be 1. In general the exponents follow $a$ and $b$.">First-order dependence on all reactants</button>
+    <button class="q-opt" data-explain="Temperature enters through $k$, but the concentrations still appear in the rate law.">Only temperature dependence</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 2">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-1</p><h2>Quiz 2 — Arrhenius equation</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q2">
+    <p class="q-text">According to the Arrhenius equation, the rate constant $k$ is:</p>
+    <button class="q-opt" data-explain="A positive exponent would make $k$ grow without bound as $T$ rises — the barrier must lower the rate, so the exponent is negative.">$k = A\,e^{E_a/RT}$</button>
+    <button class="q-opt" data-correct data-explain="Correct. $k = A e^{-E_a/RT}$: a larger $E_a$ or a lower $T$ gives a smaller $k$.">$k = A\,e^{-E_a/RT}$</button>
+    <button class="q-opt" data-explain="Arrhenius is exponential in $-E_a/RT$, not a simple reciprocal of $T$.">$k = A/RT$</button>
+    <button class="q-opt" data-explain="The dependence on $E_a$ and $T$ is exponential, not a product of terms.">$k = E_a \times A \times T$</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 3">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-2</p><h2>Quiz 3 — Non-elementary reactions</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q3">
+    <p class="q-text">In a non-elementary reaction, the rate expression is:</p>
+    <button class="q-opt" data-explain="Non-elementary reactions often do NOT follow a power law — Michaelis–Menten is a ratio of concentration terms.">Always in the form of a power law</button>
+    <button class="q-opt" data-explain="It still depends on concentration; temperature acts through the rate constants.">Only dependent on temperature</button>
+    <button class="q-opt" data-correct data-explain="Correct. It is the net of several elementary steps, so it may be a ratio and the order need not be an integer.">A result of multiple elementary steps and may not follow the power law</button>
+    <button class="q-opt" data-explain="The rate does depend on reactant concentration — that is what we measure and use for reactor design.">Independent of reactant concentration</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 4">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-2</p><h2>Quiz 4 — Pseudo-steady-state (PSSH)</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q4">
+    <p class="q-text">In the pseudo-steady-state hypothesis (PSSH), it is assumed that:</p>
+    <button class="q-opt" data-explain="Equilibrium of a non-limiting step is a different approximation. PSSH instead sets the net formation rate of the intermediate to zero.">Intermediates are in equilibrium with the reactants</button>
+    <button class="q-opt" data-correct data-explain="Correct. Reactive intermediates form and disappear so fast that $d[\text{intermediate}]/dt \approx 0$.">The concentration of the unstable intermediates stays constant over time</button>
+    <button class="q-opt" data-explain="Reactants are not converted instantly — the finite step rates set the overall rate.">Reactants are instantly converted to products</button>
+    <button class="q-opt" data-explain="Only the intermediate's net rate is ~0; the overall reaction rate is generally not zero.">The overall reaction rate is zero</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 5">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-4</p><h2>Quiz 5 — Reversible reactions</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q5">
+    <p class="q-text">For a reversible reaction, the net rate expression is:</p>
+    <button class="q-opt" data-correct data-explain="Correct. Net rate = forward − reverse; it vanishes at equilibrium, which recovers $K_e$.">$r = k_f C_A^{a} C_B^{b} - k_r C_C^{c} C_D^{d}$</button>
+    <button class="q-opt" data-explain="This keeps only the forward term and ignores the reverse reaction, so it never reaches equilibrium.">$r = k_f C_A^{a} C_B^{b}$</button>
+    <button class="q-opt" data-explain="This is the reverse term alone — it misses the forward reaction.">$r = k_r C_C^{c} C_D^{d}$</button>
+    <button class="q-opt" data-explain="A difference of concentrations is not a rate law; rates depend on rate constants and concentration powers.">$r = C_A - C_C$</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 6">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-5</p><h2>Quiz 6 — Michaelis–Menten</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q6">
+    <p class="q-text">In Michaelis–Menten kinetics, the rate expression is:</p>
+    <button class="q-opt" data-correct data-explain="Correct. It saturates at $V_{max}$ for large $C_S$ and equals $\tfrac12 V_{max}$ when $C_S = K_M$.">$r = \dfrac{V_{max} C_S}{K_M + C_S}$</button>
+    <button class="q-opt" data-explain="Swapping the roles of $V_{max}$ and $K_M$ would not saturate at $V_{max}$ — check the large-$C_S$ limit.">$r = \dfrac{K_M C_S}{V_{max} + C_S}$</button>
+    <button class="q-opt" data-explain="With no $V_{max}$ in the numerator, the rate cannot approach $V_{max}$.">$r = \dfrac{C_S}{V_{max} + K_M}$</button>
+    <button class="q-opt" data-explain="A linear form grows without bound — enzyme kinetics saturate.">$r = V_{max} + K_M C_S$</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 7">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-5</p><h2>Quiz 7 — Enzyme inhibition</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q7">
+    <p class="q-text">In enzyme inhibition, the Michaelis–Menten equation is modified to include:</p>
+    <button class="q-opt" data-explain="Putting the inhibitor in the numerator would speed the reaction up — but an inhibitor slows it down.">Only the inhibitor concentration in the numerator</button>
+    <button class="q-opt" data-correct data-explain="Correct. Competitive inhibition raises the apparent $K_M$ and non-competitive lowers $V_{max}$ — both appear in the denominator, e.g. $K_M(1+C_I/K_I)$.">Inhibitor concentration terms in the denominator</button>
+    <button class="q-opt" data-explain="Surface area matters for solid catalysts, not for homogeneous enzyme kinetics.">Catalyst surface-area terms</button>
+    <button class="q-opt" data-explain="The rate law is written in concentrations, not explicit reaction time.">Reaction-time terms</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 8">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-6</p><h2>Quiz 8 — Monod kinetics</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q8">
+    <p class="q-text">In Monod kinetics for microbial growth, the specific growth rate $\mu$ is:</p>
+    <button class="q-opt" data-explain="Here $\mu_{max}$ sits in the denominator, which is dimensionally wrong — it should be the saturating value.">$\mu = \dfrac{\mu_{max} K_S}{C_S + \mu_{max}}$</button>
+    <button class="q-opt" data-correct data-explain="Correct. Same form as Michaelis–Menten: $\mu \to \mu_{max}$ at high $C_S$, and $\mu = \tfrac12\mu_{max}$ when $C_S = K_S$.">$\mu = \dfrac{\mu_{max} C_S}{K_S + C_S}$</button>
+    <button class="q-opt" data-explain="This has no $\mu_{max}$ as the saturating limit — $\mu$ would not approach $\mu_{max}$.">$\mu = \dfrac{K_S}{C_S + \mu_{max}}$</button>
+    <button class="q-opt" data-explain="$\mu_{max}$ belongs in the numerator as the maximum rate, not the denominator.">$\mu = \dfrac{C_S}{K_S + \mu_{max}}$</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 9">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-6</p><h2>Quiz 9 — Maximum specific growth rate</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q9">
+    <p class="q-text">The maximum specific growth rate $\mu_{max}$ is:</p>
+    <button class="q-opt" data-correct data-explain="Correct. It is the asymptotic (highest) specific growth rate, reached when substrate is saturating under the given conditions.">The highest rate of cell growth under the given conditions</button>
+    <button class="q-opt" data-explain="With no substrate, $C_S = 0$ and $\mu \to 0$ — the opposite of the maximum.">The rate when no substrate is present</button>
+    <button class="q-opt" data-explain="Temperature affects $\mu_{max}$, but it is not defined at zero temperature.">The rate at zero temperature</button>
+    <button class="q-opt" data-explain="Inhibition pulls the growth rate below $\mu_{max}$, so it is not the inhibited rate.">The growth rate under inhibition</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<section class="slide" data-title="Quiz 10">
+  <div class="s-head"><p class="kicker">Check your understanding · 2-6</p><h2>Quiz 10 — Batch culture growth</h2></div>
+  <div class="grow"><div class="quiz-q" data-qid="q10">
+    <p class="q-text">In a microbial batch culture with excess substrate, the growth rate $r_g = \mu C_C$ is:</p>
+    <button class="q-opt" data-explain="Zero order would mean growth does not depend on how many cells are present — but more cells produce more growth.">Zero-order with respect to cell concentration</button>
+    <button class="q-opt" data-correct data-explain="Correct. With excess substrate $\mu \approx \mu_{max}$ (constant), so $r_g = \mu_{max} C_C$ — first order in cells, giving exponential growth.">First-order with respect to cell concentration</button>
+    <button class="q-opt" data-explain="The growth term is linear in $C_C$, not quadratic.">Second-order with respect to cell concentration</button>
+    <button class="q-opt" data-explain="Temperature affects $\mu_{max}$, so the growth rate is not independent of temperature.">Independent of temperature</button>
+    <div class="q-explain"></div>
+  </div></div>
+</section>
+
+<!-- ================= KEY TAKEAWAYS ================= -->
+<section class="slide" data-title="Key takeaways">
+  <div class="s-head"><p class="kicker">Exit ticket</p><h2>Key Takeaways</h2></div>
+  <div class="grow">
+    <div class="tk"><div class="n">1</div><p>Elementary reaction → power law $r = k_r C_A^a C_B^b$; temperature enters through Arrhenius.</p></div>
+    <div class="tk"><div class="n">2</div><p>Non-elementary reaction → propose a mechanism, then use the RLS and PSSH to reach a measurable rate.</p></div>
+    <div class="tk"><div class="n">3</div><p>PSSH on radicals or complexes yields Michaelis–Menten and Monod forms — and non-integer orders like $3/2$.</p></div>
+    <div class="tk"><div class="n">4</div><p>For reversible reactions, $K_e(T)$ follows van't Hoff: it falls (exo) or rises (endo) with $T$.</p></div>
+    <p class="quiz-score" style="margin-top:8px"></p>
+    <p style="color:var(--muted); font-size:17px; margin-top:14px">Write down one question you still have — bring it to the next class.</p>
+  </div>
+</section>
+
+</div>
+
+<div id="progress"></div>
+<div id="hud">
+  <button id="btnToc" title="Contents (T)">☰</button>
+  <button id="btnPrev" title="Previous (←)">‹</button>
+  <button id="btnNext" title="Next (→)">›</button>
+</div>
+<div id="toc"><div class="panel"><h3>CONTENTS</h3><div id="tocList"></div></div></div>
+
+<script>
+/* ================= Deck engine ================= */
+const DECK_META = { course: '2105604 ADV CHE KINETICS' };
+
+const el = id => document.getElementById(id);
+const cs = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function fmt(x, d = 3){
+  if (!isFinite(x)) return '–';
+  if (x !== 0 && (Math.abs(x) < 1e-3 || Math.abs(x) >= 1e5)) return x.toExponential(d - 1);
+  return parseFloat(x.toPrecision(d)).toString();
+}
+function mix(c1, c2, t){
+  const p = c => [1,3,5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const a = p(c1), b = p(c2);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+
+const Deck = (() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = -1;
+  const enterCbs = [];
+
+  let _sec = '';
+  slides.forEach((s, i) => {
+    if (s.dataset.sec) _sec = s.dataset.sec;
+    if (s.classList.contains('title-slide') || s.classList.contains('section-slide') || s.dataset.nofooter !== undefined) return;
+    const f = document.createElement('div');
+    f.className = 's-foot';
+    f.innerHTML = `<span>${DECK_META.course}</span><span class="s-sec">${_sec}</span><span>${i + 1} / ${slides.length}</span>`;
+    s.appendChild(f);
+  });
+
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = i;
+    slides[cur].classList.add('active');
+    location.hash = '#/' + (cur + 1);
+    el('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+    [...document.querySelectorAll('#tocList a')].forEach((a, j) => a.classList.toggle('cur', j === cur));
+    fireEnter(false);
+  }
+  function fireEnter(onlyUnfired){
+    enterCbs.forEach(c => {
+      const hit = (typeof c.key === 'number') ? c.key === cur : slides[cur].id === c.key;
+      if (!hit) return;
+      if (onlyUnfired && c.fired) return;
+      if (c.once && c.fired) return;
+      try{ c.fn(); c.fired = true; }catch(e){ console.error(e); }
+    });
+  }
+  addEventListener('load', () => fireEnter(true));
+  function onEnter(key, fn, opts = {}){ enterCbs.push({ key, fn, once: !!opts.once, fired: false }); }
+
+  const list = el('tocList');
+  slides.forEach((s, i) => {
+    if (s.dataset.sec){ const h = document.createElement('div'); h.className = 'sec'; h.textContent = s.dataset.sec; list.appendChild(h); }
+    const a = document.createElement('a');
+    a.href = '#/' + (i + 1);
+    a.textContent = (i + 1) + '. ' + (s.dataset.title || s.querySelector('h1,h2,.q')?.textContent.slice(0, 60) || 'Slide');
+    a.onclick = e => { e.preventDefault(); goTo(i); toc(false); };
+    list.appendChild(a);
+  });
+  function toc(open){ el('toc').classList.toggle('open', open ?? !el('toc').classList.contains('open')); }
+  el('toc').addEventListener('click', e => { if (e.target === el('toc')) toc(false); });
+  el('btnToc').onclick = () => toc();
+  el('btnPrev').onclick = () => goTo(cur - 1);
+  el('btnNext').onclick = () => goTo(cur + 1);
+
+  addEventListener('keydown', e => {
+    if (['ArrowRight',' ','PageDown'].includes(e.key)){ e.preventDefault(); goTo(cur + 1); }
+    else if (['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); goTo(cur - 1); }
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End') goTo(slides.length - 1);
+    else if (e.key.toLowerCase() === 't') toc();
+    else if (e.key === 'Escape') toc(false);
+    else if (e.key.toLowerCase() === 'f'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+    else if (e.key.toLowerCase() === 'o') debugOverflow();
+  });
+
+  function debugOverflow(){
+    const st = el('stage').getBoundingClientRect();
+    const sc = st.width / 1280;
+    const report = [];
+    slides.forEach((s, i) => {
+      const wasActive = s.classList.contains('active');
+      if (!wasActive) s.classList.add('active');
+      s.querySelectorAll('*').forEach(n => {
+        const r = n.getBoundingClientRect();
+        if ((!r.width && !r.height) || n.closest('.q-explain')) return;
+        const past = Math.max(r.bottom - st.bottom, r.right - st.right) / sc;
+        if (past > 2){
+          n.style.outline = '3px solid red';
+          report.push(`slide ${i + 1}: <${n.tagName.toLowerCase()} class="${n.className}"> ${Math.round(past)}px past edge`);
+        }
+      });
+      if (!wasActive) s.classList.remove('active');
+    });
+    if (report.length){ console.warn('OVERFLOW REPORT\n' + report.join('\n')); }
+    window.__overflowReport = report;
+    alert(report.length ? report.length + ' overflowing element(s) outlined red - see console' : 'No overflow - all slides fit 1280x720');
+    return report;
+  }
+
+  let x0 = null;
+  addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 60) goTo(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
+
+  function fit(){
+    const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.98;
+    el('stage').style.transform = `translate(-50%,-50%) scale(${s})`;
+  }
+  addEventListener('resize', fit); fit();
+
+  function hashIndex(){ const m = location.hash.match(/#\/(\d+)/); return m ? +m[1] - 1 : NaN; }
+  addEventListener('hashchange', () => { const i = hashIndex(); if (!isNaN(i) && i !== cur) goTo(i); });
+  const h0 = hashIndex();
+  goTo(isNaN(h0) ? 0 : h0);
+
+  return { goTo, onEnter, get current(){ return cur; }, get count(){ return slides.length; } };
+})();
+
+/* ================= KaTeX ================= */
+const KATEX_OPTS = { delimiters: [
+  { left: '$$', right: '$$', display: true },
+  { left: '$', right: '$', display: false },
+  { left: '\\(', right: '\\)', display: false },
+  { left: '\\[', right: '\\]', display: true }
+], throwOnError: false };
+document.addEventListener('DOMContentLoaded', () => {
+  const tryRender = () => window.renderMathInElement
+    ? renderMathInElement(document.body, KATEX_OPTS)
+    : setTimeout(tryRender, 120);
+  tryRender();
+});
+
+/* ================= Quiz engine ================= */
+const Quiz = { score: 0, answered: 0, total: document.querySelectorAll('.quiz-q').length };
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const exp = q.querySelector('.q-explain') || (() => { const d = document.createElement('div'); d.className = 'q-explain'; q.appendChild(d); return d; })();
+  q.querySelectorAll('.q-opt').forEach(opt => opt.addEventListener('click', () => {
+    if (q.dataset.done) return;
+    q.dataset.done = '1';
+    const ok = opt.hasAttribute('data-correct');
+    opt.classList.add(ok ? 'right' : 'wrong');
+    q.querySelectorAll('.q-opt[data-correct]').forEach(c => c.classList.add('right'));
+    q.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+    if (exp){
+      exp.innerHTML = opt.getAttribute('data-explain') || '';
+      exp.classList.add('show');
+      if (window.renderMathInElement) renderMathInElement(exp, KATEX_OPTS);
+    }
+    Quiz.answered++; if (ok) Quiz.score++;
+    document.querySelectorAll('.quiz-score').forEach(s =>
+      s.textContent = `Quiz score: ${Quiz.score} / ${Quiz.total}` + (Quiz.answered < Quiz.total ? ` (${Quiz.total - Quiz.answered} unanswered)` : ''));
+  }));
+});
+
+/* ================= Reveal blocks ================= */
+document.querySelectorAll('.reveal-btn').forEach(b =>
+  b.addEventListener('click', () => b.closest('.reveal').classList.add('open')));
+
+/* ================= Simulation helpers ================= */
+function bindSlider(id, fn){
+  const s = el(id);
+  const h = () => fn(+s.value);
+  s.addEventListener('input', h); h();
+  return s;
+}
+if (window.Chart){
+  Chart.defaults.font.family = "'Montserrat','Prompt',sans-serif";
+  Chart.defaults.font.size = 14;
+  Chart.defaults.color = cs('--muted');
+}
+function baseOpts(xlabel, ylabel){
+  return { animation:false, responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, labels:{ boxWidth:22, font:{size:13} } }, tooltip:{ enabled:true } },
+    scales:{ x:{ type:'linear', title:{ display:true, text:xlabel }, grid:{ display:false } },
+             y:{ title:{ display:true, text:ylabel }, grid:{ color:cs('--line') }, beginAtZero:true } } };
+}
+
+/* ---- 1. Order of reaction ---- */
+Deck.onEnter('sl-order', () => {
+  const xs = []; for (let c = 0; c <= 2.01; c += 0.05) xs.push(+c.toFixed(2));
+  const rate = (k,n,c) => k * Math.pow(c, n);
+  const ch = new Chart(el('cvOrder'), {
+    type:'line',
+    data:{ labels:xs, datasets:[{ label:'r = k·Cᴬⁿ', data:xs.map(c=>rate(1,1,c)),
+      borderColor:cs('--navy'), backgroundColor:'transparent', borderWidth:3, pointRadius:0, tension:.25 }] },
+    options:baseOpts('Cₐ (mol/m³)','r (mol/m³·s)')
+  });
+  function upd(){
+    const n=+el('ordN').value, k=+el('ordK').value;
+    el('ordNval').textContent=n; el('ordKval').textContent=k.toFixed(1);
+    ch.data.datasets[0].data = xs.map(c=>rate(k,n,c));
+    ch.update('none');
+    el('ordOut').textContent = fmt(rate(k,n,1.5));
+  }
+  ['ordN','ordK'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 2. Arrhenius ---- */
+Deck.onEnter('sl-arr', () => {
+  const A=1e11, R=8.314;
+  const k=(T,Ea)=>A*Math.exp(-Ea*1000/(R*T));
+  const Ts=[]; for(let T=300;T<=900;T+=20) Ts.push(T);
+  const ch=new Chart(el('cvArr'),{
+    type:'line',
+    data:{ labels:Ts, datasets:[
+      { label:'k(T)', data:Ts.map(T=>k(T,80)), borderColor:cs('--blue'), backgroundColor:'transparent', borderWidth:3, pointRadius:0, tension:.3 },
+      { label:'marker', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:(()=>{ const o=baseOpts('T (K)','k (s⁻¹)'); o.scales.y.type='logarithmic'; o.scales.y.beginAtZero=false; return o; })()
+  });
+  function upd(){
+    const T=+el('arrT').value, Ea=+el('arrEa').value;
+    el('arrTval').textContent=T+' K'; el('arrEaval').textContent=Ea+' kJ/mol';
+    ch.data.datasets[0].data=Ts.map(t=>k(t,Ea));
+    ch.data.datasets[1].data=[{x:T,y:k(T,Ea)}];
+    ch.update('none');
+    el('arrOut').textContent=fmt(k(T,Ea));
+  }
+  ['arrT','arrEa'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 2b. Arrhenius linearized: ln k vs 1/T ---- */
+Deck.onEnter('sl-arrlin', () => {
+  const R=8.314;
+  const Ts=[]; for(let T=300;T<=900;T+=20) Ts.push(T);
+  const lnk=(T,Ea,p)=> p*Math.LN10 - Ea*1000/(R*T);
+  const pts=(Ea,p)=>Ts.map(T=>({x:1/T, y:lnk(T,Ea,p)}));
+  const o=baseOpts('1/T  (10⁻³ K⁻¹)','ln k');
+  o.scales.y.beginAtZero=false; o.scales.y.min=-65; o.scales.y.max=32;   // fixed axis: slope change stays visible
+  o.scales.x.min=0.001; o.scales.x.max=0.0035;
+  o.scales.x.ticks={ callback:v=>(v*1000).toFixed(2) };
+  const ch=new Chart(el('cvArrLin'),{
+    type:'line',
+    data:{ datasets:[
+      { label:'ln k = ln A − (Eₐ/R)(1/T)', data:pts(80,11), borderColor:cs('--blue'), backgroundColor:'transparent', borderWidth:3.5, pointRadius:0 } ] },
+    options:o
+  });
+  function upd(){
+    const Ea=+el('alEa').value, p=+el('alA').value;
+    el('alEaval').textContent=Ea+' kJ/mol'; el('alAval').textContent='10^'+p.toFixed(1);
+    ch.data.datasets[0].data=pts(Ea,p);
+    ch.update('none');
+    el('alOut').textContent=fmt(-Ea*1000/R);
+  }
+  ['alEa','alA'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 3. Three-halves order ---- */
+Deck.onEnter('sl-th', () => {
+  const xs=[]; for(let c=0;c<=4.01;c+=0.1) xs.push(+c.toFixed(1));
+  const ch=new Chart(el('cvTh'),{
+    type:'line',
+    data:{ labels:xs, datasets:[
+      { label:'order 1', data:xs.map(c=>1*c), borderColor:cs('--blue'), borderWidth:2, borderDash:[6,4], pointRadius:0 },
+      { label:'order 3/2', data:xs.map(c=>1*Math.pow(c,1.5)), borderColor:cs('--navy'), borderWidth:3.5, pointRadius:0, tension:.25 },
+      { label:'order 2', data:xs.map(c=>1*c*c), borderColor:cs('--orange'), borderWidth:2, borderDash:[6,4], pointRadius:0 },
+      { label:'marker', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:(()=>{ const o=baseOpts('C (mol/m³)','−r (mol/m³·s)'); o.scales.y.min=0; o.scales.y.max=18; o.scales.x.min=0; o.scales.x.max=4; return o; })()
+  });
+  function upd(){
+    const k=+el('thK').value, c=+el('thC').value;
+    el('thKval').textContent=k.toFixed(1); el('thCval').textContent=c.toFixed(1);
+    ch.data.datasets[1].data=xs.map(x=>k*Math.pow(x,1.5));
+    ch.data.datasets[3].data=[{x:c,y:k*Math.pow(c,1.5)}];
+    ch.update('none');
+    el('thOut').textContent=fmt(k*Math.pow(c,1.5));
+  }
+  ['thK','thC'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 4. Ke vs T ---- */
+Deck.onEnter('sl-ke', () => {
+  const R=8.314, T0=298;
+  const Ke=(T,dH,K0)=>K0*Math.exp(dH*1000/R*(1/T0-1/T));
+  const Ts=[]; for(let T=300;T<=800;T+=20) Ts.push(T);
+  const ch=new Chart(el('cvKe'),{
+    type:'line',
+    data:{ labels:Ts, datasets:[
+      { label:'Ke(T)', data:Ts.map(T=>Ke(T,-40,1)), borderColor:cs('--navy'), backgroundColor:'transparent', borderWidth:3, pointRadius:0, tension:.3 },
+      { label:'T = 500 K', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:(()=>{ const o=baseOpts('T (K)','Kₑ'); o.scales.y.type='logarithmic'; o.scales.y.min=1e-4; o.scales.y.max=1e4; o.scales.x.min=300; o.scales.x.max=800; return o; })()
+  });
+  function upd(){
+    const dH=+el('keDH').value, K0=+el('keK0').value;
+    el('keDHval').textContent=dH+' kJ/mol'; el('keK0val').textContent=K0.toFixed(1);
+    ch.data.datasets[0].data=Ts.map(T=>Ke(T,dH,K0));
+    ch.data.datasets[1].data=[{x:500,y:Ke(500,dH,K0)}];
+    ch.update('none');
+    el('keOut').textContent=fmt(Ke(500,dH,K0));
+  }
+  ['keDH','keK0'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 5. Michaelis–Menten ---- */
+Deck.onEnter('sl-mm', () => {
+  const xs=[]; for(let s=0;s<=50.5;s+=1) xs.push(s);
+  const rp=(V,K,s)=>V*s/(K+s);
+  const ch=new Chart(el('cvMM'),{
+    type:'line',
+    data:{ labels:xs, datasets:[
+      { label:'rₚ', data:xs.map(s=>rp(6,5,s)), borderColor:cs('--green'), backgroundColor:'transparent', borderWidth:3, pointRadius:0, tension:.3 },
+      { label:'½ Vmax @ Cs=Kм', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:(()=>{ const o=baseOpts('Cₛ (mol/L)','rₚ (mol/L·s)'); o.scales.y.min=0; o.scales.y.max=10.5; o.scales.x.min=0; o.scales.x.max=50; return o; })()
+  });
+  function upd(){
+    const V=+el('mmVmax').value, K=+el('mmKM').value;
+    el('mmVval').textContent=V.toFixed(1); el('mmKval').textContent=K.toFixed(0);
+    ch.data.datasets[0].data=xs.map(s=>rp(V,K,s));
+    ch.data.datasets[1].data=[{x:K,y:rp(V,K,K)}];
+    ch.update('none');
+    el('mmOut').textContent=K.toFixed(0)+' mol/L';
+  }
+  ['mmVmax','mmKM'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 6. Lineweaver–Burk ---- */
+Deck.onEnter('sl-lb', () => {
+  const inv=[]; for(let x=-1.1;x<=1.01;x+=0.05) inv.push(+x.toFixed(3));
+  const line=(V,K,x)=>(K/V)*x + 1/V;
+  const ch=new Chart(el('cvLB'),{
+    type:'line',
+    data:{ labels:inv, datasets:[
+      { label:'1/rₚ', data:inv.map(x=>({x:x,y:line(6,5,x)})), borderColor:cs('--blue'), backgroundColor:'transparent', borderWidth:3, pointRadius:0 },
+      { label:'y-intercept 1/Vmax', data:[], borderColor:cs('--green'), backgroundColor:cs('--green'), pointRadius:6, showLine:false },
+      { label:'x-intercept −1/Kм', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:(()=>{ const o=baseOpts('1/Cₛ','1/rₚ'); o.scales.y.beginAtZero=false; o.scales.y.min=-0.6; o.scales.y.max=6; o.scales.x.min=-1.1; o.scales.x.max=1.05; return o; })()
+  });
+  function upd(){
+    const V=+el('lbVmax').value, K=+el('lbKM').value;
+    el('lbVval').textContent=V.toFixed(1); el('lbKval').textContent=K.toFixed(0);
+    ch.data.datasets[0].data=inv.map(x=>({x:x,y:line(V,K,x)}));
+    ch.data.datasets[1].data=[{x:0,y:1/V}];
+    ch.data.datasets[2].data=[{x:-1/K,y:0}];
+    ch.update('none');
+    el('lbOut').textContent=fmt(K/V);
+  }
+  ['lbVmax','lbKM'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 7. Enzyme inhibition ---- */
+Deck.onEnter('sl-inh', () => {
+  const V=6, K=5; let mode='comp';
+  const xs=[]; for(let s=0;s<=50.5;s+=1) xs.push(s);
+  const base=s=>V*s/(K+s);
+  const comp=(s,i)=>V*s/(s + K*(1+i));
+  const non=(s,i)=>(V/(1+i))*s/(K+s);
+  const ch=new Chart(el('cvInh'),{
+    type:'line',
+    data:{ labels:xs, datasets:[
+      { label:'no inhibitor', data:xs.map(base), borderColor:cs('--muted'), borderWidth:2, borderDash:[6,4], pointRadius:0 },
+      { label:'with inhibitor', data:xs.map(s=>comp(s,2)), borderColor:cs('--red'), backgroundColor:'transparent', borderWidth:3, pointRadius:0, tension:.3 } ] },
+    options:baseOpts('Cₛ (mol/L)','rₚ (mol/L·s)')
+  });
+  function upd(){
+    const i=+el('inhI').value;
+    el('inhIval').textContent=i.toFixed(1);
+    const f = mode==='comp' ? (s=>comp(s,i)) : (s=>non(s,i));
+    ch.data.datasets[1].data=xs.map(f);
+    ch.data.datasets[1].borderColor = mode==='comp'?cs('--red'):cs('--orange');
+    ch.update('none');
+    el('inhOut').textContent = mode==='comp'
+      ? 'apparent Kм → '+fmt(K*(1+i))+' (Vmax unchanged)'
+      : 'apparent Vmax → '+fmt(V/(1+i))+' (Kм unchanged)';
+  }
+  el('inhComp').onclick=()=>{ mode='comp'; el('inhComp').classList.add('active'); el('inhNon').classList.remove('active'); upd(); };
+  el('inhNon').onclick=()=>{ mode='non'; el('inhNon').classList.add('active'); el('inhComp').classList.remove('active'); upd(); };
+  el('inhI').addEventListener('input',upd); upd();
+}, {once:true});
+
+/* ---- 8. Batch growth curve ---- */
+Deck.onEnter('sl-batch', () => {
+  const ts=[]; for(let t=0;t<=24;t+=0.5) ts.push(t);
+  // piecewise ln(C): lag flat, log linear, stationary plateau, death decline
+  function lnC(t,mu,lag){
+    const logEnd = lag + 8;           // duration of exponential phase
+    const statEnd = logEnd + 5;       // stationary plateau length
+    const base = 1;                   // ln C at start
+    if (t <= lag) return base;
+    if (t <= logEnd) return base + mu*(t-lag);
+    const peak = base + mu*(logEnd-lag);
+    if (t <= statEnd) return peak;
+    return Math.max(base, peak - 0.25*(t-statEnd));
+  }
+  const ch=new Chart(el('cvBatch'),{
+    type:'line',
+    data:{ labels:ts, datasets:[
+      { label:'ln(cell conc.)', data:ts.map(t=>lnC(t,0.7,3)), borderColor:cs('--green'), backgroundColor:'transparent', borderWidth:3.5, pointRadius:0, tension:.25 } ] },
+    options:(()=>{ const o=baseOpts('time (h)','ln(cell conc.)'); o.plugins.legend.display=false; o.scales.y.min=0; o.scales.y.max=14; o.scales.x.min=0; o.scales.x.max=24; return o; })()
+  });
+  function upd(){
+    const mu=+el('bMu').value, lag=+el('bLag').value;
+    el('bMuval').textContent=mu.toFixed(1)+' h⁻¹'; el('bLagval').textContent=lag.toFixed(1)+' h';
+    ch.data.datasets[0].data=ts.map(t=>lnC(t,mu,lag));
+    ch.update('none');
+  }
+  ['bMu','bLag'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 9. Monod ---- */
+Deck.onEnter('sl-monod', () => {
+  const xs=[]; for(let s=0;s<=40.5;s+=1) xs.push(s);
+  const mu=(mx,ks,s)=>mx*s/(ks+s);
+  const ch=new Chart(el('cvMonod'),{
+    type:'line',
+    data:{ labels:xs, datasets:[
+      { label:'μ', data:xs.map(s=>mu(0.7,5,s)), borderColor:cs('--green'), backgroundColor:'transparent', borderWidth:3, pointRadius:0, tension:.3 },
+      { label:'½ μmax @ Cs=Ks', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:baseOpts('Cₛ (g/L)','μ (h⁻¹)')
+  });
+  function upd(){
+    const mx=+el('mMu').value, ks=+el('mKs').value;
+    el('mMuval').textContent=mx.toFixed(1); el('mKsval').textContent=ks.toFixed(0);
+    ch.data.datasets[0].data=xs.map(s=>mu(mx,ks,s));
+    ch.data.datasets[1].data=[{x:ks,y:mu(mx,ks,ks)}];
+    ch.update('none');
+    el('monOut').textContent=ks.toFixed(0);
+  }
+  ['mMu','mKs'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+
+/* ---- 10. Substrate inhibition (Andrews) ---- */
+Deck.onEnter('sl-subinh', () => {
+  const xs=[]; for(let s=0;s<=100.5;s+=2) xs.push(s);
+  const mumax=0.8;
+  const andrews=(ks,ki,s)=>mumax*s/(ks+s+s*s/ki);
+  const monod=(ks,s)=>mumax*s/(ks+s);
+  const ch=new Chart(el('cvSub'),{
+    type:'line',
+    data:{ labels:xs, datasets:[
+      { label:'Monod (no inhibition)', data:xs.map(s=>monod(5,s)), borderColor:cs('--muted'), borderWidth:2, borderDash:[6,4], pointRadius:0 },
+      { label:'Andrews / Haldane', data:xs.map(s=>andrews(5,50,s)), borderColor:cs('--navy'), backgroundColor:'transparent', borderWidth:3.5, pointRadius:0, tension:.3 },
+      { label:'optimal S*', data:[], borderColor:cs('--red'), backgroundColor:cs('--red'), pointRadius:6, showLine:false } ] },
+    options:baseOpts('S (g/L)','μ (h⁻¹)')
+  });
+  function upd(){
+    const ki=+el('siKI').value, ks=+el('siKs').value;
+    el('siKIval').textContent=ki.toFixed(0); el('siKsval').textContent=ks.toFixed(0);
+    const sStar=Math.sqrt(ks*ki);
+    ch.data.datasets[0].data=xs.map(s=>monod(ks,s));
+    ch.data.datasets[1].data=xs.map(s=>andrews(ks,ki,s));
+    ch.data.datasets[2].data=[{x:sStar,y:andrews(ks,ki,sStar)}];
+    ch.update('none');
+    el('siOut').textContent=fmt(sStar);
+  }
+  ['siKI','siKs'].forEach(id=>el(id).addEventListener('input',upd)); upd();
+}, {once:true});
+</script>
+</body>
+</html>
